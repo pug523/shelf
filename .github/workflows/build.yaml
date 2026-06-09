@@ -24,7 +24,7 @@ jobs:
         distribution: 'temurin'
         java-version: 26
 
-    - name: Cache gradle files
+    - name: Cache Gradle Files
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
       with:
         path: |
@@ -38,7 +38,7 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e
 
-    - name: Build Mod with Gradle
+    - name: Build with Gradle
       run: |
         chmod +x gradlew
         ./gradlew build
@@ -52,7 +52,7 @@ jobs:
         name: build-artifacts
         path: versions/*/build/libs/
 
-    - name: Collect mod jars
+    - name: Collect Mod Jars
       run: |
         shopt -s extglob
         mkdir mod-jars
@@ -61,7 +61,7 @@ jobs:
         done
         ls -l mod-jars
 
-    - name: Upload mod jars
+    - name: Upload Mod Jars
       uses: actions/upload-artifact@v7
       with:
         name: mod-jars

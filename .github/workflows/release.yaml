@@ -50,13 +50,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Download build artifacts
+      - name: Download Build Artifacts
         uses: actions/download-artifact@v8
         with:
           name: build-artifacts
           path: build-artifacts
 
-      - name: Get github release information
+      - name: Get Github Release Information
         if: ${{ github.event_name == 'workflow_dispatch' }}
         id: get_release
         uses: cardinalby/git-get-release-action@1.2.6
@@ -65,7 +65,7 @@ jobs:
         with:
           tag: ${{ github.event.inputs.target_release_tag }}
 
-      - name: Generate publish related information
+      - name: Generate Publish Related Information
         id: release_info
         run: |
           if [ "$GITHUB_EVENT_NAME" = "release" ]; then
@@ -74,21 +74,21 @@ jobs:
               echo "tag_name=${{ github.event.inputs.target_release_tag }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Read common properties
+      - name: Read Common Properties
         id: properties_g
         uses: BrycensRanch/read-properties-action@v1
         with:
           file: gradle.properties
           all: true
 
-      - name: Read version-specific properties
+      - name: Read Version-Specific Properties
         id: properties_v
         uses: BrycensRanch/read-properties-action@v1
         with:
           file: ${{ format('versions/{0}/gradle.properties', matrix.subproject) }}
           all: true
 
-      - name: Prepare file information
+      - name: Prepare File Information
         id: file_info
         run: |
           shopt -s extglob
@@ -104,7 +104,7 @@ jobs:
           echo "name=$(basename $FILE_PATH)" >> $GITHUB_OUTPUT
           echo "hash=$(sha256sum $FILE_PATH | awk '{ print $1 }')" >> $GITHUB_OUTPUT
 
-      - name: Prepare changelog
+      - name: Prepare Changelog
         uses: actions/github-script@v9
         id: changelog
         with:
@@ -122,7 +122,7 @@ jobs:
             - SHA-256: `${{ steps.file_info.outputs.hash }}`
             - Built from: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-      - name: Publish Minecraft Mods
+      - name: Publish Mods to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           MODRINTH_PROJECT_ID: ysmYXPgd  # https://modrinth.com/mod/shelf

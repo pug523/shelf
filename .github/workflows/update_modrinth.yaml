@@ -17,10 +17,10 @@ jobs:
         with:
           python-version: 3.14
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: pip install requests
 
-      - name: Update modrinth description
+      - name: Update Modrinth Description
         env:
           MODRINTH_PROJECT_ID: ysmYXPgd  # https://modrinth.com/mod/shelf
           MODRINTH_API_TOKEN: ${{ secrets.MODRINTH_API_TOKEN }}
