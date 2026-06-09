@@ -1,0 +1,33 @@
+name: Matrix Prepare
+
+on:
+  workflow_call:
+    inputs:
+      target_subproject:
+        description: see release.yaml, for generating matrix entries
+        type: string
+        required: false
+        default: ''
+    outputs:
+      matrix:
+        description: The generated run matrix
+        value: ${{ jobs.matrix_prep.outputs.matrix }}
+
+
+jobs:
+  matrix_prep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: 3.14
+
+      - id: setmatrix
+        run: python .github/workflows/scripts/matrix.py
+        env:
+          TARGET_SUBPROJECT: ${{ inputs.target_subproject }}
+
+    outputs:
+      matrix: ${{ steps.setmatrix.outputs.matrix }}
+

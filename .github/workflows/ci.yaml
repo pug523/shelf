@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths: &ci_paths
+      - "*.gradle"
+      - "gradle.properties"
+      - "src/**"
+      - "versions/**"
+      - ".github/**"
+      - "gradle/**"
+  pull_request:
+    branches: [main]
+    paths: *ci_paths
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yaml
+    with:
+      release: false
