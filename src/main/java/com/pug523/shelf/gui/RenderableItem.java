@@ -1,5 +1,7 @@
 package com.pug523.shelf.gui;
 
+import com.pug523.shelf.config.Option;
+
 import net.minecraft.network.chat.Component;
 
 public record RenderableItem(Component text, Option<?> option, boolean isHeader) {

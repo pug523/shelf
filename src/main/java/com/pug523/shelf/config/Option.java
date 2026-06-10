@@ -61,11 +61,11 @@ public class Option<T> {
     }
 
     public boolean isPendingModifiedFromDefault() {
-        return !Objects.equals(getPendingValue(), this.defaultValue);
+        return !Objects.equals(this.pendingValue, this.defaultValue);
     }
 
     public boolean isPendingModifiedFromActual() {
-        return !Objects.equals(getPendingValue(), getActualValue());
+        return !Objects.equals(this.pendingValue, getActualValue());
     }
 
     public void applyPendingToActual() {
