@@ -8,7 +8,7 @@ public class TabNode {
     private final Component name;
     private final List<OptionGroup> optionGroups = new ArrayList<>();
     private final List<TabNode> children = new ArrayList<>();
-    private int depth = 0; // Set dynamically when calculating visibility layout
+    private int depth = 0; // Set dynamically when calculating visibility layout.
     private boolean expanded = true;
 
     public TabNode(Component name) {
