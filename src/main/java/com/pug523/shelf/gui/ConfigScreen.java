@@ -7,17 +7,21 @@ import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
 import com.pug523.shelf.Shelf;
+import com.pug523.shelf.config.Option;
+import com.pug523.shelf.config.Profile;
 import com.pug523.shelf.gui.widget.OptionWidget;
-import com.pug523.shelf.gui.widget.RenderUtil;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+
+//#if MC >= 12109
+import net.minecraft.client.input.MouseButtonEvent;
+//#endif
 
 public class ConfigScreen extends Screen {
     // Localization Keys Constants
@@ -200,39 +204,32 @@ public class ConfigScreen extends Screen {
         }
     }
 
-    private void captureConfigSnapshot() {
-        undoSnapshots.clear();
-        for (TabNode root : rootTreeNodes) {
-            captureNodeSnapshotRecursive(root);
-        }
-    }
-
-    private void captureNodeSnapshotRecursive(TabNode node) {
-        for (OptionGroup optionGroup : node.getOptionGroups()) {
-            for (Option<?> option : optionGroup.getOptions()) {
-                OptionWidget widget = option.getWidget();
-                if (widget != null) {
-                    undoSnapshots.add(widget.captureSnapshot());
-                }
-            }
-        }
-        for (TabNode child : node.getChildren()) {
-            captureNodeSnapshotRecursive(child);
-        }
-    }
-
     private void applyChanges() {
-        captureConfigSnapshot();
+        rootTreeNodes.stream()
+            .flatMap(TabNode::streamAllNodes)
+            .flatMap(node -> node.getOptionGroups().stream())
+            .flatMap(group -> group.getOptionWidgets().stream())
+            .map(OptionWidget::getOption)
+            .filter(option -> option.isPendingModifiedFromActual())
+            .forEach(option -> {
+                option.applyPendingToActual();
+            });
         onApply.run();
         this.dirty = false;
         updateButtonStates();
     }
 
     private void undoChanges() {
-        if (!this.dirty || undoSnapshots.isEmpty()) return;
-        for (OptionWidget.Memento snapshot : undoSnapshots) {
-            snapshot.restore();
-        }
+        if (!this.dirty) return;
+        rootTreeNodes.stream()
+            .flatMap(TabNode::streamAllNodes)
+            .flatMap(node -> node.getOptionGroups().stream())
+            .flatMap(group -> group.getOptionWidgets().stream())
+            .map(OptionWidget::getOption)
+            .filter(option -> option.isPendingModifiedFromActual())
+            .forEach(option -> {
+                option.discardPending();
+            });
 
         this.dirty = false;
         updateButtonStates();
@@ -254,6 +251,10 @@ public class ConfigScreen extends Screen {
 
     @Override
     public void extractRenderState(@NonNull GuiGraphicsExtractor gui, int mouseX, int mouseY, float partialTick) {
+        //#if MC <= 12105
+        //$$ super.render(gui, mouseX, mouseY, partialTick);
+        //#endif
+
         // Render Canvas Screen Base Tint
         gui.fill(0, 0, this.width, this.height, layoutConfig.colorScreenBaseBackground);
 
@@ -385,7 +386,9 @@ public class ConfigScreen extends Screen {
             gui.text(this.font, text(LANG_KEY_SELECT_OPTION), layout.descAreaX + DESC_TEXT_OFFSET_X, layoutConfig.topBarHeight + DESC_TEXT_OFFSET_Y, layoutConfig.colorTextDisabled, false);
         }
 
+        //#if MC >= 12106
         super.extractRenderState(gui, mouseX, mouseY, partialTick);
+        //#endif
     }
 
     private void drawScrollBar(GuiGraphicsExtractor gui, int x, int y, int height, double scroll, int contentHeight) {
@@ -399,7 +402,7 @@ public class ConfigScreen extends Screen {
     }
 
     @Override
-    //#if MC >= 12111
+    //#if MC >= 12109
     public boolean mouseClicked(@NonNull MouseButtonEvent event, boolean doubleClick) {
         if (super.mouseClicked(event, doubleClick)) return true;
         int button = event.button();
@@ -407,7 +410,6 @@ public class ConfigScreen extends Screen {
         double mouseY = event.y();
     //#else
     //$$ public boolean mouseClicked(double mouseX, double mouseY, int button) {
-    //$$     if (super.mouseClicked(mouseX, mouseY, button)) return true;
     //#endif
         if (button == GLFW.GLFW_MOUSE_BUTTON_1 && layout.isWithinContentArea(mouseY)) {
             if (layout.isMouseOverTabs(mouseX)) {
@@ -430,29 +432,54 @@ public class ConfigScreen extends Screen {
                 }
             }
             else if (layout.isMouseOverOptions(mouseX)) {
+                int extraPadding = 0;
                 for (int i = 0; i < cachedOptionItems.size(); i++) {
                     RenderableItem item = cachedOptionItems.get(i);
-                    // Completely ignore header row interaction lines.
+
+                    if (item.isHeader() && i > 0) {
+                        extraPadding += 12;
+                    }
+
+                    // Header click boundaries are processed to keep padding aligned, but input handling is skipped.
                     if (item.isHeader()) continue;
 
-                    int yPos = layoutConfig.topBarHeight + OPTION_ITEM_START_OFFSET_Y + (i * layoutConfig.optionItemHeight) - (int) optionScrollY;
+                    int yPos = layoutConfig.topBarHeight + OPTION_ITEM_START_OFFSET_Y + (i * layoutConfig.optionItemHeight) + extraPadding - (int) optionScrollY;
                     if (mouseY >= yPos && mouseY < yPos + layoutConfig.optionItemHeight) {
                         this.focusedOptionIndex = i;
-
                         Option<?> option = item.option();
-                        if (option != null && option.getWidget() != null && option.getWidget().mouseClicked(mouseX, mouseY, button)) {
-                            markDirty();
-                            return true;
+
+                        if (option != null) {
+                            int resetBtnX = layout.descAreaX - RESET_BUTTON_WIDTH - 6;
+                            int resetBtnY = yPos + (layoutConfig.optionItemHeight - 16) / 2;
+
+                            // Click Collision Interception: Check if user targeted the row reset button specifically
+                            if (mouseX >= resetBtnX && mouseX < resetBtnX + RESET_BUTTON_WIDTH && mouseY >= resetBtnY && mouseY < resetBtnY + 16) {
+                                if (option.isModified()) {
+                                    option.resetToDefault();
+                                    markDirty();
+                                }
+                                return true;
+                            }
+
+                            // Regular fallback: pass event downward into specific active Widget configuration inputs
+                            if (option.getWidget() != null && option.getWidget().mouseClicked(mouseX, mouseY, button)) {
+                                markDirty();
+                                return true;
+                            }
                         }
                     }
                 }
             }
         }
-        return false;
+        //#if MC >= 12109
+        return super.mouseClicked(event, doubleClick);
+        //#else
+        //$$ return super.mouseClicked(mouseX, mouseY, button);
+        //#endif
     }
 
     @Override
-    //#if MC >= 12111
+    //#if MC >= 12109
     public boolean mouseReleased(@NonNull MouseButtonEvent event) {
         int button = event.button();
         double mouseX = event.x();
@@ -465,7 +492,7 @@ public class ConfigScreen extends Screen {
                 item.option().getWidget().mouseReleased(mouseX, mouseY, button);
             }
         }
-        //#if MC >= 12111
+        //#if MC >= 12109
         return super.mouseReleased(event);
         //#else
         //$$ return super.mouseReleased(mouseX, mouseY, button);
@@ -487,7 +514,7 @@ public class ConfigScreen extends Screen {
     }
 
     @Override
-    //#if MC >= 12111
+    //#if MC >= 12109
     public boolean mouseDragged(@NonNull MouseButtonEvent event, double dragX, double dragY) {
         if (super.mouseDragged(event, dragX, dragY)) return true;
         double mouseX = event.x();
@@ -495,7 +522,6 @@ public class ConfigScreen extends Screen {
         int button = event.button();
     //#else
     //$$ public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-    //$$     if (super.mouseDragged(mouseX, mouseY, button, dragX, dragY)) return true;
     //#endif
         if (focusedOptionIndex >= 0 && focusedOptionIndex < cachedOptionItems.size()) {
             RenderableItem item = cachedOptionItems.get(focusedOptionIndex);
@@ -506,7 +532,11 @@ public class ConfigScreen extends Screen {
                 }
             }
         }
-        return false;
+        //#if MC >= 12109
+        return super.mouseDragged(event, dragX, dragY);
+        //#else
+        //$$ return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        //#endif
     }
 
     private Profile getCurrentProfile() {
