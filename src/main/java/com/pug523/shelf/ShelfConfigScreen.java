@@ -42,7 +42,7 @@ public class ShelfConfigScreen {
 
         TabNode advancedVideoTweaks = new TabNode(categoryText("advanced_tweaks"))
             .addGroup(new OptionGroup(categoryText("experimental_shaders"), List.of(
-                new Option<>(key("option.vsync"), new BooleanOptionWidget(() -> false, (v) -> {}, false))
+                new Option<>(key("option.vsync"), new BooleanOptionWidget(() -> config.vsync, (v) -> config.vsync = v, false))
             )));
 
         // Link them up recursively.
