@@ -43,15 +43,19 @@ public class TomlConfigManager<T extends Serializable> implements ConfigManager<
         ObjectDeserializerBuilder builder = ObjectDeserializer.builder();
 
         // Double (TOML float) -> Float
+        builder.withDeserializerForClass(Double.class, float.class, (value, constraint, context) -> value.floatValue());
         builder.withDeserializerForClass(Double.class, Float.class, (value, constraint, context) -> value.floatValue());
 
         // Long (TOML int) -> Integer
+        builder.withDeserializerForClass(Long.class, int.class, (value, constraint, context) -> value.intValue());
         builder.withDeserializerForClass(Long.class, Integer.class, (value, constraint, context) -> value.intValue());
 
         // Long (TOML int) -> Double
+        builder.withDeserializerForClass(Long.class, double.class, (value, constraint, context) -> value.doubleValue());
         builder.withDeserializerForClass(Long.class, Double.class, (value, constraint, context) -> value.doubleValue());
 
         // Long (TOML int) -> Float
+        builder.withDeserializerForClass(Long.class, float.class, (value, constraint, context) -> value.floatValue());
         builder.withDeserializerForClass(Long.class, Float.class, (value, constraint, context) -> value.floatValue());
 
         return builder.build();

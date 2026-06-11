@@ -3,7 +3,6 @@ package com.pug523.shelf.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.File;
@@ -46,8 +45,7 @@ public class JsonConfigManager<T extends Serializable> implements ConfigManager<
     public void load() {
         if (configFile.exists()) {
             try (FileReader reader = new FileReader(configFile)) {
-                JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
-
+                JsonObject root = GSON.fromJson(reader, JsonObject.class);
                 this.config = GSON.fromJson(root, configClass);
 
                 if (this.config == null) {

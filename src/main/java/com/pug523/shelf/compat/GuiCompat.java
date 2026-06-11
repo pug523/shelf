@@ -65,8 +65,10 @@ public class GuiCompat {
         //@formatter:off
             //#if MC >= 11900
             //$$ font.drawInBatch(text, x, y, color, shadow, this.poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
-            //#else
+            //#elseif MC >= 11700
             //$$ font.drawInBatch(text, x, y, color, shadow, this.poseStack.last().pose(), bufferSource, false, 0, 15728880);
+            //#else
+            //$$ font.drawInBatch(text.getVisualOrderText(), (float)x, (float)y, color, shadow, this.poseStack.last().pose(), bufferSource, false, 0, 15728880);
             //#endif
         //$$ bufferSource.endBatch();
         //@formatter:on
@@ -124,10 +126,23 @@ public class GuiCompat {
     //$$ }
     //#else
     //$$ public void blit(net.minecraft.resources.ResourceLocation texture, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight, float r, float g, float b, float alpha) {
-    //$$     RenderSystem.setShaderTexture(0, texture);
-    //$$     RenderSystem.setShaderColor(r, g, b, alpha);
+    //@formatter:off
+        //#if MC >= 11700
+        //$$ RenderSystem.setShaderTexture(0, texture);
+        //$$ RenderSystem.setShaderColor(r, g, b, alpha);
+        //#else
+        //$$ net.minecraft.client.Minecraft.getInstance().getTextureManager().bind(texture);
+        //$$ org.lwjgl.opengl.GL11.glColor4f(r, g, b, alpha);
+        //#endif
+    //@formatter:on
     //$$     GuiComponent.blit(this.poseStack, x, y, 0, u, v, width, height, textureWidth, textureHeight);
-    //$$     RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+    //@formatter:off
+        //#if MC >= 11700
+        //$$ RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        //#else
+        //$$ org.lwjgl.opengl.GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        //#endif
+    //@formatter:on
     //$$ }
     //#endif
 }
