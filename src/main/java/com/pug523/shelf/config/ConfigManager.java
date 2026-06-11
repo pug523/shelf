@@ -1,6 +1,8 @@
 package com.pug523.shelf.config;
 
-public interface ConfigManager<T> {
+import java.io.Serializable;
+
+public interface ConfigManager<T extends Serializable> {
     T getConfig();
 
     void load();

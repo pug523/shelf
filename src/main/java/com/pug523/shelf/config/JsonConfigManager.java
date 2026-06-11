@@ -10,9 +10,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.function.Supplier;
 
-public class JsonConfigManager<T> implements ConfigManager<T> {
+public class JsonConfigManager<T extends Serializable> implements ConfigManager<T> {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private final Class<T> configClass;
@@ -27,15 +28,13 @@ public class JsonConfigManager<T> implements ConfigManager<T> {
         this.config = defaultSupplier.get();
     }
 
-    public JsonConfigManager(Class<T> configClass, String configDirectory, String fileName, Supplier<T> defaultSupplier) {
+    public JsonConfigManager(Class<T> configClass, String configDirectory, String fileName,
+            Supplier<T> defaultSupplier) {
         this(configClass, resolveConfigFile(configDirectory, fileName), defaultSupplier);
     }
 
     private static File resolveConfigFile(String dir, String file) {
-        return FabricLoader.getInstance().getConfigDir()
-            .resolve(dir)
-            .resolve(file)
-            .toFile();
+        return FabricLoader.getInstance().getConfigDir().resolve(dir).resolve(file).toFile();
     }
 
     @Override
