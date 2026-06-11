@@ -17,10 +17,24 @@ preprocess {
     def mc012111 = createNode('1.21.11', 1_21_11, '')
     def mc012108 = createNode('1.21.8', 1_21_08, '')
     def mc012105 = createNode('1.21.5', 1_21_05, '')
+    def mc012103 = createNode('1.21.3', 1_21_03, '')
+    def mc012101 = createNode('1.21.1', 1_21_01, '')
+    def mc012006 = createNode('1.20.6', 1_20_06, '')
+    def mc012004 = createNode('1.20.4', 1_20_04, '')
+    def mc012001 = createNode('1.20.1', 1_20_01, '')
+    def mc011904 = createNode('1.19.4', 1_19_04, '')
+    def mc011802 = createNode('1.18.2', 1_18_02, '')
 
     mc260102.link(mc012111, file('versions/mapping-26.1.2-1.21.11.txt'))
     mc012111.link(mc012108, null)
     mc012108.link(mc012105, null)
+    mc012105.link(mc012103, null)
+    mc012103.link(mc012101, null)
+    mc012101.link(mc012006, null)
+    mc012006.link(mc012004, null)
+    mc012004.link(mc012001, null)
+    mc012001.link(mc011904, null)
+    mc011904.link(mc011802, null)
 
     for (final def node in getNodes()) {
         findProject(node.project).ext.mcVersion = node.mcVersion
