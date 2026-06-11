@@ -30,6 +30,7 @@ dependencies {
     def autoImplementation = { Object... args -> unobfuscated ? implementation(*args) : modImplementation(*args) }
     def autoRuntimeOnly = { Object... args -> unobfuscated ? runtimeOnly(*args) : modRuntimeOnly(*args) }
     def autoCompileOnly = { Object... args -> unobfuscated ? compileOnly(*args) : modCompileOnly(*args) }
+    def autoLocalRuntime = { Object... args -> unobfuscated ? runtimeOnly(*args) : modLocalRuntime(*args) }
 
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     if (!unobfuscated) {
@@ -37,15 +38,21 @@ dependencies {
     }
 
     autoImplementation("net.fabricmc:fabric-loader:${project.loader_version}")
-    autoImplementation("maven.modrinth:modmenu:${project.modmenu_version}")
-    // autoImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+    autoCompileOnly("maven.modrinth:modmenu:${project.modmenu_version}")
+    autoLocalRuntime("maven.modrinth:modmenu:${project.modmenu_version}")
+
+    autoLocalRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}")
+
     include(autoImplementation("me.fallenbreath:conditional-mixin-fabric:${project.conditional_mixin_version}"))
 
     if (mcVersion <= 12108) {
       compileOnly("org.jspecify:jspecify:${project.jspecify_version}")
     }
 
-    include(implementation("com.electronwill.night-config:toml:${project.night_config_version}"))
+    implementation("com.electronwill.night-config:toml:${project.night_config_version}")
+    include("com.electronwill.night-config:toml:${project.night_config_version}")
+    include("com.electronwill.night-config:core:${project.night_config_version}")
 }
 
 JavaVersion javaCompatibility
@@ -66,7 +73,10 @@ final JavaVersion MIXIN_COMPATIBILITY_LEVEL = javaCompatibility
 loom {
     accessWidenerPath = file("${project.mod_id}.accesswidener")
 
-    def commonVmArgs = ['-Dmixin.debug.export=true']
+    def commonVmArgs = [
+        '-Dmixin.debug.export=true',
+        "-Dfabric.configDir=${rootProject.projectDir}/run/shared_config"
+    ]
     if (mcVersion < 11904) {
         // carpet 1.4.100+v230314 for mc1.19.4 and above
         // fail to pass the check on at MinecraftServer_pingPlayerSampleLimit#modifyPlayerSampleLimit
@@ -92,15 +102,6 @@ loom {
             ideConfigGenerated false
         }
     }
-
-    // splitEnvironmentSourceSets()
-
-    // mods {
-    //     "shelf" {
-    //         sourceSet sourceSets.main
-    //         sourceSet sourceSets.client
-    //     }
-    // }
 }
 
 String modVersionSuffix = ''
