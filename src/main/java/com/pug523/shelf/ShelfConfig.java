@@ -1,12 +1,15 @@
 package com.pug523.shelf;
 
+import com.pug523.shelf.gui.layout.LayoutConfig;
+
 public class ShelfConfig {
-    public Boolean autoRestock = false;
-    public Integer fov = 90;
-    public Integer renderDistance = 32;
-    public Double volume = 100.0d;
-    public Float sensitivity = 1.0f;
-    public Boolean vsync = false;
+    public boolean autoRestock = false;
+    public int fov = 90;
+    public int renderDistance = 32;
+    public double volume = 100.0d;
+    public float sensitivity = 1.0f;
+    public boolean vsync = false;
+    public LayoutConfig layoutConfig = LayoutConfig.defaultConfig;
 
     public transient static final ShelfConfig defaultConfig = new ShelfConfig();
 }
