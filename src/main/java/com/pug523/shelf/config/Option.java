@@ -5,6 +5,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import com.pug523.shelf.compat.ComponentCompat;
+
 import net.minecraft.network.chat.Component;
 
 public class Option<T> {
@@ -17,19 +19,19 @@ public class Option<T> {
 
     private T pendingValue;
 
-
-    public Option(Component name, String descriptionKey, T defaultValue, Supplier<T> getter, Consumer<T> setter, List<Tag> tags) {
+    public Option(Component name, String descriptionKey, T defaultValue, Supplier<T> getter, Consumer<T> setter,
+            List<Tag> tags) {
         this.name = name;
         this.descriptionKey = descriptionKey;
         this.defaultValue = defaultValue;
         this.getter = getter;
         this.setter = setter;
-		this.tags = tags;
+        this.tags = tags;
         this.pendingValue = getter.get();
     }
 
     public Option(String nameKey, T defaultValue, Supplier<T> getter, Consumer<T> setter, List<Tag> tags) {
-        this(Component.translatable(nameKey), nameKey + ".desc", defaultValue, getter, setter, tags);
+        this(ComponentCompat.translatable(nameKey), nameKey + ".desc", defaultValue, getter, setter, tags);
     }
 
     public Component getName() {
@@ -37,7 +39,7 @@ public class Option<T> {
     }
 
     public Component getDescription() {
-        return Component.translatable(this.descriptionKey);
+        return ComponentCompat.translatable(this.descriptionKey);
     }
 
     public T getDefaultValue() {

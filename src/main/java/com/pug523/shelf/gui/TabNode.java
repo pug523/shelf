@@ -19,17 +19,41 @@ public class TabNode {
         this.name = name;
     }
 
-    public Component getName() { return this.name; }
-    public List<OptionGroup> getOptionGroups() { return this.optionGroups; }
-    public List<TabNode> getChildren() { return this.children; }
+    public Component getName() {
+        return this.name;
+    }
 
-    public int getDepth() { return this.depth; }
-    public void setDepth(int depth) { this.depth = depth; }
+    public List<OptionGroup> getOptionGroups() {
+        return this.optionGroups;
+    }
 
-    public boolean isExpanded() { return this.expanded; }
-    public void setExpanded(boolean expanded) { this.expanded = expanded; }
-    public void toggleExpanded() { this.expanded = !this.expanded; }
-    public boolean hasChildren() { return !children.isEmpty(); }
+    public List<TabNode> getChildren() {
+        return this.children;
+    }
+
+    public int getDepth() {
+        return this.depth;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
+    }
+
+    public boolean isExpanded() {
+        return this.expanded;
+    }
+
+    public void setExpanded(boolean expanded) {
+        this.expanded = expanded;
+    }
+
+    public void toggleExpanded() {
+        this.expanded = !this.expanded;
+    }
+
+    public boolean hasChildren() {
+        return !children.isEmpty();
+    }
 
     // Fluent API helper to easily add sub-directories or categories.
     public TabNode addNode(TabNode child) {
@@ -55,9 +79,6 @@ public class TabNode {
     }
 
     public Stream<TabNode> streamAllNodes() {
-        return Stream.concat(
-            Stream.of(this),
-            this.children.stream().flatMap(TabNode::streamAllNodes)
-        );
+        return Stream.concat(Stream.of(this), this.children.stream().flatMap(TabNode::streamAllNodes));
     }
 }
