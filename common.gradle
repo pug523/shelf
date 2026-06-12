@@ -40,9 +40,17 @@ dependencies {
     autoImplementation("net.fabricmc:fabric-loader:${project.loader_version}")
 
     autoCompileOnly("maven.modrinth:modmenu:${project.modmenu_version}")
-    autoLocalRuntime("maven.modrinth:modmenu:${project.modmenu_version}")
 
-    autoLocalRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}")
+    if (11800 <= mcVersion) {
+        autoLocalRuntime("maven.modrinth:modmenu:${project.modmenu_version}")
+        if (mcVersion <= 12108) {
+            // autoLocalRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}")
+            autoLocalRuntime(fabricApi.module("fabric-resource-loader-v0", project.fabric_api_version))
+            autoLocalRuntime(fabricApi.module("fabric-screen-api-v1", project.fabric_api_version))
+            autoLocalRuntime(fabricApi.module("fabric-key-binding-api-v1", project.fabric_api_version))
+            autoLocalRuntime(fabricApi.module("fabric-lifecycle-events-v1", project.fabric_api_version))
+        }
+    }
 
     include(autoImplementation("me.fallenbreath:conditional-mixin-fabric:${project.conditional_mixin_version}"))
 
@@ -176,8 +184,12 @@ tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
     it.options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
     if (JAVA_COMPATIBILITY <= JavaVersion.VERSION_1_8) {
-      // suppressed "source/target value 8 is obsolete and will be removed in a future release"
-      it.options.compilerArgs << '-Xlint:-options'
+        // suppressed "source/target value 8 is obsolete and will be removed in a future release"
+        it.options.compilerArgs << '-Xlint:-options'
+    }
+
+    if (JavaVersion.current() >= JAVA_COMPATIBILITY) {
+        it.options.release = Integer.parseInt(JAVA_COMPATIBILITY.getMajorVersion())
     }
 }
 
