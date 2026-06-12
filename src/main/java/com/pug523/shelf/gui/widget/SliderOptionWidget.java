@@ -77,8 +77,8 @@ public class SliderOptionWidget<N extends Number & Comparable<N>> extends Option
         if (round) {
             int centerX = fillEnd;
             int centerY = sliderY + (cfg.sliderHeight / 2);
-            int radius = cfg.sliderKnobSize / 2;
-            RenderUtil.drawDynamicCircle(gui, centerX, centerY, radius, cfg.colorSliderKnob);
+            int radius = (int) (cfg.sliderKnobSize / 2.5f);
+            RenderUtil.drawCircle(gui, centerX, centerY, radius, cfg.colorSliderKnob);
         } else {
             int knobX = fillEnd - (cfg.sliderKnobSize / 2);
             int knobY = sliderY + (cfg.sliderHeight / 2) - (cfg.sliderKnobSize / 2);

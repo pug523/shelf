@@ -38,31 +38,37 @@ public class ConfigScreenRenderer {
             TabTreeController tabs, OptionContext context, OptionFocusController focus, ScrollController scrolls) {
         LayoutConfig cfg = layout.getConfig();
 
-        drawBase(gui, screen, layout, cfg);
+        SdfRenderQueue.startBuffering();
 
-        drawHeader(gui, screen, layout, cfg);
-        drawFooter(gui, screen, layout, cfg, screen.getFooterButtons(), mouseX, mouseY);
+        base(gui, screen, layout, cfg);
 
-        drawMiddle(gui, screen, layout, cfg);
+        header(gui, screen, layout, cfg);
+        footer(gui, screen, layout, cfg, screen.getFooterButtons(), mouseX, mouseY);
 
-        drawTabs(gui, screen, layout, cfg, tabs, scrolls);
+        middle(gui, screen, layout, cfg);
 
-        drawOptions(gui, screen, layout, cfg, context.items(), focus, scrolls, mouseX, mouseY);
+        tabs(gui, screen, layout, cfg, tabs, scrolls);
 
-        drawDescription(gui, screen, layout, cfg, context.items(), focus);
+        options(gui, screen, layout, cfg, context.items(), focus, scrolls, mouseX, mouseY);
+
+        description(gui, screen, layout, cfg, context.items(), focus);
+
+        //#if MC <= 12103
+        //$$ SdfRenderQueue.flushAll();
+        //#endif
     }
 
-    private void drawBase(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg) {
+    private void base(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg) {
         gui.fill(0, 0, screen.width, screen.height, cfg.colorScreenBaseBackground);
     }
 
-    private void drawHeader(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg) {
+    private void header(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg) {
         gui.fill(0, 0, screen.width, cfg.topBarHeight, cfg.colorHeaderBackground);
         gui.text(screen.getFont(), screen.getTitle(), cfg.textPaddingX,
-                (cfg.topBarHeight - screen.getFont().lineHeight) / 2 + 1, cfg.colorTextPrimary);
+                (cfg.topBarHeight - screen.getFont().lineHeight) / 2 + 1, cfg.colorTextPrimary, false);
     }
 
-    private void drawFooter(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg,
+    private void footer(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg,
             List<ClickableWidget> footerButtons, int mouseX, int mouseY) {
         gui.fill(0, screen.height - cfg.bottomBarHeight, screen.width, screen.height, cfg.colorFooterBackground);
 
@@ -85,7 +91,7 @@ public class ConfigScreenRenderer {
         }
     }
 
-    private void drawMiddle(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg) {
+    private void middle(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg) {
         gui.fill(0, cfg.topBarHeight, layout.tabAreaWidth, screen.height - cfg.bottomBarHeight,
                 cfg.colorTabPanelBackground);
 
@@ -96,8 +102,8 @@ public class ConfigScreenRenderer {
                 cfg.colorDescriptionPanelBackground);
     }
 
-    private void drawTabs(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg,
-            TabTreeController tabs, ScrollController scrolls) {
+    private void tabs(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg, TabTreeController tabs,
+            ScrollController scrolls) {
         List<TabNode> flat = tabs.getFlat();
 
         gui.enableScissor(0, cfg.topBarHeight + 1, layout.tabAreaWidth, screen.height - cfg.bottomBarHeight);
@@ -128,7 +134,7 @@ public class ConfigScreenRenderer {
             }
 
             x += 12;
-            gui.text(screen.getFont(), node.getName(), x, y + textOffset, color);
+            gui.text(screen.getFont(), node.getName(), x, y + textOffset, color, false);
         }
 
         gui.disableScissor();
@@ -137,7 +143,7 @@ public class ConfigScreenRenderer {
                 scroll, contentHeight + cfg.tabItemStartOffsetY, cfg);
     }
 
-    private void drawOptions(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg,
+    private void options(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg,
             List<RenderableItem> items, OptionFocusController focus, ScrollController scrolls, int mouseX, int mouseY) {
         gui.enableScissor(layout.tabAreaWidth + 1, cfg.topBarHeight + 1, layout.descAreaX,
                 screen.height - cfg.bottomBarHeight);
@@ -160,7 +166,7 @@ public class ConfigScreenRenderer {
 
             if (item.isHeader()) {
                 gui.text(screen.getFont(), item.text(), layout.tabAreaWidth + cfg.optionHeaderOffsetX,
-                        y + (optionHeight - screen.getFont().lineHeight) / 2, cfg.colorTextMuted);
+                        y + (optionHeight - screen.getFont().lineHeight) / 2, cfg.colorTextMuted, false);
                 continue;
             }
 
@@ -185,7 +191,7 @@ public class ConfigScreenRenderer {
 
             int textX = layout.tabAreaWidth + cfg.optionTextOffsetX;
             int textY = y + (optionHeight - screen.getFont().lineHeight) / 2 + 1;
-            gui.text(screen.getFont(), option.getName(), textX, textY, color);
+            gui.text(screen.getFont(), option.getName(), textX, textY, color, false);
 
             widget.render(screen.getFont(), gui, layout, layout.tabAreaWidth, y,
                     layout.optionAreaWidth - cfg.resetButtonWidth - 12, optionHeight, mouseX, mouseY);
@@ -257,7 +263,7 @@ public class ConfigScreenRenderer {
                 | (Mth.floor(g * 255.0f) & 0xFF) << 8 | Mth.floor(b * 255.0f) & 0xFF;
     }
 
-    private void drawDescription(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg,
+    private void description(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg,
             List<RenderableItem> items, OptionFocusController focus) {
         int idx = focus.getFocused();
         if (idx < 0 || idx >= items.size()) {
@@ -278,14 +284,14 @@ public class ConfigScreenRenderer {
         int y = cfg.topBarHeight + cfg.descTextOffsetY;
         int w = screen.width - layout.descAreaX - cfg.descTextRightPadding;
 
-        gui.text(screen.getFont(), name.copy().withStyle(ChatFormatting.BOLD), x, y, cfg.colorTextPrimary);
+        gui.text(screen.getFont(), name.copy().withStyle(ChatFormatting.BOLD), x, y, cfg.colorTextPrimary, false);
         gui.textWithWordWrap(screen.getFont(), desc, x, y + screen.getFont().lineHeight + 12, w,
                 cfg.colorTextSecondary);
     }
 
     private void drawEmpty(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg) {
         gui.text(screen.getFont(), TextUtil.guiText("select_an_option"), layout.descAreaX + cfg.descTextOffsetX,
-                cfg.topBarHeight + cfg.descTextOffsetY, cfg.colorTextDisabled);
+                cfg.topBarHeight + cfg.descTextOffsetY, cfg.colorTextDisabled, false);
     }
 
     private void drawScrollBar(GuiCompat gui, int x, int y, int height, double scroll, int contentHeight,

@@ -45,7 +45,7 @@ public class BooleanOptionWidget extends OptionWidget<Boolean> {
         }
 
         if (round) {
-            RenderUtil.drawDynamicCapsule(gui, sx, sy, cfg.toggleSwitchWidth, cfg.toggleSwitchHeight, bgBoxColor);
+            RenderUtil.drawCapsule(gui, sx, sy, cfg.toggleSwitchWidth, cfg.toggleSwitchHeight, bgBoxColor);
         } else {
             gui.fill(sx, sy, sx + cfg.toggleSwitchWidth, sy + cfg.toggleSwitchHeight, bgBoxColor);
         }
@@ -60,7 +60,7 @@ public class BooleanOptionWidget extends OptionWidget<Boolean> {
             int radius = knobWidth / 2;
             int centerX = knobX + radius;
             int centerY = knobY + radius;
-            RenderUtil.drawDynamicCircle(gui, centerX, centerY, radius, cfg.colorToggleKnob);
+            RenderUtil.drawCircle(gui, centerX, centerY, radius, cfg.colorToggleKnob);
         } else {
             gui.fill(knobX, knobY, knobX + knobWidth, knobY + knobHeight, cfg.colorToggleKnob);
         }
