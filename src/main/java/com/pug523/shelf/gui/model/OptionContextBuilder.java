@@ -1,4 +1,4 @@
-package com.pug523.shelf.gui.builder;
+package com.pug523.shelf.gui.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,8 +6,6 @@ import java.util.List;
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.gui.OptionGroup;
 import com.pug523.shelf.gui.TabNode;
-import com.pug523.shelf.gui.model.OptionContext;
-import com.pug523.shelf.gui.model.RenderableItem;
 import com.pug523.shelf.gui.widget.OptionWidget;
 
 import net.minecraft.network.chat.Component;
