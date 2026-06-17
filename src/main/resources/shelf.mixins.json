@@ -1,10 +1,10 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.pug523.shelf.mixins",
+  "package": "com.pug523.shelf.mixin",
   "compatibilityLevel": "{{COMPATIBILITY_LEVEL}}",
   "client": [
-    "MinecraftMixin"
+    "RenderTargetMixin"
   ],
   "injectors": {
     "defaultRequire": 1
