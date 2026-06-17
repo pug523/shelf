@@ -3,6 +3,7 @@ package com.pug523.shelf.gui;
 import java.util.List;
 
 import org.jspecify.annotations.NonNull;
+import org.lwjgl.glfw.GLFW;
 
 import com.pug523.shelf.compat.GuiCompat;
 import com.pug523.shelf.compat.JavaCompat;
@@ -19,7 +20,7 @@ import com.pug523.shelf.gui.model.OptionContextBuilder;
 import com.pug523.shelf.gui.renderer.ConfigScreenRenderer;
 import com.pug523.shelf.gui.text.TextUtil;
 import com.pug523.shelf.gui.widget.ActionButtonWidget;
-import com.pug523.shelf.gui.widget.ClickableWidget;
+import com.pug523.shelf.gui.widget.IClickableWidget;
 
 import net.minecraft.client.gui.Font;
 //#if MC >= 12000
@@ -29,6 +30,8 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 //#endif
 import net.minecraft.client.gui.screens.Screen;
 //#if MC >= 12109
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 //#endif
 import net.minecraft.network.chat.Component;
@@ -50,7 +53,7 @@ public class ConfigScreen extends Screen {
     private final ActionButtonWidget undoButton;
     private final ActionButtonWidget applyButton;
     private final ActionButtonWidget doneButton;
-    private final List<ClickableWidget> footerButtons;
+    private final List<IClickableWidget> footerButtons;
 
     public ConfigScreen(Component title, Screen parent, List<TabNode> roots, List<Profile> profiles, Runnable onApply,
             LayoutConfig config) {
@@ -113,7 +116,7 @@ public class ConfigScreen extends Screen {
         this.applyButton.setEnabled(hasChanges);
     }
 
-    public List<ClickableWidget> getFooterButtons() {
+    public List<IClickableWidget> getFooterButtons() {
         return footerButtons;
     }
 
@@ -124,7 +127,7 @@ public class ConfigScreen extends Screen {
         updateButtonStates();
         GuiCompat compat = new GuiCompat(gui);
         renderer.render(compat, this, layout, mouseX, mouseY, tabController, optionContextController.getContext(), focusController, scrollController);
-        // super.extractRenderState(gui, mouseX, mouseY, partialTick);
+        super.extractRenderState(gui, mouseX, mouseY, partialTick);
     }
     //#elseif MC >= 12000
     //$$ public void render(GuiGraphics gui, int mouseX, int mouseY, float partialTick) {
@@ -165,19 +168,21 @@ public class ConfigScreen extends Screen {
         int button = event.button();
         double mouseX = event.x();
         double mouseY = event.y();
+        int modifiers = event.modifiers();
     //#else
     //$$ public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    //$$     int modifiers = 0;
     //#endif
     // @formatter:on
-        for (ClickableWidget btn : footerButtons) {
-            if (btn.mouseClicked(mouseX, mouseY, button)) {
+        for (IClickableWidget btn : footerButtons) {
+            if (btn.mouseClicked(mouseX, mouseY, button, modifiers)) {
                 return true;
             }
         }
 
         TabNode before = tabController.getSelected();
 
-        boolean handled = input.mouseClicked(mouseX, mouseY, button, layout);
+        boolean handled = input.mouseClicked(mouseX, mouseY, button, modifiers, layout);
 
         if (before != tabController.getSelected()) {
             rebuildOptionContext();
@@ -231,7 +236,6 @@ public class ConfigScreen extends Screen {
     // @formatter:off
     //#if MC >= 12109
     public boolean mouseDragged(@NonNull MouseButtonEvent event, double dragX, double dragY) {
-        if (super.mouseDragged(event, dragX, dragY)) return true;
         double mouseX = event.x();
         double mouseY = event.y();
         int button = event.button();
@@ -239,6 +243,43 @@ public class ConfigScreen extends Screen {
     //$$ public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
     //#endif
     // @formatter:on
-        return input.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return input.mouseDragged(mouseX, mouseY, button, dragX, dragY, layout);
+    }
+
+    @Override
+    // @formatter:off
+    //#if MC >= 12109
+    public boolean keyPressed(@NonNull KeyEvent event) {
+        int keycode = event.key();
+        int scancode = event.scancode();
+        int modifiers = event.modifiers();
+    //#else
+    //$$ public boolean keyPressed(int keycode, int scancode, int modifiers) {
+    //#endif
+    // @formatter:on
+        boolean result = input.keyPressed(keycode, scancode, modifiers, layout);
+        if (!result && keycode == GLFW.GLFW_KEY_ESCAPE) {
+            this.close();
+            return true;
+        }
+        return result;
+    }
+
+    @Override
+    // @formatter:off
+    //#if MC >= 12109
+    public boolean charTyped(@NonNull CharacterEvent event) {
+        int codepoint = event.codepoint();
+        //#if MC >= 260000
+        int modifiers = 0;
+        //#else
+        //$$ int modifiers = event.modifiers();
+        //#endif
+    //#else
+    //$$ public boolean charTyped(char cp, int modifiers) {
+    //$$     int codepoint = (int) cp;
+    //#endif
+    // @formatter:on
+        return input.charTyped(codepoint, modifiers);
     }
 }

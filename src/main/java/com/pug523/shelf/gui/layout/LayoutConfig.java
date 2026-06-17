@@ -21,17 +21,24 @@ public class LayoutConfig {
     public int resetButtonWidth = 27;
     public int scrollbarWidth = 3;
     public int scrollbarMinHeight = 20;
+    public double scrollbarMaxHeightPercent = 0.25;
     public int optionTextOffsetX = 16;
     public int optionHeaderOffsetX = 8;
+    public int optionHeaderOffsetY = 12;
     public int descTextOffsetX = 10;
     public int descTextOffsetY = 15;
     public int descTextRightPadding = 20;
 
-    // Boolean Toggle Widget Sizing
-    public int toggleSwitchWidth = 30;
-    public int toggleSwitchHeight = 14;
-    public int togglePaddingRight = 25;
-    public int toggleHitboxPadding = 4;
+    // Capsule Toggle Widget Sizing
+    public int capsuleToggleWidth = 30;
+    public int capsuleToggleHeight = 14;
+    public int capsuleTogglePaddingRight = 25;
+    public int capsuleToggleHitboxPadding = 4;
+
+    // Toggle Action Button Widget Sizing
+    public int toggleButtonWidth = 44;
+    public int toggleButtonHeight = 18;
+    public int toggleButtonRightPadding = 20;
 
     // Slider Widget Sizing
     public int sliderWidth = 80;

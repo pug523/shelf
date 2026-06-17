@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.pug523.shelf.gui.TabNode;
+import com.pug523.shelf.gui.layout.LayoutConfig;
 
 public class TabTreeController {
 
@@ -17,8 +18,9 @@ public class TabTreeController {
 
     public void init() {
         rebuildFlat();
-        if (!flat.isEmpty())
+        if (!flat.isEmpty()) {
             selected = flat.get(0);
+        }
     }
 
     public void rebuildFlat() {
@@ -43,5 +45,9 @@ public class TabTreeController {
     public void toggle(TabNode node) {
         node.toggleExpanded();
         rebuildFlat();
+    }
+
+    public int totalHeight(LayoutConfig config) {
+        return getFlat().size() * config.tabItemHeight + config.tabItemStartOffsetY;
     }
 }

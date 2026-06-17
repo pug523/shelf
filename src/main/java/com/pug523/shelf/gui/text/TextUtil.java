@@ -36,4 +36,8 @@ public class TextUtil {
         //$$ return font.width(text.getString());
         //#endif
     }
+
+    public static final int width(Font font, String text) {
+        return font.width(text);
+    }
 }

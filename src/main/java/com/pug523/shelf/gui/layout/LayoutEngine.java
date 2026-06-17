@@ -1,5 +1,10 @@
 package com.pug523.shelf.gui.layout;
 
+import java.util.List;
+
+import com.pug523.shelf.gui.model.OptionContext;
+import com.pug523.shelf.gui.model.RenderableItem;
+
 public class LayoutEngine {
     private final LayoutConfig config;
 
