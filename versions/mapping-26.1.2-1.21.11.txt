@@ -4,3 +4,5 @@ net.minecraft.client.gui.GuiGraphicsExtractor net.minecraft.client.gui.GuiGraphi
 
 net.minecraft.client.gui.screens.Screen extractRenderState() net.minecraft.client.gui.screens.Screen render()
 net.minecraft.client.gui.screens.Screen extractBackground() net.minecraft.client.gui.screens.Screen renderBackground()
+net.minecraft.client.gui.components.AbstractWidget extractRenderState() net.minecraft.client.gui.components.AbstractWidget render()
+net.minecraft.client.gui.components.EditBox extractWidgetRenderState() net.minecraft.client.gui.components.EditBox renderWidget()
