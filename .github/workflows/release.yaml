@@ -48,7 +48,7 @@ jobs:
       matrix: ${{ fromJson(needs.matrix_prepare.outputs.matrix) }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download Build Artifacts
         uses: actions/download-artifact@v8
