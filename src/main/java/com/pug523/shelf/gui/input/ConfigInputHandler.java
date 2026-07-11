@@ -13,9 +13,11 @@ import com.pug523.shelf.gui.controller.OptionFocusController;
 import com.pug523.shelf.gui.controller.TabTreeController;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
+import com.pug523.shelf.gui.layout.Bounds;
+import com.pug523.shelf.gui.layout.OptionRowLayout;
 import com.pug523.shelf.gui.model.OptionContext;
 import com.pug523.shelf.gui.model.RenderableItem;
-import com.pug523.shelf.gui.overlay.OverlayController;
+import com.pug523.shelf.gui.controller.OverlayController;
 import com.pug523.shelf.gui.overlay.ScreenOverlay;
 import com.pug523.shelf.gui.sound.SoundUtil;
 import com.pug523.shelf.gui.widget.OptionWidget;
@@ -35,7 +37,7 @@ public final class ConfigInputHandler {
     private boolean isDraggingOptionScrollBar = false;
 
     public ConfigInputHandler(TabTreeController tabs, ScrollController scrolls, OptionContextController options,
-            OptionFocusController focus, ConfigChangeController changes, OverlayController overlays) {
+                              OptionFocusController focus, ConfigChangeController changes, OverlayController overlays) {
         this.tabs = tabs;
         this.scrolls = scrolls;
         this.options = options;
@@ -45,33 +47,34 @@ public final class ConfigInputHandler {
     }
 
     public boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers, LayoutEngine layout) {
-        if (button != InputUtil.LEFT_MOUSE_BUTTON) {
-            return false;
+        if (overlays.hasActiveOverlay()) {
+            ScreenOverlay overlay = overlays.getActiveOverlay();
+            if (overlay != null) {
+                overlay.mouseClicked(mouseX, mouseY, button, layout);
+                return true;
+            }
         }
+
+        // if (button != InputUtil.LEFT_MOUSE_BUTTON) {
+        //     return false;
+        // }
 
         if (!layout.isWithinContentArea(mouseY)) {
             return false;
         }
 
-        if (overlays.hasActiveOverlay()) {
-            ScreenOverlay overlay = overlays.getActiveOverlay();
-            return overlay.mouseClicked(mouseX, mouseY, button);
-        }
-
         LayoutConfig cfg = layout.getConfig();
-        int yStart = cfg.topBarHeight + 1;
-        int height = layout.mainContentHeight - 1;
+        int yStart = layout.tabArea.y;
 
         if (layout.isMouseOverTabs(mouseX)) {
-            int tabScrollBgX = layout.tabAreaWidth - cfg.scrollbarWidth;
-            if (mouseX >= tabScrollBgX && mouseX <= layout.tabAreaWidth) {
+            if (mouseX >= layout.tabScrollbarTrack.x && mouseX <= layout.tabScrollbarTrack.maxX) {
                 isDraggingTabScrollBar = true;
                 int totalTabHeight = tabs.totalHeight(cfg);
-                int maxHeight = (int) (height * cfg.scrollbarMaxHeightPercent);
-                int barHeight = Mth.clamp((int) ((height / (float) totalTabHeight) * height), cfg.scrollbarMinHeight,
-                        maxHeight);
-                int maxScroll = totalTabHeight - height;
-                int barY = yStart + (int) ((scrolls.getTabScroll() / maxScroll) * (height - barHeight));
+
+                Bounds thumb = layout.calculateScrollBarThumb(layout.tabScrollbarTrack, scrolls.getTabScroll(),
+                    totalTabHeight);
+                int barY = thumb != null ? thumb.y : yStart;
+                int barHeight = thumb != null ? thumb.height : cfg.scrollbarMinHeight;
 
                 boolean forceJump = mouseY < barY || mouseY >= barY + barHeight;
                 handleScrollBarDrag(mouseY, layout, true, forceJump);
@@ -80,27 +83,15 @@ public final class ConfigInputHandler {
         }
 
         if (layout.isMouseOverOptions(mouseX)) {
-            int optionScrollBgX = layout.descAreaX - cfg.scrollbarWidth;
-            if (mouseX >= optionScrollBgX && mouseX <= layout.descAreaX) {
+            if (mouseX >= layout.optionScrollbarTrack.x && mouseX <= layout.optionScrollbarTrack.maxX) {
                 OptionContext context = options.getContext();
                 if (context != null) {
                     isDraggingOptionScrollBar = true;
 
-                    int optionHeight = cfg.optionItemHeight;
-                    int extraPadding = 0;
-                    List<RenderableItem> items = context.items();
-                    for (int i = 0; i < items.size(); i++) {
-                        if (items.get(i).isHeader() && i > 0) {
-                            extraPadding += cfg.optionHeaderOffsetY;
-                        }
-                    }
-                    int totalOptionHeight = items.size() * optionHeight + extraPadding + cfg.optionItemStartOffsetY;
-
-                    int maxHeight = (int) (height * cfg.scrollbarMaxHeightPercent);
-                    int barHeight = Mth.clamp((int) ((height / (float) totalOptionHeight) * height),
-                            cfg.scrollbarMinHeight, maxHeight);
-                    int maxScroll = totalOptionHeight - height;
-                    int barY = yStart + (int) ((scrolls.getOptionScroll() / maxScroll) * (height - barHeight));
+                    Bounds thumb = layout.calculateScrollBarThumb(layout.optionScrollbarTrack,
+                        scrolls.getOptionScroll(), layout.totalOptionHeight);
+                    int barY = thumb != null ? thumb.y : layout.optionScrollbarTrack.y;
+                    int barHeight = thumb != null ? thumb.height : cfg.scrollbarMinHeight;
 
                     boolean forceJump = mouseY < barY || mouseY >= barY + barHeight;
                     handleScrollBarDrag(mouseY, layout, false, forceJump);
@@ -122,8 +113,8 @@ public final class ConfigInputHandler {
 
     private void handleScrollBarDrag(double mouseY, LayoutEngine layout, boolean isTab, boolean forceJump) {
         LayoutConfig cfg = layout.getConfig();
-        int yStart = cfg.topBarHeight + 1;
-        int height = layout.mainContentHeight - 1;
+        int yStart = layout.tabArea.y;
+        int height = layout.tabArea.height;
 
         if (!forceJump) {
             return;
@@ -137,25 +128,25 @@ public final class ConfigInputHandler {
         } else {
             OptionContext context = options.getContext();
             if (context != null) {
-                int optionHeight = cfg.optionItemHeight;
-                int extraPadding = 0;
-                List<RenderableItem> items = context.items();
-                for (int i = 0; i < items.size(); i++) {
-                    if (items.get(i).isHeader() && i > 0) {
-                        extraPadding += cfg.optionHeaderOffsetY;
-                    }
+                int contentHeight = 0;
+                if (!layout.optionRows.isEmpty()) {
+                    OptionRowLayout lastRow = layout.optionRows.get(layout.optionRows.size() - 1);
+                    contentHeight = lastRow.rowBounds.maxY + cfg.optionItemStartOffsetY;
                 }
-                int totalOptionHeight = items.size() * optionHeight + extraPadding + cfg.optionItemStartOffsetY;
-                scrolls.setOptionScroll(relativeY * (totalOptionHeight - height), totalOptionHeight, height);
+                scrolls.setOptionScroll(relativeY * (contentHeight - height), contentHeight, height);
             }
         }
     }
 
-    public void mouseReleased(double mouseX, double mouseY, int button) {
+    public void mouseReleased(double mouseX, double mouseY, int button, LayoutEngine layout) {
         if (overlays.hasActiveOverlay()) {
             ScreenOverlay overlay = overlays.getActiveOverlay();
-            overlay.mouseReleased(mouseX, mouseY, button);
-            return;
+            if (overlay != null) {
+                overlay.mouseReleased(mouseX, mouseY, button, layout);
+                isDraggingTabScrollBar = false;
+                isDraggingOptionScrollBar = false;
+                return;
+            }
         }
 
         if (button == InputUtil.LEFT_MOUSE_BUTTON) {
@@ -177,12 +168,18 @@ public final class ConfigInputHandler {
             OptionWidget<?> widget = item.widget();
 
             if (widget != null) {
-                widget.mouseReleased(mouseX, mouseY, button);
+                widget.mouseReleased(mouseX, mouseY, button, layout);
             }
         }
     }
 
     public boolean mouseScrolled(double mouseX, double mouseY, double dy, LayoutEngine layout) {
+        if (overlays.hasActiveOverlay()) {
+            // TODO:
+            // overlays.getActiveOverlay().mouseScrolled();
+            return false;
+        }
+
         if (!layout.isWithinContentArea(mouseY)) {
             return false;
         }
@@ -190,23 +187,18 @@ public final class ConfigInputHandler {
         LayoutConfig config = layout.getConfig();
         if (layout.isMouseOverTabs(mouseX)) {
             int totalTabHeight = tabs.totalHeight(config);
-            scrolls.scrollTabs(-dy * config.tabScrollSpeed, totalTabHeight, layout.mainContentHeight);
+            scrolls.scrollTabs(-dy * config.tabScrollSpeed, totalTabHeight, layout.tabArea.height);
             return true;
         }
         if (layout.isMouseOverOptions(mouseX)) {
             OptionContext context = options.getContext();
             if (context != null) {
-                int optionHeight = config.optionItemHeight;
-                int extraPadding = 0;
-                List<RenderableItem> items = context.items();
-                for (int i = 0; i < items.size(); i++) {
-                    if (items.get(i).isHeader() && i > 0) {
-                        extraPadding += config.optionHeaderOffsetY;
-                    }
+                int contentHeight = 0;
+                if (!layout.optionRows.isEmpty()) {
+                    OptionRowLayout lastRow = layout.optionRows.get(layout.optionRows.size() - 1);
+                    contentHeight = lastRow.rowBounds.maxY + config.optionItemStartOffsetY;
                 }
-
-                int totalOptionHeight = items.size() * optionHeight + extraPadding + config.optionItemStartOffsetY;
-                scrolls.scrollOptions(-dy * config.optionScrollSpeed, totalOptionHeight, layout.mainContentHeight);
+                scrolls.scrollOptions(-dy * config.optionScrollSpeed, contentHeight, layout.optionArea.height);
                 return true;
             }
         }
@@ -215,9 +207,15 @@ public final class ConfigInputHandler {
     }
 
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY,
-            LayoutEngine layout) {
+                                LayoutEngine layout) {
+        if (overlays.hasActiveOverlay()) {
+            // TODO:
+            // overlays.getActiveOverlay().mouseDragged();
+            return false;
+        }
+
         LayoutConfig cfg = layout.getConfig();
-        int height = layout.mainContentHeight - 1;
+        int height = layout.tabArea.height;
 
         if (isDraggingTabScrollBar) {
             int totalTabHeight = tabs.totalHeight(cfg);
@@ -230,18 +228,14 @@ public final class ConfigInputHandler {
         if (isDraggingOptionScrollBar) {
             OptionContext context = options.getContext();
             if (context != null) {
-                int optionHeight = cfg.optionItemHeight;
-                int extraPadding = 0;
-                List<RenderableItem> items = context.items();
-                for (int i = 0; i < items.size(); i++) {
-                    if (items.get(i).isHeader() && i > 0) {
-                        extraPadding += cfg.optionHeaderOffsetY;
-                    }
+                int contentHeight = 0;
+                if (!layout.optionRows.isEmpty()) {
+                    OptionRowLayout lastRow = layout.optionRows.get(layout.optionRows.size() - 1);
+                    contentHeight = lastRow.rowBounds.maxY + cfg.optionItemStartOffsetY;
                 }
-                int totalOptionHeight = items.size() * optionHeight + extraPadding + cfg.optionItemStartOffsetY;
-                if (totalOptionHeight > height) {
-                    double scrollDelta = (dragY / (double) height) * (totalOptionHeight - height);
-                    scrolls.setOptionScroll(scrolls.getOptionScroll() + scrollDelta, totalOptionHeight, height);
+                if (contentHeight > height) {
+                    double scrollDelta = (dragY / (double) height) * (contentHeight - height);
+                    scrolls.setOptionScroll(scrolls.getOptionScroll() + scrollDelta, contentHeight, height);
                 }
             }
             return true;
@@ -267,7 +261,7 @@ public final class ConfigInputHandler {
             return false;
         }
 
-        if (widget.mouseDragged(mouseX, mouseY, button, dragX, dragY)) {
+        if (widget.mouseDragged(mouseX, mouseY, button, dragX, dragY, layout)) {
             changes.markDirty();
             return true;
         }
@@ -278,7 +272,14 @@ public final class ConfigInputHandler {
     public boolean keyPressed(int keycode, int scancode, int modifiers, LayoutEngine layout) {
         if (overlays.hasActiveOverlay()) {
             ScreenOverlay overlay = overlays.getActiveOverlay();
-            return overlay.keyPressed(keycode, scancode, modifiers);
+            if (overlay != null) {
+                boolean result = overlay.keyPressed(keycode, scancode, modifiers, layout);
+                if (!result && keycode == GLFW.GLFW_KEY_ESCAPE) {
+                    overlays.closeActive();
+                    result = true;
+                }
+                return result;
+            }
         }
 
         OptionContext context = options.getContext();
@@ -301,11 +302,11 @@ public final class ConfigInputHandler {
                     break;
             } while (context.items().get(next).isHeader());
 
-            if (next != current && next >= 0 && next < totalItems) {
+            if (next != current && next < totalItems) {
                 if (current >= 0 && current < totalItems) {
                     RenderableItem prevItem = context.items().get(current);
                     if (prevItem != null && !prevItem.isHeader() && prevItem.widget() != null) {
-                        prevItem.widget().focusChanged(false);
+                        prevItem.widget().focusChanged(false, layout);
                     }
                 }
 
@@ -313,28 +314,25 @@ public final class ConfigInputHandler {
 
                 RenderableItem nextItem = context.items().get(next);
                 if (nextItem != null && !nextItem.isHeader() && nextItem.widget() != null) {
-                    nextItem.widget().focusChanged(true);
+                    nextItem.widget().focusChanged(true, layout);
                 }
 
                 LayoutConfig cfg = layout.getConfig();
-                int extraPadding = 0;
-                for (int i = 0; i <= next; i++) {
-                    if (context.items().get(i).isHeader() && i > 0) {
-                        extraPadding += 12;
-                    }
-                }
+                OptionRowLayout row = layout.optionRows.get(next);
 
-                int itemTopY = cfg.optionItemStartOffsetY + next * cfg.optionItemHeight + extraPadding;
-                int itemBottomY = itemTopY + cfg.optionItemHeight;
+                int itemTopY = row.rowBounds.y;
+                int itemBottomY = row.rowBounds.maxY;
 
-                int visibleHeight = layout.mainContentHeight - 1;
+                int visibleHeight = layout.optionArea.height;
                 double currentScroll = scrolls.getOptionScroll();
 
+                OptionRowLayout lastRow = layout.optionRows.get(layout.optionRows.size() - 1);
+                int contentHeight = lastRow.rowBounds.maxY + cfg.optionItemStartOffsetY;
+
                 if (itemTopY < currentScroll) {
-                    scrolls.setOptionScroll(itemTopY, totalItems * cfg.optionItemHeight + extraPadding, visibleHeight);
+                    scrolls.setOptionScroll(itemTopY, contentHeight, visibleHeight);
                 } else if (itemBottomY > currentScroll + visibleHeight) {
-                    scrolls.setOptionScroll(itemBottomY - visibleHeight,
-                            totalItems * cfg.optionItemHeight + extraPadding, visibleHeight);
+                    scrolls.setOptionScroll(itemBottomY - visibleHeight, contentHeight, visibleHeight);
                 }
 
                 return true;
@@ -346,16 +344,18 @@ public final class ConfigInputHandler {
             OptionWidget<?> widget = item.widget();
 
             if (widget != null) {
-                result |= widget.keyPressed(keycode, scancode, modifiers);
+                result |= widget.keyPressed(keycode, scancode, modifiers, layout);
             }
         }
         return result;
     }
 
-    public boolean charTyped(int codepoint, int modifiers) {
+    public boolean charTyped(int codepoint, int modifiers, LayoutEngine layout) {
         if (overlays.hasActiveOverlay()) {
             ScreenOverlay overlay = overlays.getActiveOverlay();
-            return overlay.charTyped(codepoint, modifiers);
+            if (overlay != null) {
+                return overlay.charTyped(codepoint, modifiers, layout);
+            }
         }
 
         OptionContext context = options.getContext();
@@ -367,7 +367,7 @@ public final class ConfigInputHandler {
             OptionWidget<?> widget = item.widget();
 
             if (widget != null) {
-                result |= widget.charTyped(codepoint, modifiers);
+                result |= widget.charTyped(codepoint, modifiers, layout);
             }
         }
         return result;
@@ -378,19 +378,19 @@ public final class ConfigInputHandler {
 
         for (int i = 0; i < flat.size(); i++) {
             TabNode node = flat.get(i);
+            Bounds baseBounds = layout.tabItemBounds.get(i);
 
-            int yPos = layout.getConfig().topBarHeight + layout.getConfig().tabItemStartOffsetY
-                    + i * layout.getConfig().tabItemHeight - (int) scrolls.getTabScroll();
+            int yPos = baseBounds.y - (int) scrolls.getTabScroll();
 
             if (mouseY < yPos) {
                 continue;
             }
 
-            if (mouseY >= yPos + layout.getConfig().tabItemHeight) {
+            if (mouseY >= yPos + baseBounds.height) {
                 continue;
             }
 
-            int toggleX = 10 + node.getDepth() * 10;
+            int toggleX = layout.getConfig().textPaddingX + node.getDepth() * layout.getConfig().tabTreeIndentation;
 
             if (node.hasChildren() && mouseX >= toggleX && mouseX <= toggleX + 16) {
                 tabs.toggle(node);
@@ -400,7 +400,7 @@ public final class ConfigInputHandler {
                 if (context != null && currentFocused >= 0 && currentFocused < context.items().size()) {
                     RenderableItem prevItem = context.items().get(currentFocused);
                     if (prevItem != null && !prevItem.isHeader() && prevItem.widget() != null) {
-                        prevItem.widget().focusChanged(false);
+                        prevItem.widget().focusChanged(false, layout);
                     }
                 }
                 focus.setFocused(-1);
@@ -423,21 +423,17 @@ public final class ConfigInputHandler {
 
         List<RenderableItem> items = context.items();
 
-        int extraPadding = 0;
         for (int i = 0; i < items.size(); i++) {
             RenderableItem item = items.get(i);
+            OptionRowLayout row = layout.optionRows.get(i);
 
-            if (item.isHeader() && i > 0) {
-                extraPadding += 12;
-            }
             if (item.isHeader()) {
                 continue;
             }
 
-            int yPos = layout.getConfig().topBarHeight + layout.getConfig().optionItemStartOffsetY
-                    + i * layout.getConfig().optionItemHeight + extraPadding - (int) scrolls.getOptionScroll();
+            int yPos = row.rowBounds.y - (int) scrolls.getOptionScroll();
 
-            if (mouseY < yPos || mouseY >= yPos + layout.getConfig().optionItemHeight) {
+            if (mouseY < yPos || mouseY >= yPos + row.rowBounds.height) {
                 continue;
             }
 
@@ -445,7 +441,7 @@ public final class ConfigInputHandler {
             if (previousFocusedIndex >= 0 && previousFocusedIndex != i && previousFocusedIndex < items.size()) {
                 RenderableItem prevItem = items.get(previousFocusedIndex);
                 if (prevItem != null && !prevItem.isHeader() && prevItem.widget() != null) {
-                    prevItem.widget().focusChanged(false);
+                    prevItem.widget().focusChanged(false, layout);
                 }
             }
 
@@ -454,18 +450,17 @@ public final class ConfigInputHandler {
             if (widget == null) {
                 return true;
             }
-            widget.focusChanged(true);
+            widget.focusChanged(true, layout);
 
             Option<?> option = widget.getOption();
             if (option == null) {
                 return true;
             }
 
-            int resetBtnX = layout.descAreaX - layout.getConfig().resetButtonWidth - 6;
-            int resetBtnY = yPos + (layout.getConfig().optionItemHeight - 16) / 2 - 1;
+            Bounds currentResetBounds = new Bounds(row.resetButtonBounds.x, yPos + 4, row.resetButtonBounds.width,
+                row.resetButtonBounds.height);
 
-            if (mouseX >= resetBtnX && mouseX < resetBtnX + layout.getConfig().resetButtonWidth && mouseY >= resetBtnY
-                    && mouseY < resetBtnY + 16) {
+            if (currentResetBounds.contains((int) mouseX, (int) mouseY)) {
                 if (option.isPendingModifiedFromDefault()) {
                     option.resetPendingToDefault();
                     SoundUtil.clickSound();
@@ -475,7 +470,8 @@ public final class ConfigInputHandler {
                 return true;
             }
 
-            if (widget.mouseClicked(mouseX, mouseY, InputUtil.LEFT_MOUSE_BUTTON, modifiers)) {
+            widget.mouseClicked(mouseX, mouseY, InputUtil.LEFT_MOUSE_BUTTON, modifiers, layout);
+            if (option.isPendingModifiedFromActual()) {
                 changes.markDirty();
                 return true;
             }
