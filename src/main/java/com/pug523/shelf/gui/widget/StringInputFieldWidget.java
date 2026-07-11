@@ -29,6 +29,7 @@ public class StringInputFieldWidget extends OptionWidget<String> {
         this.validator = validator;
         this.responder = responder;
 
+        // TODO: move magic numbers to layout config
         rebuildEditBox(Minecraft.getInstance().font, 0, 0, 100, 20, ComponentCompat.empty());
     }
 
@@ -54,8 +55,7 @@ public class StringInputFieldWidget extends OptionWidget<String> {
 
     private boolean isHovered(double mouseX, double mouseY) {
         //#if MC >= 11900
-        return mouseX >= this.editBox.getX() && mouseX < this.editBox.getX() + this.editBox.getWidth()
-                && mouseY >= this.editBox.getY() && mouseY < this.editBox.getY() + this.editBox.getHeight();
+        return mouseX >= this.editBox.getX() && mouseX < this.editBox.getX() + this.editBox.getWidth() && mouseY >= this.editBox.getY() && mouseY < this.editBox.getY() + this.editBox.getHeight();
         //#elseif MC >= 11600
         //$$ return mouseX >= this.editBox.x && mouseX < this.editBox.x + this.editBox.getWidth()
         //$$         && mouseY >= this.editBox.y && mouseY < this.editBox.y + this.editBox.getHeight();
@@ -74,16 +74,18 @@ public class StringInputFieldWidget extends OptionWidget<String> {
     }
 
     @Override
-    public void render(Font font, GuiCompat gui, LayoutEngine layout, int x, int y, int width, int height, int mouseX,
-            int mouseY, int scissorX, int scissorY, int scissorMaxX, int scissorMaxY) {
+    public void render(Font font, GuiCompat gui, LayoutEngine layout, int x, int y, int width, int height, int mouseX, int mouseY) {
         String value = this.option.getPendingValue();
-        if (value != this.editBox.getValue()) {
+        if (!value.equals(this.editBox.getValue())) {
             this.editBox.setValue(value);
         }
 
-        int targetX = x + width - 150;
+        // TODO: move magic numbers to layout config
+        int leftTextPadding = 150;
+
+        int targetX = x + leftTextPadding;
         int targetY = y + (height - 20) / 2;
-        int targetWidth = 140;
+        int targetWidth = Math.max(50, width - leftTextPadding - layout.optionWidgetRightMargin);
         int targetHeight = 20;
 
         //#if MC >= 11900
@@ -111,13 +113,13 @@ public class StringInputFieldWidget extends OptionWidget<String> {
             //#if MC >= 12002
             this.editBox.setHeight(targetHeight);
             //#else
-            //$$ rebuildEditBox(Minecraft.getInstance().font, targetX, targetY, targetWidth, targetHeight, ComponentCompat.empty());
+            //$$ rebuildEditBox(font, targetX, targetY, targetWidth, targetHeight, ComponentCompat.empty());
             //#endif
             // @formatter:on
         }
         //#else
         //$$ if (this.editBox.width != targetWidth || this.editBox.height != targetHeight) {
-        //$$     rebuildEditBox(Minecraft.getInstance().font, targetX, targetY, targetWidth, targetHeight, ComponentCompat.empty());
+        //$$     rebuildEditBox(font, targetX, targetY, targetWidth, targetHeight, ComponentCompat.empty());
         //$$ }
         //#endif
 
@@ -135,19 +137,18 @@ public class StringInputFieldWidget extends OptionWidget<String> {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers, LayoutEngine layout) {
         setFocused(isHovered(mouseX, mouseY));
 
         //#if MC >= 12109
-        return this.editBox.mouseClicked(new MouseButtonEvent(mouseX, mouseY, new MouseButtonInfo(button, modifiers)),
-                false);
+        return this.editBox.mouseClicked(new MouseButtonEvent(mouseX, mouseY, new MouseButtonInfo(button, modifiers)), false);
         //#else
         //$$ return this.editBox.mouseClicked(mouseX, mouseY, button);
         //#endif
     }
 
     @Override
-    public boolean keyPressed(int keycode, int scancode, int modifiers) {
+    public boolean keyPressed(int keycode, int scancode, int modifiers, LayoutEngine layout) {
         //#if MC >= 12109
         return this.editBox.keyPressed(new KeyEvent(keycode, scancode, modifiers));
         //#else
@@ -156,7 +157,7 @@ public class StringInputFieldWidget extends OptionWidget<String> {
     }
 
     @Override
-    public boolean charTyped(int codepoint, int modifiers) {
+    public boolean charTyped(int codepoint, int modifiers, LayoutEngine layout) {
         //#if MC >= 260000
         return this.editBox.charTyped(new CharacterEvent(codepoint));
         //#elseif MC >= 12109
@@ -167,7 +168,7 @@ public class StringInputFieldWidget extends OptionWidget<String> {
     }
 
     @Override
-    public void focusChanged(boolean focus) {
+    public void focusChanged(boolean focus, LayoutEngine layout) {
         if (!focus) {
             setFocused(false);
         }
