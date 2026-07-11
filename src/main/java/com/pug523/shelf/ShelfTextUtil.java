@@ -13,27 +13,27 @@ public class ShelfTextUtil {
     public static final String CONFIG_CATEGORY_LANG_KEY_PREFIX = CONFIG_LANG_KEY_PREFIX + "category.";
     public static final String CONFIG_OPTION_LANG_KEY_PREFIX = CONFIG_LANG_KEY_PREFIX + "option.";
 
-    public static final String confKey(String key) {
+    public static String confKey(String key) {
         return CONFIG_LANG_KEY_PREFIX + key;
     }
 
-    public static final Component confText(String key, ChatFormatting... formatting) {
+    public static Component confText(String key, ChatFormatting... formatting) {
         return ComponentCompat.translatable(confKey(key)).withStyle(formatting);
     }
 
-    public static final String categoryKey(String key) {
+    public static String categoryKey(String key) {
         return CONFIG_CATEGORY_LANG_KEY_PREFIX + key;
     }
 
-    public static final Component categoryText(String key, ChatFormatting... formatting) {
+    public static Component categoryText(String key, ChatFormatting... formatting) {
         return ComponentCompat.translatable(categoryKey(key)).withStyle(formatting);
     }
 
-    public static final String optKey(String key) {
+    public static String optKey(String key) {
         return CONFIG_OPTION_LANG_KEY_PREFIX + key;
     }
 
-    public static final Component optText(String key, ChatFormatting... formatting) {
+    public static Component optText(String key, ChatFormatting... formatting) {
         return ComponentCompat.translatable(optKey(key)).withStyle(formatting);
     }
 }
