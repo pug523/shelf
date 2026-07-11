@@ -9,8 +9,10 @@ indent_style = space
 indent_size = 2
 
 [*.java]
-indent_style = space
 indent_size = 4
+
+[*.{vsh,fsh,vert,frag,glsl}]
+indent_size = 2
 
 [*.py]
 indent_size = 4
