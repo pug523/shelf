@@ -1,0 +1,1 @@
+net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback

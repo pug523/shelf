@@ -6,3 +6,7 @@ net.minecraft.client.gui.screens.Screen extractRenderState() net.minecraft.clien
 net.minecraft.client.gui.screens.Screen extractBackground() net.minecraft.client.gui.screens.Screen renderBackground()
 net.minecraft.client.gui.components.AbstractWidget extractRenderState() net.minecraft.client.gui.components.AbstractWidget render()
 net.minecraft.client.gui.components.EditBox extractWidgetRenderState() net.minecraft.client.gui.components.EditBox renderWidget()
+
+net.minecraft.client.renderer.state.gui.GuiElementRenderState net.minecraft.client.gui.render.state.GuiElementRenderState
+net.minecraft.client.renderer.state.gui.GuiRenderState net.minecraft.client.gui.render.state.GuiRenderState
+net.minecraft.client.renderer.state.gui.GuiRenderState addGuiElement() net.minecraft.client.gui.render.state.GuiRenderState submitGuiElement()
