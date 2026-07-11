@@ -3,8 +3,9 @@ package com.pug523.shelf;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 
+import com.pug523.shelf.command.ShelfCommand;
 import com.pug523.shelf.config.ConfigUtil;
-import com.pug523.shelf.config.IConfigManager;
+import com.pug523.shelf.config.ConfigManager;
 import com.pug523.shelf.config.TomlConfigManager;
 //#if MC >= 11802
 import com.mojang.logging.LogUtils;
@@ -28,17 +29,20 @@ public class Shelf implements ClientModInitializer {
         //#endif
     // @formatter:on
 
-    public static IConfigManager<ShelfConfig> CONFIG = null;
+    public static ConfigManager<ShelfConfig> CONFIG = null;
 
     @Override
     public void onInitializeClient() {
         VERSION = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow(RuntimeException::new).getMetadata()
                 .getVersion().getFriendlyString();
 
-        CONFIG = new TomlConfigManager<ShelfConfig>(ShelfConfig.class,
-                ConfigUtil.resolveConfigFile(Shelf.MOD_ID, "config.toml"), ShelfConfig::createDefault,
-                ShelfConfigMigrator.migrator);
+        CONFIG = new TomlConfigManager<>(
+            ConfigUtil.resolveConfigFile(Shelf.MOD_ID, "config.toml"), ShelfConfig::createDefault,
+            ShelfConfigMigrator.migrator);
+
         CONFIG.load();
+
+        ShelfCommand.register();
 
         LOGGER.info("Shelf has initialized.");
     }
