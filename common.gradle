@@ -39,6 +39,12 @@ dependencies {
 
     autoImplementation("net.fabricmc:fabric-loader:${project.loader_version}")
 
+    if (11900 <= mcVersion) {
+        autoImplementation(fabricApi.module("fabric-command-api-v2", project.fabric_api_version))
+    } else {
+        autoImplementation(fabricApi.module("fabric-command-api-v1", project.fabric_api_version))
+    }
+
     autoCompileOnly("maven.modrinth:modmenu:${project.modmenu_version}")
 
     if (11800 <= mcVersion) {
