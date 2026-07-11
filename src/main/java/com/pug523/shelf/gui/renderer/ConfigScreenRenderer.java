@@ -8,15 +8,20 @@ import com.pug523.shelf.compat.ProfilerCompat;
 import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.ConfigScreen;
 import com.pug523.shelf.gui.TabNode;
+import com.pug523.shelf.gui.controller.ConfigChangeController;
 import com.pug523.shelf.gui.controller.OptionFocusController;
 import com.pug523.shelf.gui.controller.ScrollController;
 import com.pug523.shelf.gui.controller.TabTreeController;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
+import com.pug523.shelf.gui.layout.Bounds;
+import com.pug523.shelf.gui.layout.OptionRowLayout;
 import com.pug523.shelf.gui.model.OptionContext;
 import com.pug523.shelf.gui.model.RenderableItem;
+import com.pug523.shelf.gui.controller.OverlayController;
+import com.pug523.shelf.gui.overlay.ScreenOverlay;
 import com.pug523.shelf.gui.text.TextUtil;
-import com.pug523.shelf.gui.widget.IClickableWidget;
+import com.pug523.shelf.gui.widget.ActionButtonWidget;
 import com.pug523.shelf.gui.widget.OptionWidget;
 
 import net.minecraft.ChatFormatting;
@@ -27,313 +32,233 @@ import net.minecraft.client.renderer.RenderPipelines;
 //#elseif MC >= 11500
 //$$ import com.mojang.blaze3d.systems.RenderSystem;
 //#endif
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 public class ConfigScreenRenderer {
-    private static final Identifier RESET_BUTTON_TEXTURE = IdentifierCompat.of("shelf",
-            "textures/gui/reset_button.png");
+    private static final Identifier RESET_BUTTON_TEXTURE = IdentifierCompat.ofShelf("textures/gui/reset_button.png");
 
-    public void render(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, int mouseX, int mouseY,
-            TabTreeController tabs, OptionContext context, OptionFocusController focus, ScrollController scrolls) {
+    public void render(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, int mouseX, int mouseY, float partialTick, TabTreeController tabs, OptionContext context, OptionFocusController focus, ScrollController scrolls, ConfigChangeController change, OverlayController overlay) {
         ProfilerFiller profiler = ProfilerCompat.getProfiler();
         profiler.push("shelf_config_screen_render");
 
+        boolean hasOverlay = overlay.hasActiveOverlay();
+        int renderMouseX = hasOverlay ? -999 : mouseX;
+        int renderMouseY = hasOverlay ? -999 : mouseY;
+
+        boolean hasChanges = change.isDirty();
+        screen.getFooterButtons().get(0).setEnabled(hasChanges); // undoButton
+        screen.getFooterButtons().get(1).setEnabled(hasChanges); // applyButton
+
         LayoutConfig cfg = layout.getConfig();
 
-        SdfRenderQueue.startBuffering();
+        renderPanels(gui, screen, layout, cfg);
+        renderHeader(gui, screen, layout, cfg);
+        renderFooter(gui, screen, layout, cfg, renderMouseX, renderMouseY);
+        renderTabs(gui, screen, layout, cfg, renderMouseX, renderMouseY, tabs, scrolls);
+        renderOptions(gui, screen, layout, cfg, renderMouseX, renderMouseY, context, focus, scrolls);
+        renderDescription(gui, screen, layout, cfg, context.items(), focus);
+        renderOverlay(gui, screen, layout, cfg, mouseX, mouseY, partialTick, overlay);
 
-        base(gui, screen, layout, cfg);
-
-        header(gui, screen, layout, cfg);
-        footer(gui, screen, layout, cfg, screen.getFooterButtons(), mouseX, mouseY);
-
-        middle(gui, screen, layout, cfg);
-
-        tabs(gui, screen, layout, cfg, tabs, scrolls);
-
-        options(gui, screen, layout, cfg, context.items(), focus, scrolls, mouseX, mouseY);
-
-        description(gui, screen, layout, cfg, context.items(), focus);
-
-        //#if MC <= 12103
-        //$$ SdfRenderQueue.flushAll();
-        //#endif
+        // RenderUtil.renderDebugRawQuad(gui, 150, 150, 250, 250);
+        RenderUtil.renderCircle(gui, 150.0f, 150.0f, 10.0f, 0xC000FF00);
 
         profiler.pop();
     }
 
-    private void base(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg) {
+    private void renderPanels(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg) {
         gui.fill(0, 0, screen.width, screen.height, cfg.colorScreenBaseBackground);
+        gui.fill(layout.tabArea.x, layout.tabArea.y, layout.tabArea.maxX, layout.tabArea.maxY, cfg.colorTabPanelBackground);
+        gui.fill(layout.optionArea.x, layout.optionArea.y, layout.optionArea.maxX, layout.optionArea.maxY, cfg.colorOptionPanelBackground);
+        gui.fill(layout.descArea.x, layout.descArea.y, layout.descArea.maxX, layout.descArea.maxY, cfg.colorDescriptionPanelBackground);
     }
 
-    private void header(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg) {
-        gui.fill(0, 0, screen.width, cfg.topBarHeight, cfg.colorHeaderBackground);
-        gui.text(screen.getFont(), screen.getTitle(), cfg.textPaddingX,
-                (cfg.topBarHeight - screen.getFont().lineHeight) / 2 + 1, cfg.colorTextPrimary, false);
+    private void renderHeader(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg) {
+        gui.fill(layout.headerArea.x, layout.headerArea.y, layout.headerArea.maxX, layout.headerArea.maxY, cfg.colorHeaderBackground);
+        int textY = (layout.headerArea.height - screen.getFont().lineHeight) / 2 + 1;
+        gui.text(screen.getFont(), screen.getTitle(), cfg.textPaddingX, textY, cfg.colorTextPrimary, false);
     }
 
-    private void footer(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg,
-            List<IClickableWidget> footerButtons, int mouseX, int mouseY) {
-        gui.fill(0, screen.height - cfg.bottomBarHeight, screen.width, screen.height, cfg.colorFooterBackground);
+    private void renderFooter(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg, int mouseX, int mouseY) {
+        gui.fill(layout.footerArea.x, layout.footerArea.y, layout.footerArea.maxX, layout.footerArea.maxY, cfg.colorFooterBackground);
 
-        if (footerButtons == null || footerButtons.isEmpty())
-            return;
+        List<ActionButtonWidget> footerButtons = screen.getFooterButtons();
+        if (footerButtons == null) return;
 
-        int buttonWidth = 60;
-        int buttonHeight = 20;
-        int padding = 10;
-        int spacing = 5;
-
-        // Line up footer buttons from the right.
-        int currentX = screen.width - buttonWidth - padding;
-        int buttonY = screen.height - cfg.bottomBarHeight + (cfg.bottomBarHeight - buttonHeight) / 2;
-
-        for (int i = footerButtons.size() - 1; i >= 0; i--) {
-            IClickableWidget button = footerButtons.get(i);
-            button.render(screen.getFont(), gui, layout, currentX, buttonY, buttonWidth, buttonHeight, mouseX, mouseY,
-                    currentX, buttonY, buttonWidth, buttonHeight);
-            currentX -= (buttonWidth + spacing);
+        for (int i = 0; i < footerButtons.size(); i++) {
+            Bounds btnBounds = layout.footerButtonBounds.get(i);
+            gui.enableScissor(btnBounds.x, btnBounds.y, btnBounds.maxX, btnBounds.maxY);
+            footerButtons.get(i).render(screen.getFont(), gui, layout, btnBounds.x, btnBounds.y, btnBounds.width, btnBounds.height, mouseX, mouseY);
+            gui.disableScissor();
         }
     }
 
-    private void middle(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg) {
-        gui.fill(0, cfg.topBarHeight, layout.tabAreaWidth, screen.height - cfg.bottomBarHeight,
-                cfg.colorTabPanelBackground);
+    private void renderTabs(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg, int mouseX, int mouseY, TabTreeController tabs, ScrollController scrolls) {
+        gui.enableScissor(layout.tabArea.x, layout.tabArea.y, layout.tabArea.maxX, layout.tabArea.maxY);
 
-        gui.fill(layout.tabAreaWidth, cfg.topBarHeight, layout.descAreaX, screen.height - cfg.bottomBarHeight,
-                cfg.colorOptionPanelBackground);
-
-        gui.fill(layout.descAreaX, cfg.topBarHeight, screen.width, screen.height - cfg.bottomBarHeight,
-                cfg.colorDescriptionPanelBackground);
-    }
-
-    private void tabs(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg, TabTreeController tabs,
-            ScrollController scrolls) {
         List<TabNode> flat = tabs.getFlat();
-
-        int scissorX = 0;
-        int scissorY = cfg.topBarHeight + 1;
-        int scissorMaxX = layout.tabAreaWidth;
-        int scissorMaxY = screen.height;
-        int scissorWidth = scissorMaxX - scissorX;
-        int scissorHeight = scissorMaxY - scissorY;
-        gui.enableScissor(scissorX, scissorY, scissorWidth, scissorHeight);
-
-        int tabHeight = cfg.tabItemHeight;
-        double scroll = scrolls.getTabScroll();
-        int textOffset = (tabHeight - screen.getFont().lineHeight) / 2;
+        double tabScroll = scrolls.getTabScroll();
+        int textOffset = (cfg.tabItemHeight - screen.getFont().lineHeight) / 2;
 
         for (int i = 0; i < flat.size(); i++) {
-            TabNode node = flat.get(i);
-            int x = cfg.textPaddingX + (node.getDepth() * cfg.tabTreeIndentation);
-            int y = cfg.topBarHeight + cfg.tabItemStartOffsetY + (i * tabHeight) - (int) scroll;
+            if (i >= layout.tabItemBounds.size())
+                break;
 
-            if (y + tabHeight < scissorY || y > scissorMaxY) {
+            TabNode node = flat.get(i);
+            Bounds scrolledBounds = layout.getScrolledTabBounds(i, tabScroll);
+
+            if (scrolledBounds.y + scrolledBounds.height < layout.tabArea.y + 1 || scrolledBounds.y > screen.height) {
                 continue;
             }
 
-            int centerY = y + tabHeight / 2 + 1;
+            boolean hovered = mouseX >= layout.tabArea.x && mouseX < layout.tabArea.maxX
+                && mouseY >= scrolledBounds.y && mouseY < scrolledBounds.y + scrolledBounds.height;
+
+            if (hovered) {
+                gui.fill(0, scrolledBounds.y, layout.tabArea.width, scrolledBounds.y + scrolledBounds.height,
+                    cfg.colorItemHoverBackground);
+            }
 
             int color = (node == tabs.getSelected()) ? cfg.colorItemSelectedText : cfg.colorItemUnselectedText;
-
             if (node == tabs.getSelected()) {
-                gui.fill(0, y, layout.tabAreaWidth, y + tabHeight, cfg.colorItemSelectedBackground);
+                gui.fill(0, scrolledBounds.y, layout.tabArea.width, scrolledBounds.y + scrolledBounds.height,
+                    cfg.colorItemSelectedBackground);
             }
 
+            int itemX = cfg.textPaddingX + (node.getDepth() * cfg.tabTreeIndentation);
+            int centerY = scrolledBounds.y + scrolledBounds.height / 2 + 1;
             if (node.hasChildren()) {
                 if (node.isExpanded()) {
-                    RenderUtil.renderDownwardArrow(gui, x + 2, centerY - 3, color);
+                    RenderUtil.renderDownwardArrow(gui, itemX + cfg.tabArrowOffsetX, centerY - 3, color);
                 } else {
-                    RenderUtil.renderRightwardArrow(gui, x + 3, centerY - 4, color);
+                    RenderUtil.renderRightwardArrow(gui, itemX + cfg.tabArrowOffsetX + 1, centerY - 4, color);
                 }
             }
-
-            x += 12;
-            gui.text(screen.getFont(), node.getName(), x, y + textOffset, color, false);
+            gui.text(screen.getFont(), node.getName(), itemX + cfg.tabTextOffsetX, scrolledBounds.y + textOffset, color, false);
         }
-
         gui.disableScissor();
 
-        drawScrollBar(gui, layout.tabAreaWidth - cfg.scrollbarWidth, cfg.topBarHeight + 1, layout.mainContentHeight - 1,
-                scroll, tabs.totalHeight(cfg), cfg);
+        renderScrollbar(gui, layout, layout.tabScrollbarTrack, tabScroll, tabs.totalHeight(cfg), cfg);
     }
 
-    private void options(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg,
-            List<RenderableItem> items, OptionFocusController focus, ScrollController scrolls, int mouseX, int mouseY) {
-        int scissorX = layout.tabAreaWidth + 1;
-        int scissorY = cfg.topBarHeight + 1;
-        int scissorMaxX = layout.descAreaX - layout.getConfig().scrollbarWidth;
-        int scissorMaxY = screen.height - cfg.bottomBarHeight;
-        gui.enableScissor(scissorX, scissorY, scissorMaxX, scissorMaxY);
+    private void renderOptions(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg, int mouseX, int mouseY, OptionContext context, OptionFocusController focus, ScrollController scrolls) {
+        gui.enableScissor(layout.optionArea.x, layout.optionArea.y, layout.optionArea.maxX, layout.optionArea.maxY);
 
-        int x = layout.tabAreaWidth;
-        int optionWidth = scissorMaxX - scissorX;
-        int optionHeight = cfg.optionItemHeight;
-
-        int extraPadding = 0;
-
-        int contentHeight = calculateOptionHeight(items, optionHeight, cfg.optionHeaderOffsetY);
-        double scroll = scrolls.getOptionScroll();
+        List<RenderableItem> items = context.items();
+        double optionScroll = scrolls.getOptionScroll();
 
         for (int i = 0; i < items.size(); i++) {
+            if (i >= layout.optionRows.size()) break;
+
             RenderableItem item = items.get(i);
-            if (item.isHeader() && i > 0) {
-                extraPadding += cfg.optionHeaderOffsetY;
-            }
+            OptionRowLayout row = layout.optionRows.get(i);
 
-            int y = cfg.topBarHeight + cfg.optionItemStartOffsetY + (i * optionHeight) + extraPadding - (int) scroll;
-
-            if (y + optionHeight < scissorY || y > scissorMaxY) {
+            Bounds scrolledRow = layout.getScrolledOptionBounds(row.rowBounds, optionScroll);
+            if (scrolledRow.y + scrolledRow.height < layout.optionArea.y + 1 || scrolledRow.y > layout.optionArea.maxY) {
                 continue;
             }
 
+            int textY = layout.getScrolledTextY(row.textY, optionScroll);
+
             if (item.isHeader()) {
-                gui.text(screen.getFont(), item.text(), layout.tabAreaWidth + cfg.optionHeaderOffsetX,
-                        y + (optionHeight - screen.getFont().lineHeight) / 2, cfg.colorTextMuted, false);
+                gui.text(screen.getFont(), item.text(), row.textX, textY, cfg.colorTextMuted, false);
                 continue;
             }
 
             OptionWidget<?> widget = item.widget();
             Option<?> option = widget != null ? widget.getOption() : null;
-            if (widget == null || option == null)
-                continue;
+            if (widget == null || option == null || row.resetButtonBounds == null) continue;
 
             boolean selected = focus.getFocused() == i;
-            boolean hovered = mouseX >= scissorX && mouseX < x + optionWidth && mouseY >= y
-                    && mouseY < y + optionHeight;
+            boolean hovered = mouseX >= layout.optionArea.x + 1 && mouseX < layout.optionArea.x + scrolledRow.width && mouseY >= scrolledRow.y && mouseY < scrolledRow.y + scrolledRow.height;
 
             if (hovered) {
-                gui.fill(layout.tabAreaWidth + 1, y, x + optionWidth, y + optionHeight, cfg.colorItemHoverBackground);
+                gui.fill(layout.optionArea.x, scrolledRow.y, layout.optionArea.x + scrolledRow.width, scrolledRow.y + scrolledRow.height, cfg.colorItemHoverBackground);
             }
             if (selected) {
-                gui.fill(layout.tabAreaWidth + 1, y, x + optionWidth, y + optionHeight,
-                        cfg.colorItemSelectedBackground);
+                gui.fill(layout.optionArea.x, scrolledRow.y, layout.optionArea.x + scrolledRow.width, scrolledRow.y + scrolledRow.height, cfg.colorItemSelectedBackground);
             }
 
             int color = selected ? cfg.colorItemSelectedText : cfg.colorItemUnselectedText;
+            gui.text(screen.getFont(), option.getName(), row.textX, textY, color, false);
 
-            int textX = layout.tabAreaWidth + cfg.optionTextOffsetX;
-            int textY = y + (optionHeight - screen.getFont().lineHeight) / 2 + 1;
-            gui.text(screen.getFont(), option.getName(), textX, textY, color, false);
+            gui.enableScissor(layout.optionArea.x, layout.optionArea.y, layout.optionArea.maxX, layout.optionArea.maxY);
+            widget.render(screen.getFont(), gui, layout, scrolledRow.x, scrolledRow.y, scrolledRow.width, scrolledRow.height, mouseX, mouseY);
+            gui.disableScissor();
 
-            widget.render(screen.getFont(), gui, layout, x, y, layout.optionAreaWidth - cfg.resetButtonWidth - 12,
-                    optionHeight, mouseX, mouseY, scissorX, scissorY, scissorMaxX, scissorMaxY);
+            // Reset Button Area
+            Bounds scrolledReset = layout.getScrolledResetButtonBounds(row.resetButtonBounds, optionScroll);
+            boolean resetHovered = scrolledReset.contains(mouseX, mouseY);
+            boolean canReset = option.isPendingModifiedFromDefault();
 
-            drawResetButton(gui, screen, layout, cfg, option, mouseX, mouseY, y);
+            gui.fill(scrolledReset.x, scrolledReset.y, scrolledReset.maxX, scrolledReset.maxY, resetHovered && canReset ? 0x40FFFFFF : 0x20000000);
+
+            int rx = scrolledReset.x + (scrolledReset.width - cfg.resetIconSize) / 2;
+            int ry = scrolledReset.y + (scrolledReset.height - cfg.resetIconSize) / 2;
+
+            renderResetIcon(gui, rx, ry, hovered, canReset, cfg);
         }
-
         gui.disableScissor();
 
-        drawScrollBar(gui, layout.descAreaX - cfg.scrollbarWidth, cfg.topBarHeight + 1, layout.mainContentHeight - 1,
-                scroll, contentHeight + cfg.optionItemStartOffsetY, cfg);
+        renderScrollbar(gui, layout, layout.optionScrollbarTrack, optionScroll, layout.totalOptionHeight, cfg);
     }
 
-    private int calculateOptionHeight(List<RenderableItem> items, int optionHeight, int headerGap) {
-        int extra = 0;
-        for (int i = 0; i < items.size(); i++) {
-            if (items.get(i).isHeader() && i > 0) {
-                extra += headerGap;
-            }
-        }
-        return items.size() * optionHeight + extra;
-    }
-
-    private void drawResetButton(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg,
-            Option<?> option, int mouseX, int mouseY, int y) {
-        int x = layout.descAreaX - cfg.resetButtonWidth - 6;
-        int h = 16;
-        int iconWidth = 14;
-        int iconHeight = 14;
-
-        boolean hovered = mouseX >= x && mouseX < x + cfg.resetButtonWidth && mouseY >= y + 4 && mouseY < y + 4 + h;
-        boolean canReset = option.isPendingModifiedFromDefault();
-
-        gui.fill(x, y + 4, x + cfg.resetButtonWidth, y + 4 + h, hovered && canReset ? 0x40FFFFFF : 0x20000000);
-
-        int tx = x + (cfg.resetButtonWidth - iconWidth) / 2;
-        int ty = y + 4 + (h - iconHeight) / 2;
-
-        float alpha;
-        float r;
-        float g;
-        float b;
-        if (canReset) {
-            alpha = hovered ? 1.0f : 0.8f;
-            r = 0.9f;
-            g = 0.3f;
-            b = 0.3f;
-        } else {
-            alpha = 0.3f;
-            r = 0.5f;
-            g = 0.5f;
-            b = 0.5f;
-        }
+    private void renderResetIcon(GuiCompat gui, int rx, int ry, boolean hovered, boolean canReset, LayoutConfig cfg) {
+        float alpha = canReset ? (hovered ? 1.0f : 0.8f) : 0.3f;
+        float r = canReset ? 0.9f : 0.5f;
+        float g = canReset ? 0.3f : 0.5f;
+        float b = canReset ? 0.3f : 0.5f;
 
         //#if MC >= 12106
-        gui.blit(RenderPipelines.GUI_TEXTURED, RESET_BUTTON_TEXTURE, tx, ty, 0.0f, 0.0f, iconWidth, iconHeight,
-                iconWidth, iconHeight, colorFromArgbFloat(alpha, r, g, b));
+        gui.blit(RenderPipelines.GUI_TEXTURED, RESET_BUTTON_TEXTURE, rx, ry, 0.0f, 0.0f, cfg.resetIconSize, cfg.resetIconSize, cfg.resetIconSize, cfg.resetIconSize, colorFromArgbFloat(alpha, r, g, b));
         //#elseif MC >= 12102
-        //$$ gui.blit(RenderType::guiTextured, RESET_BUTTON_TEXTURE, tx, ty, 0.0f, 0.0f, iconWidth, iconHeight,
-        //$$         iconWidth, iconHeight, colorFromArgbFloat(alpha, r, g, b));
+        //$$ gui.blit(RenderType::guiTextured, RESET_BUTTON_TEXTURE, rx, ry, 0.0f, 0.0f, cfg.resetIconSize, cfg.resetIconSize,
+        //$$     cfg.resetIconSize, cfg.resetIconSize, colorFromArgbFloat(alpha, r, g, b));
         //#else
-        //$$ gui.blit(RESET_BUTTON_TEXTURE, tx, ty, 0.0f, 0.0f, iconWidth, iconHeight,
-        //$$         iconWidth, iconHeight, r, g, b, alpha);
+        //$$ gui.blit(RESET_BUTTON_TEXTURE, rx, ry, 0.0f, 0.0f, cfg.resetIconSize, cfg.resetIconSize,
+        //$$     cfg.resetIconSize, cfg.resetIconSize, r, g, b, alpha);
         //#endif
     }
 
-    private static int colorFromArgbFloat(float a, float r, float g, float b) {
-        return (Mth.floor(a * 255.0f) & 0xFF) << 24 | (Mth.floor(r * 255.0f) & 0xFF) << 16
-                | (Mth.floor(g * 255.0f) & 0xFF) << 8 | Mth.floor(b * 255.0f) & 0xFF;
+    private void renderScrollbar(GuiCompat gui, LayoutEngine layout, Bounds track, double scroll, int contentHeight, LayoutConfig cfg) {
+        Bounds thumb = layout.calculateScrollBarThumb(track, scroll, contentHeight);
+        if (thumb != null) {
+            gui.fill(track.x, track.y, track.maxX, track.maxY, cfg.colorScrollBarTrack);
+            gui.fill(thumb.x, thumb.y, thumb.maxX, thumb.maxY, cfg.colorScrollBarThumb);
+        }
     }
 
-    private void description(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg,
-            List<RenderableItem> items, OptionFocusController focus) {
+    private void renderDescription(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg, List<RenderableItem> items, OptionFocusController focus) {
         int idx = focus.getFocused();
-        if (idx < 0 || idx >= items.size()) {
-            drawEmpty(gui, screen, layout, cfg);
+        int x = layout.descArea.x + cfg.descTextOffsetX;
+        int y = layout.descArea.y + cfg.descTextOffsetY;
+
+        if (idx < 0 || idx >= items.size() || items.get(idx).isHeader() || items.get(idx).widget() == null) {
+            gui.text(screen.getFont(), TextUtil.guiText("select_an_option"), x, y, cfg.colorTextDisabled, false);
             return;
         }
 
-        RenderableItem item = items.get(idx);
-        if (item.isHeader() || item.widget() == null) {
-            drawEmpty(gui, screen, layout, cfg);
-            return;
-        }
+        Option<?> option = items.get(idx).widget().getOption();
+        int wrapW = screen.width - layout.descArea.x - cfg.descTextRightPadding;
 
-        Component name = item.widget().getOption().getName();
-        Component desc = item.widget().getOption().getDescription();
-
-        int x = layout.descAreaX + cfg.descTextOffsetX;
-        int y = cfg.topBarHeight + cfg.descTextOffsetY;
-        int w = screen.width - layout.descAreaX - cfg.descTextRightPadding;
-
-        gui.text(screen.getFont(), name.copy().withStyle(ChatFormatting.BOLD), x, y, cfg.colorTextPrimary, false);
-        gui.textWithWordWrap(screen.getFont(), desc, x, y + screen.getFont().lineHeight + 12, w,
-                cfg.colorTextSecondary);
+        gui.text(screen.getFont(), option.getName().copy().withStyle(ChatFormatting.BOLD), x, y, cfg.colorTextPrimary, false);
+        gui.textWithWordWrap(screen.getFont(), option.getDescription(), x, y + screen.getFont().lineHeight + cfg.descTitleSpacingY, wrapW, cfg.colorTextSecondary);
     }
 
-    private void drawEmpty(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg) {
-        gui.text(screen.getFont(), TextUtil.guiText("select_an_option"), layout.descAreaX + cfg.descTextOffsetX,
-                cfg.topBarHeight + cfg.descTextOffsetY, cfg.colorTextDisabled, false);
+    private void renderOverlay(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, LayoutConfig cfg, int mouseX, int mouseY, float partialTick, OverlayController overlayController) {
+        if (overlayController.hasActiveOverlay()) {
+            ScreenOverlay overlay = overlayController.getActiveOverlay();
+            if (overlay != null) {
+                if (overlay.shouldDimBackground()) {
+                    // TODO: move magic number to layout config
+                    gui.fill(0, 0, screen.width, screen.height, 0x66000000);
+                }
+                overlay.render(screen.getFont(), gui, mouseX, mouseY, partialTick, layout);
+            }
+        }
     }
 
-    private void drawScrollBar(GuiCompat gui, int x, int y, int height, double scroll, int contentHeight,
-            LayoutConfig cfg) {
-        if (contentHeight <= height) {
-            return;
-        }
-
-        int maxHeight = (int) (height * cfg.scrollbarMaxHeightPercent);
-        int barHeight = (int) ((height / (float) contentHeight) * height);
-        barHeight = Mth.clamp(barHeight, cfg.scrollbarMinHeight, maxHeight);
-
-        int maxScroll = contentHeight - height;
-        int barY = y + (int) ((scroll / maxScroll) * (height - barHeight));
-
-        gui.fill(x, y, x + cfg.scrollbarWidth, y + height, cfg.colorScrollBarTrack);
-        gui.fill(x, barY, x + cfg.scrollbarWidth, barY + barHeight, cfg.colorScrollBarThumb);
+    private static int colorFromArgbFloat(float a, float r, float g, float b) {
+        return (int) (a * 255.0f) << 24 | (int) (r * 255.0f) << 16 | (int) (g * 255.0f) << 8 | (int) (b * 255.0f);
     }
 }
