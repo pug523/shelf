@@ -166,9 +166,9 @@ public class GuiCompat {
 
     //#if MC >= 12106
     public void blit(Object pipeline, Identifier texture, int x, int y, float u, float v, int width, int height,
-            int textureWidth, int textureHeight, int color) {
+                     int textureWidth, int textureHeight, int color) {
         this.graphics.blit((RenderPipeline) pipeline, texture, x, y, u, v, width, height, textureWidth, textureHeight,
-                color);
+            color);
     }
     //#elseif MC >= 12102
     //$$ public void blit(Function<net.minecraft.resources.ResourceLocation, RenderType> renderType, net.minecraft.resources.ResourceLocation texture, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight, int color) {

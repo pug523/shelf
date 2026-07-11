@@ -1,5 +1,6 @@
 package com.pug523.shelf.compat;
 
+import com.pug523.shelf.Shelf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
@@ -25,6 +26,10 @@ public class IdentifierCompat {
         //#else
         //$$ return new ResourceLocation(namespace, path);
         //#endif
+    }
+
+    public static Identifier ofShelf(String id) {
+        return IdentifierCompat.of(Shelf.MOD_ID, id);
     }
 
     public static Identifier tryParse(String path) {
