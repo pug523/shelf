@@ -13,23 +13,23 @@ public class TextUtil {
     public static final String CONFIG_LANG_KEY_PREFIX = LIB_LANG_KEY_PREFIX + "config.";
     public static final String GUI_LANG_KEY_PREFIX = CONFIG_LANG_KEY_PREFIX + "gui.";
 
-    public static final String confKey(String key) {
+    public static String confKey(String key) {
         return CONFIG_LANG_KEY_PREFIX + key;
     }
 
-    public static final Component confText(String key, ChatFormatting... formatting) {
+    public static Component confText(String key, ChatFormatting... formatting) {
         return ComponentCompat.translatable(confKey(key)).withStyle(formatting);
     }
 
-    public static final String guiKey(String key) {
+    public static String guiKey(String key) {
         return GUI_LANG_KEY_PREFIX + key;
     }
 
-    public static final Component guiText(String key, ChatFormatting... formatting) {
+    public static Component guiText(String key, ChatFormatting... formatting) {
         return ComponentCompat.translatable(guiKey(key)).withStyle(formatting);
     }
 
-    public static final int width(Font font, Component text) {
+    public static int width(Font font, Component text) {
         //#if MC >= 11600
         return font.width(text);
         //#else
@@ -37,7 +37,7 @@ public class TextUtil {
         //#endif
     }
 
-    public static final int width(Font font, String text) {
+    public static int width(Font font, String text) {
         return font.width(text);
     }
 }
