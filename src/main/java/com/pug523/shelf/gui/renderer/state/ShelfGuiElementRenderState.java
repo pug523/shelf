@@ -16,14 +16,17 @@ public interface ShelfGuiElementRenderState
     extends GuiElementRenderState
     //#endif
 {
-    //#if MC >= 12106
+    //#if MC >= 12106 && MC <= 12108
+    //$$ @Override
+    //$$ default void buildVertices(@NonNull VertexConsumer vertices, float depth) {
+    //$$     buildVertices(vertices);
+    //$$ }
+    //#endif
+
+    //#if MC >= 12109
     @Override
     //#endif
-    //#if MC >= 12106 && MC <= 12108
-    //$$ void buildVertices(@NonNull VertexConsumer vertices, float depth);
-    //#else
     void buildVertices(@NonNull VertexConsumer vertices);
-    //#endif
 
     //#if MC >= 12106
     @Override

@@ -1,6 +1,6 @@
 package com.pug523.shelf.gui.renderer.state;
 
-import org.joml.Matrix3x2f;
+import com.pug523.shelf.gui.renderer.RenderUtil;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -12,8 +12,18 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.renderer.RenderPipelines;
 
+//#if MC >= 12106
+import org.joml.Matrix3x2f;
+//#else
+//$$ import com.mojang.blaze3d.vertex.PoseStack;
+//#endif
+
 public class ColorGradientRenderState implements ShelfGuiElementRenderState {
+    //#if MC >= 12106
     private final Matrix3x2f pose;
+    //#else
+    //$$ private final PoseStack.Pose pose;
+    //#endif
     @Nullable
     private final ScreenRectangle bounds;
     @Nullable
@@ -42,26 +52,17 @@ public class ColorGradientRenderState implements ShelfGuiElementRenderState {
         this.x1y1Color = x1y1Color;
 
         GuiGraphicsExtractor graphics = gui.getGraphics();
-        this.scissorArea = graphics.scissorStack.peek();
+        this.scissorArea = RenderUtil.peekScissorStack(gui);
+        //#if MC >= 12106
         this.pose = new Matrix3x2f(graphics.pose());
-        int width = x1 - x0;
-        int height = y1 - y0;
-        ScreenRectangle b = new ScreenRectangle(x0, y0, width, height).transformMaxBounds(this.pose);
-        if (scissorArea == null) {
-            bounds = b;
-        } else {
-            bounds = scissorArea.intersection(b);
-        }
+        //#else
+        //$$ this.pose = graphics.pose().last().copy();
+        //#endif
+        this.bounds = RenderStateUtil.bounds(this.x0, this.y0, this.x1, this.y1, this.pose, this.scissorArea);
     }
 
     @Override
-    // @formatter:off
-    //#if MC >= 12106 && MC <= 12108
-    //$$ public void buildVertices(@NonNull VertexConsumer vertices, float depth) {
-    //#else
     public void buildVertices(@NonNull VertexConsumer vertices) {
-    //#endif
-    // @formatter:on
         RenderStateUtil.addVertexWith2DPose(vertices, this.pose, this.x1, this.y0).setColor(this.x1y0Color);
         RenderStateUtil.addVertexWith2DPose(vertices, this.pose, this.x0, this.y0).setColor(this.x0y0Color);
         RenderStateUtil.addVertexWith2DPose(vertices, this.pose, this.x0, this.y1).setColor(this.x0y1Color);
