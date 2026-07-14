@@ -1,6 +1,5 @@
 package com.pug523.shelf.gui.renderer.state;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -13,57 +12,35 @@ import org.joml.Matrix3x2fc;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.system.MemoryStack;
 
 //#if MC >= 12106
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
-import com.mojang.blaze3d.buffers.Std140SizeCalculator;
-
+import com.pug523.shelf.gui.renderer.SdfParamBufferPool;
 import java.nio.ByteBuffer;
+
+import org.lwjgl.system.MemoryStack;
 //#else
 //$$ import com.mojang.blaze3d.buffers.BufferType;
 //$$ import com.mojang.blaze3d.buffers.BufferUsage;
 //$$ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+//$$ import com.mojang.blaze3d.vertex.PoseStack;
 //$$ import com.mojang.blaze3d.vertex.VertexFormat;
 //$$ import net.minecraft.client.renderer.RenderStateShard;
 //$$ import net.minecraft.client.renderer.RenderType;
 //#endif
 
-import static com.pug523.shelf.gui.renderer.RenderPipelines.SDF_PARAMS_UNIFORM_NAME;
 
 public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplier {
     //#if MC >= 12106
-    public static final int USAGE = GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_UNIFORM;
-    public static final int SDF_PARAMS_UBO_SIZE = new Std140SizeCalculator().putVec4().get();
-    public static final GpuBuffer sdfParamsBuffer = RenderSystem.getDevice().createBuffer(() -> "SDF params UBO", USAGE, SDF_PARAMS_UBO_SIZE);
-    public static final GpuBufferSlice sdfParamsBufferSlice = sdfParamsBuffer.slice();
-    //#else
-    //$$ public static final int SDF_PARAMS_UBO_SIZE = 16; // vec4 = 16 bytes (width, height, radius, 0.0f)
-    //$$ public static final GpuBuffer sdfParamsBuffer = RenderSystem.getDevice().createBuffer(
-    //$$     () -> "SDF Params UBO",
-    //$$     BufferType.UNIFORM,
-    //$$     BufferUsage.DYNAMIC_WRITE,
-    //$$     SDF_PARAMS_UBO_SIZE
-    //$$ );
-    //$$ public static final RenderType SDF_RENDER_TYPE = RenderType.create(
-    //$$     "shelf_sdf",
-    //$$     DefaultVertexFormat.POSITION_TEX_COLOR,
-    //$$     VertexFormat.Mode.QUADS,
-    //$$     1536,
-    //$$     false,
-    //$$     false,
-    //$$     RenderType.CompositeState.builder()
-    //$$         .setShaderState(new RenderStateShard.ShaderStateShard(() -> RenderSystem.getDevice().getShaderProgram(SHADER_ID)))
-    //$$         .setOutputState(new RenderStateShard.OutputStateShard("setup_sdf_ubo", () -> {
-    //$$             RenderSystem.getDevice().setUniformBuffer(0, sdfParamsBuffer);
-    //$$         }, () -> {}))
-    //$$         .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
-    //$$         .createCompositeState(false)
-    //$$ );
+    private final GpuBufferSlice sdfParamsBufferSlice;
     //#endif
 
+    //#if MC >= 12106
     public final Matrix3x2f pose;
+    //#else
+    //$$ public final PoseStack.Pose pose;
+    //#endif
     public final float x0;
     public final float y0;
     public final float x1;
@@ -75,10 +52,22 @@ public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplie
     private final @Nullable ScreenRectangle scissorArea;
     private final @Nullable ScreenRectangle bounds;
 
+    // @formatter:off
+    //#if MC >= 12106
     public SdfRenderState(Matrix3x2fc pose, float x0, float y0,
                           float x1, float y1, float width, float height, float radius, int color,
                           @Nullable ScreenRectangle scissorArea, @Nullable ScreenRectangle bounds) {
+    //#else
+    //$$ public SdfRenderState(PoseStack pose, float x0, float y0,
+    //$$                       float x1, float y1, float width, float height, float radius, int color,
+    //$$                       @Nullable ScreenRectangle scissorArea, @Nullable ScreenRectangle bounds) {
+    //#endif
+    // @formatter:on
+        //#if MC >= 12106
         this.pose = new Matrix3x2f(pose);
+        //#else
+        //$$ this.pose = pose.last().copy();
+        //#endif
         this.x0 = x0;
         this.y0 = y0;
         this.x1 = x1;
@@ -90,28 +79,35 @@ public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplie
         this.scissorArea = scissorArea;
         this.bounds = bounds;
 
+        //#if MC >= 12106
+        this.sdfParamsBufferSlice = SdfParamBufferPool.allocate();
+
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            //#if MC >= 12106
-            ByteBuffer byteBuffer = Std140Builder.onStack(stack, SDF_PARAMS_UBO_SIZE)
+            ByteBuffer byteBuffer = Std140Builder.onStack(stack, SdfParamBufferPool.ELEMENT_SIZE)
                 .putVec4(this.width, this.height, this.radius, 0.0f).get();
-            //#else
-            //$$ ByteBuffer buffer = stack.malloc(SDF_PARAMS_UBO_SIZE);
-            //$$ buffer.putFloat(width);
-            //$$ buffer.putFloat(height);
-            //$$ buffer.putFloat(radius);
-            //$$ buffer.putFloat(0.0f);
-            //$$ buffer.flip();
-            //#endif
-            RenderSystem.getDevice().createCommandEncoder().writeToBuffer(sdfParamsBufferSlice, byteBuffer);
+            RenderSystem.getDevice().createCommandEncoder().writeToBuffer(this.sdfParamsBufferSlice, byteBuffer);
         }
+        //#endif
     }
 
+    // @formatter:off
+    //#if MC >= 12106
     public SdfRenderState(Matrix3x2fc pose, float x0, float y0,
                           float x1, float y1, float width, float height, float radius, int color,
                           @Nullable ScreenRectangle scissorArea) {
+
         this(pose, x0, y0, x1, y1, width, height, radius, color, scissorArea,
             RenderStateUtil.bounds((int) x0, (int) y0, (int) x1, (int) y1, pose, scissorArea));
     }
+    //#else
+    //$$ public SdfRenderState(PoseStack pose, float x0, float y0,
+    //$$                       float x1, float y1, float width, float height, float radius, int color,
+    //$$                       @Nullable ScreenRectangle scissorArea) {
+    //$$      this(pose, x0, y0, x1, y1, width, height, radius, color, scissorArea,
+    //$$          RenderStateUtil.bounds((int) x0, (int) y0, (int) x1, (int) y1, pose.last(), scissorArea));
+    //$$ }
+    //#endif
+    // @formatter:on
 
     @Override
     public @NonNull RenderPipeline pipeline() {
@@ -129,13 +125,7 @@ public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplie
     }
 
     @Override
-    // @formatter:off
-    //#if MC >= 12106 && MC <= 12108
-    //$$ public void buildVertices(@NonNull VertexConsumer vertices, float depth) {
-    //#else
     public void buildVertices(@NonNull VertexConsumer vertices) {
-    //#endif
-    // @formatter:on
         writeVertex(vertices, x0, y0, 0.0f, 0.0f);
         writeVertex(vertices, x0, y1, 0.0f, 1.0f);
         writeVertex(vertices, x1, y1, 1.0f, 1.0f);
@@ -148,6 +138,10 @@ public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplie
 
     @Override
     public void applyUniforms(RenderPass renderPass) {
-        renderPass.setUniform(SDF_PARAMS_UNIFORM_NAME, sdfParamsBufferSlice);
+        //#if MC >= 12106
+        renderPass.setUniform(RenderPipelines.SDF_PARAMS_UBO_NAME, this.sdfParamsBufferSlice);
+        //#else
+        //$$ renderPass.setUniform(RenderPipelines.SDF_PARAMS_UNIFORM_NAME, this.width, this.height, this.radius, 0.0f);
+        //#endif
     }
 }
