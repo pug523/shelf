@@ -48,14 +48,15 @@ dependencies {
     autoCompileOnly("maven.modrinth:modmenu:${project.modmenu_version}")
 
     if (11800 <= mcVersion) {
+        autoLocalRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}")
         autoLocalRuntime("maven.modrinth:modmenu:${project.modmenu_version}")
-        if (mcVersion <= 12108) {
-            // autoLocalRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}")
-            autoLocalRuntime(fabricApi.module("fabric-resource-loader-v0", project.fabric_api_version))
-            autoLocalRuntime(fabricApi.module("fabric-screen-api-v1", project.fabric_api_version))
-            autoLocalRuntime(fabricApi.module("fabric-key-binding-api-v1", project.fabric_api_version))
-            autoLocalRuntime(fabricApi.module("fabric-lifecycle-events-v1", project.fabric_api_version))
-        }
+        // autoLocalRuntime(fabricApi.module(commandApi, project.fabric_api_version))
+        // if (mcVersion <= 12108) {
+        //     autoLocalRuntime(fabricApi.module("fabric-resource-loader-v0", project.fabric_api_version))
+        //     autoLocalRuntime(fabricApi.module("fabric-screen-api-v1", project.fabric_api_version))
+        //     autoLocalRuntime(fabricApi.module("fabric-key-binding-api-v1", project.fabric_api_version))
+        //     autoLocalRuntime(fabricApi.module("fabric-lifecycle-events-v1", project.fabric_api_version))
+        // }
     }
 
     include(autoImplementation("me.fallenbreath:conditional-mixin-fabric:${project.conditional_mixin_version}"))
@@ -177,9 +178,13 @@ processResources {
                "mod_version": project.mod_version,
                "mod_name": project.mod_name,
                "loader_version": project.loader_version,
+               "fabric_api_version": project.fabric_api_version,
                "minecraft_dependency": project.minecraft_dependency
     }
 
+    filesMatching(["**/*.vsh", "**/*.fsh"]) {
+      expand "mc_version": mcVersion
+    }
     mixinFiles.each { mixinConfigPath ->
         filesMatching(mixinConfigPath) {
             filter { s -> s.replace('{{COMPATIBILITY_LEVEL}}', "JAVA_${MIXIN_COMPATIBILITY_LEVEL.ordinal() + 1}") }
