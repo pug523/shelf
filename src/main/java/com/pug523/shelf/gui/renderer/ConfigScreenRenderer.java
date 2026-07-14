@@ -2,6 +2,7 @@ package com.pug523.shelf.gui.renderer;
 
 import java.util.List;
 
+import com.pug523.shelf.Shelf;
 import com.pug523.shelf.compat.GuiCompat;
 import com.pug523.shelf.compat.IdentifierCompat;
 import com.pug523.shelf.compat.ProfilerCompat;
@@ -60,8 +61,10 @@ public class ConfigScreenRenderer {
         renderDescription(gui, screen, layout, cfg, context.items(), focus);
         renderOverlay(gui, screen, layout, cfg, mouseX, mouseY, partialTick, overlay);
 
-        // RenderUtil.renderDebugRawQuad(gui, 150, 150, 250, 250);
-        RenderUtil.renderCircle(gui, 150.0f, 150.0f, 10.0f, 0xC000FF00);
+        // For debug
+        if (Shelf.CONFIG.getConfig().renderDebugCircle) {
+            RenderUtil.renderCircle(gui, 300.0f, 150.0f, 20.0f, 0xC000FF00);
+        }
 
         profiler.pop();
     }

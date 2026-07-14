@@ -5,6 +5,8 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.shaders.UniformType;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.pug523.shelf.compat.IdentifierCompat;
+import net.minecraft.resources.Identifier;
 
 //#if MC >= 260200
 import com.mojang.blaze3d.pipeline.BindGroupLayout;
@@ -24,13 +26,23 @@ public class RenderPipelines {
     private RenderPipelines() {
     }
 
-    public static final String SDF_PARAMS_UNIFORM_NAME = "SdfParams";
+    //#if MC >= 12106
+    public static final String SDF_PARAMS_UBO_NAME = "SdfParamsUbo";
+    //#else
+    //$$ public static final String SDF_PARAMS_UNIFORM_NAME = "SdfParams";
+    //#endif
+
+    public static final Identifier SDF_PIPELINE_ID = IdentifierCompat.ofShelf("pipeline/sdf");
+
     // @formatter:off
     //#if MC >= 260200
     private static final BindGroupLayout SDF_PARAMS = BindGroupLayout.builder()
-            .withUniform(SDF_PARAMS_UNIFORM_NAME, UniformType.UNIFORM_BUFFER).build();
+            .withUniform(SDF_PARAMS_UBO_NAME, UniformType.UNIFORM_BUFFER).build();
     //#endif
-    public static final RenderPipeline SDF_PIPELINE = RenderPipeline.builder().withLocation(ShaderIds.SDF)
+    public static final RenderPipeline SDF_PIPELINE = RenderPipeline.builder()
+            .withLocation(SDF_PIPELINE_ID)
+            .withVertexShader(ShaderIds.SDF)
+            .withFragmentShader(ShaderIds.SDF)
             //#if MC >= 260200
             .withBindGroupLayout(BindGroupLayouts.GLOBALS)
             .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
@@ -39,10 +51,17 @@ public class RenderPipelines {
             .withPrimitiveTopology(PrimitiveTopology.QUADS)
             .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
             //#else
-            //$$ .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-            //$$ .withUniform("Projection", UniformType.UNIFORM_BUFFER)
-            //$$ .withUniform(SDF_PARAMS_UNIFORM_NAME, UniformType.UNIFORM_BUFFER)
-            //$$ .withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, Mode.QUADS)
+                //#if MC >= 12106
+                //$$ .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
+                //$$ .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+                //$$ .withUniform(SDF_PARAMS_UBO_NAME, UniformType.UNIFORM_BUFFER)
+                //#else
+                //$$ .withUniform("ModelViewMat", UniformType.MATRIX4X4)
+                //$$ .withUniform("ProjMat", UniformType.MATRIX4X4)
+                //$$ .withUniform(SDF_PARAMS_UNIFORM_NAME, UniformType.VEC4)
+                //#endif
+                //$$ .withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, Mode.QUADS)
+
                 //#if MC >= 260000
                 //$$ .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
                 //#else
@@ -50,8 +69,6 @@ public class RenderPipelines {
                 //$$ .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
                 //#endif
             //#endif
-            .withVertexShader(ShaderIds.SDF)
-            .withFragmentShader(ShaderIds.SDF)
             .build();
     // @formatter:on
 }

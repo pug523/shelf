@@ -2,9 +2,14 @@ package com.pug523.shelf.gui.renderer;
 
 import com.pug523.shelf.compat.GuiCompat;
 import com.pug523.shelf.gui.renderer.state.SdfRenderState;
+import com.pug523.shelf.gui.renderer.state.ShelfGuiElementRenderState;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 
-// TODO: cleanup
+//#if MC <= 12105
+//$$ import com.pug523.shelf.gui.renderer.state.ShelfGuiElementRenderState;
+//$$ import com.pug523.shelf.gui.renderer.shader.SdfRenderTypeCache;
+//$$ import net.minecraft.client.renderer.RenderType;
+//#endif
 
 public class RenderUtil {
     private RenderUtil() {
@@ -29,16 +34,34 @@ public class RenderUtil {
 
     private static void addSdfRenderState(GuiCompat gui, float x, float y, float width, float height, float radius,
                                           int color) {
-        SdfRenderState state = new SdfRenderState(
+        SdfRenderState renderState = new SdfRenderState(
             gui.getGraphics().pose(), x, y, x + width, y + height, width, height, radius,
             color, peekScissorStack(gui)
         );
+        renderSdfGuiElement(gui, renderState);
+    }
+
+    //#if MC <= 12105
+    //$$ public static void renderGuiElement(GuiCompat gui, ShelfGuiElementRenderState renderState, RenderType renderType) {
+    //$$     gui.getGraphics().drawSpecial(bufferSource -> {
+    //$$         renderState.buildVertices(bufferSource.getBuffer(renderType));
+    //$$     });
+    //$$ }
+    //#endif
+
+    public static void renderSdfGuiElement(GuiCompat gui, SdfRenderState renderState) {
         //#if MC >= 12106
-        gui.getGraphics().guiRenderState.addGuiElement(state);
+        gui.getGraphics().guiRenderState.addGuiElement(renderState);
         //#else
-        //$$ gui.getGraphics().drawSpecial(bufferSource -> {
-        //$$     state.buildVertices(bufferSource.getBuffer(SdfRenderState.SDF_RENDER_TYPE));
-        //$$ });
+        //$$ renderGuiElement(gui, renderState, SdfRenderTypeCache.get(RenderTypes.SDF_RENDER_TYPE, renderState));
+        //#endif
+    }
+
+    public static void renderVanillaGuiElement(GuiCompat gui, ShelfGuiElementRenderState renderState) {
+        //#if MC >= 12106
+        gui.getGraphics().guiRenderState.addGuiElement(renderState);
+        //#else
+        //$$ renderGuiElement(gui, renderState, RenderType.gui());
         //#endif
     }
 
@@ -63,13 +86,6 @@ public class RenderUtil {
         gui.fill(startX, startY, startX + 1, startY + 5, color);
         gui.fill(startX + 1, startY + 1, startX + 2, startY + 4, color);
         gui.fill(startX + 2, startY + 2, startX + 3, startY + 3, color);
-    }
-
-    public static void renderDebugRawQuad(GuiCompat gui, float x, float y, float width, float height) {
-        float radius = Math.min(width, height) / 4.0f;
-        gui.getGraphics().guiRenderState.addGuiElement(
-            new SdfRenderState(gui.getGraphics().pose(), x,
-                y, (x + width), (y + height), width, height, radius, 0x5500FF00, null));
     }
 
     public static ScreenRectangle peekScissorStack(GuiCompat gui) {
