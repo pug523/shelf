@@ -24,7 +24,11 @@ public class SdfParamBufferPool {
     public static GpuBufferSlice allocate() {
         if (cachedAlignment == -1) {
             try {
+                //#if MC >= 260200
                 cachedAlignment = RenderSystem.getDevice().getDeviceInfo().limits().minUniformOffsetAlignment();
+                //#else
+                //$$ cachedAlignment = RenderSystem.getDevice().getUniformOffsetAlignment();
+                //#endif
             } catch (Exception e) {
                 cachedAlignment = 256;
             }
