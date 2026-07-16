@@ -1,5 +1,6 @@
 package com.pug523.shelf.compat;
 
+import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 
 //#if MC < 11900
@@ -48,5 +49,17 @@ public class ComponentCompat {
     //#endif
     // @formatter:on
         return literal("");
+    }
+
+    public static int width(Font font, Component text) {
+        //#if MC >= 11600
+        return font.width(text);
+        //#else
+        //$$ return font.width(text.getString());
+        //#endif
+    }
+
+    public static int width(Font font, String text) {
+        return font.width(text);
     }
 }
