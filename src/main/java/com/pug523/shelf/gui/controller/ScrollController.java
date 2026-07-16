@@ -3,6 +3,7 @@ package com.pug523.shelf.gui.controller;
 import net.minecraft.util.Mth;
 
 public final class ScrollController {
+    // TODO: description scroll
 
     private double tabScroll;
     private double optionScroll;
@@ -29,5 +30,10 @@ public final class ScrollController {
 
     public void setOptionScroll(double value, int contentHeight, int viewportHeight) {
         optionScroll = Mth.clamp(value, 0, Math.max(0, contentHeight - viewportHeight));
+    }
+
+    public void reset() {
+        this.tabScroll = 0;
+        this.optionScroll = 0;
     }
 }

@@ -2,24 +2,18 @@ package com.pug523.shelf.gui;
 
 import java.util.List;
 
-import com.pug523.shelf.gui.overlay.ConfirmationOverlay;
+import com.pug523.shelf.gui.controller.*;
+import com.pug523.shelf.gui.widget.SearchBarWidget;
 import org.jspecify.annotations.NonNull;
-import org.lwjgl.glfw.GLFW;
 
 import com.pug523.shelf.compat.GuiCompat;
 import com.pug523.shelf.compat.JavaCompat;
 import com.pug523.shelf.compat.ScreenCompat;
 import com.pug523.shelf.config.Profile;
-import com.pug523.shelf.gui.controller.ConfigChangeController;
-import com.pug523.shelf.gui.controller.OptionContextController;
-import com.pug523.shelf.gui.controller.OptionFocusController;
-import com.pug523.shelf.gui.controller.ScrollController;
-import com.pug523.shelf.gui.controller.TabTreeController;
 import com.pug523.shelf.gui.input.ConfigInputHandler;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 import com.pug523.shelf.gui.model.OptionContextBuilder;
-import com.pug523.shelf.gui.controller.OverlayController;
 import com.pug523.shelf.gui.renderer.ConfigScreenRenderer;
 import com.pug523.shelf.gui.text.TextUtil;
 import com.pug523.shelf.gui.widget.ActionButtonWidget;
@@ -49,6 +43,9 @@ public class ConfigScreen extends Screen {
     private final OptionFocusController focusController;
     private final ConfigChangeController changeController;
     private final OverlayController overlayController;
+    private final SearchBarController searchBarController;
+
+    private final SearchBarWidget searchBarWidget;
 
     private final OptionContextBuilder contextBuilder;
     private final ConfigScreenRenderer renderer;
@@ -68,11 +65,14 @@ public class ConfigScreen extends Screen {
         this.focusController = new OptionFocusController();
         this.changeController = new ConfigChangeController(roots, onApply);
         this.overlayController = new OverlayController();
+        this.searchBarController = new SearchBarController();
+
+        this.searchBarController.setOnQueryChanged(str -> this.scrollController.reset());
+        this.searchBarWidget = new SearchBarWidget(this.searchBarController);
 
         this.contextBuilder = new OptionContextBuilder();
         this.renderer = new ConfigScreenRenderer();
-        this.input = new ConfigInputHandler(tabController, scrollController, optionContextController, focusController,
-            changeController, overlayController);
+        this.input = new ConfigInputHandler(tabController, scrollController, optionContextController, focusController, overlayController, changeController, searchBarWidget);
 
         ActionButtonWidget undoButton = new ActionButtonWidget(TextUtil.guiText("undo"), btn -> this.changeController.undo());
         ActionButtonWidget applyButton = new ActionButtonWidget(TextUtil.guiText("apply"), btn -> this.changeController.apply());
@@ -91,6 +91,10 @@ public class ConfigScreen extends Screen {
 
     public ConfigChangeController getChangeController() {
         return this.changeController;
+    }
+
+    public SearchBarWidget getSearchBarWidget() {
+        return this.searchBarWidget;
     }
 
     //#if MC >= 12102
@@ -112,6 +116,8 @@ public class ConfigScreen extends Screen {
 
         layout.rebuild(width, height, getFont(), footerButtons, tabController.getFlat(),
             optionContextController.getContext().items());
+        renderer.rebuildWidgets(optionContextController.getContext(), layout);
+        searchBarController.setMasterData(optionContextController.getContext().items(), tabController.getFlat());
     }
 
     private void rebuildOptionContext() {
@@ -124,7 +130,7 @@ public class ConfigScreen extends Screen {
 
     private void renderConfigScreen(GuiCompat gui, int mouseX, int mouseY, float partialTick) {
         renderer.render(gui, this, layout, mouseX, mouseY, partialTick, tabController, optionContextController.getContext(),
-            focusController, scrollController, changeController, overlayController);
+            focusController, scrollController, changeController, overlayController, searchBarController);
     }
 
     @Override
@@ -224,7 +230,7 @@ public class ConfigScreen extends Screen {
     // @formatter:off
     //#if MC >= 12002
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        return input.mouseScrolled(mouseX, mouseY, scrollY, layout)
+        return input.mouseScrolled(mouseX, mouseY, scrollX, scrollY, layout)
                 || super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
     //#else
@@ -260,12 +266,7 @@ public class ConfigScreen extends Screen {
     //$$ public boolean keyPressed(int keycode, int scancode, int modifiers) {
     //#endif
     // @formatter:on
-        boolean result = input.keyPressed(keycode, scancode, modifiers, layout);
-        if (!result && keycode == GLFW.GLFW_KEY_ESCAPE) {
-            this.close();
-            return true;
-        }
-        return result;
+        return input.keyPressed(keycode, scancode, modifiers, layout);
     }
 
     @Override

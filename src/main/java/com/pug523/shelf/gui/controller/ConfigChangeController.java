@@ -2,12 +2,10 @@ package com.pug523.shelf.gui.controller;
 
 import java.util.List;
 
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.ConfigScreen;
 import com.pug523.shelf.gui.TabNode;
-import com.pug523.shelf.gui.overlay.ConfirmationOverlay;
-import com.pug523.shelf.gui.widget.OptionWidget;
-import net.minecraft.client.gui.screens.Screen;
+import com.pug523.shelf.gui.widget.overlay.ConfirmationOverlay;
+import com.pug523.shelf.gui.widget.option.OptionWidget;
 
 public class ConfigChangeController {
 
@@ -24,14 +22,18 @@ public class ConfigChangeController {
         this.dirty = true;
     }
 
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
+
     public boolean isDirty() {
         return dirty;
     }
 
     public void apply() {
         roots.stream().flatMap(TabNode::streamAllNodes).flatMap(n -> n.getOptionGroups().stream())
-                .flatMap(g -> g.getOptionWidgets().stream()).map(OptionWidget::getOption)
-                .filter(Option::isPendingModifiedFromActual).forEach(Option::applyPendingToActual);
+                .flatMap(g -> g.getOptionWidgets().stream())
+                .filter(OptionWidget::isPendingModifiedFromActual).forEach(OptionWidget::applyPendingToActual);
 
         dirty = false;
         onApply.run();
@@ -39,8 +41,8 @@ public class ConfigChangeController {
 
     public void undo() {
         roots.stream().flatMap(TabNode::streamAllNodes).flatMap(n -> n.getOptionGroups().stream())
-                .flatMap(g -> g.getOptionWidgets().stream()).map(OptionWidget::getOption)
-                .filter(Option::isPendingModifiedFromActual).forEach(Option::discardPending);
+                .flatMap(g -> g.getOptionWidgets().stream())
+                .filter(OptionWidget::isPendingModifiedFromActual).forEach(OptionWidget::discardPending);
 
         dirty = false;
     }
@@ -48,7 +50,8 @@ public class ConfigChangeController {
     public void closeOrConfirm(ConfigScreen screen) {
         if (dirty) {
             OverlayController overlayController = screen.getOverlayController();
-            overlayController.open(new ConfirmationOverlay(screen::close, overlayController::closeActive));
+            overlayController.clear();
+            overlayController.push(new ConfirmationOverlay(o -> screen.close(), o -> overlayController.pop()));
         } else {
             screen.close();
         }
