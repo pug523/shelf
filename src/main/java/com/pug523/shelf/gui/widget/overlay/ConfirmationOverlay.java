@@ -1,4 +1,4 @@
-package com.pug523.shelf.gui.overlay;
+package com.pug523.shelf.gui.widget.overlay;
 
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
@@ -13,7 +13,9 @@ import com.pug523.shelf.gui.widget.ActionButtonWidget;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 
-public class ConfirmationOverlay implements ScreenOverlay {
+import java.util.function.Consumer;
+
+public class ConfirmationOverlay implements OverlayWidget {
     private static final int COLOR_BG_OUTLINE = 0xAF11131E;
     private static final int COLOR_BG_INNER = 0xAF161923;
     private static final int COLOR_BTN_CONFIRM_BG = 0xFFEF4444;
@@ -24,19 +26,25 @@ public class ConfirmationOverlay implements ScreenOverlay {
     private static final Component BTN_YES = ComponentCompat.literal("Yes");
     private static final Component BTN_NO = ComponentCompat.literal("No");
 
-    private final Runnable onConfirm;
-    private final Runnable onCancel;
+    private final Consumer<ConfirmationOverlay> onConfirm;
+    private final Consumer<ConfirmationOverlay> onCancel;
 
     private final ActionButtonWidget yesButton = new ActionButtonWidget(BTN_YES, (btn) -> confirm());
     private final ActionButtonWidget noButton = new ActionButtonWidget(BTN_NO, (btn) -> cancel());
 
-    public ConfirmationOverlay(Runnable onConfirm, Runnable onCancel) {
+    public ConfirmationOverlay(Consumer<ConfirmationOverlay> onConfirm, Consumer<ConfirmationOverlay> onCancel) {
         this.onConfirm = onConfirm;
         this.onCancel = onCancel;
     }
 
     @Override
-    public void render(Font font, GuiCompat gui, int mouseX, int mouseY, float partialTicks, LayoutEngine layout) {
+    public boolean shouldDimBackground() {
+        return true;
+    }
+
+    @Override
+    public void render(Font font, GuiCompat gui, LayoutEngine layout, int x, int y, int width, int height, int mouseX,
+                       int mouseY) {
         LayoutConfig cfg = layout.getConfig();
         Bounds dialog = layout.confirmDialog;
 
@@ -63,33 +71,18 @@ public class ConfirmationOverlay implements ScreenOverlay {
 
     private void confirm() {
         SoundUtil.clickSound();
-        this.onConfirm.run();
+        this.onConfirm.accept(this);
     }
 
     private void cancel() {
         SoundUtil.clickSound();
-        this.onCancel.run();
+        this.onCancel.accept(this);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button, LayoutEngine layout) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers, LayoutEngine layout) {
         yesButton.mouseClicked(mouseX, mouseY, button, 0, layout);
         noButton.mouseClicked(mouseX, mouseY, button, 0, layout);
-        return true;
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button, LayoutEngine layout) {
-        return true;
-    }
-
-    @Override
-    public boolean keyPressed(int keycode, int scancode, int modifiers, LayoutEngine layout) {
-        return true;
-    }
-
-    @Override
-    public boolean charTyped(int codepoint, int modifiers, LayoutEngine layout) {
         return true;
     }
 }

@@ -1,10 +1,10 @@
-package com.pug523.shelf.gui.overlay;
+package com.pug523.shelf.gui.widget.overlay;
 
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
@@ -15,16 +15,15 @@ import com.pug523.shelf.gui.layout.LayoutEngine;
 import com.pug523.shelf.gui.layout.Bounds;
 import com.pug523.shelf.gui.renderer.RenderUtil;
 import com.pug523.shelf.gui.sound.SoundUtil;
-import com.pug523.shelf.gui.text.TextUtil;
 import com.pug523.shelf.gui.renderer.state.ColorGradientRenderState;
 
 import com.pug523.shelf.gui.widget.ActionButtonWidget;
-import net.minecraft.ChatFormatting;
+import com.pug523.shelf.gui.widget.SliderWidget;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
-public class ColorPickerOverlay implements ScreenOverlay {
+public class ColorPickerOverlay implements OverlayWidget {
     private static final int COLOR_BG_OUTLINE = 0xAF11131E;
     private static final int COLOR_BG_INNER = 0xAF161923;
     private static final int COLOR_TEXT_MUTED = 0xFF6B7280;
@@ -40,28 +39,30 @@ public class ColorPickerOverlay implements ScreenOverlay {
     public static final Component RECENT_TEXT = ComponentCompat.literal("Recent Colors");
     public static final Component BTN_CANCEL = ComponentCompat.literal("Cancel");
     public static final Component BTN_OK = ComponentCompat.literal("OK");
-    // public static final Component BTN_CLEAR = ComponentCompat.literal("Clear");
-    // public static final Component BTN_X = ComponentCompat.literal("✕").withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
     public static final Component BTN_TOGGLE_HSV = ComponentCompat.literal("Mode: HSV");
     public static final Component BTN_TOGGLE_RGB = ComponentCompat.literal("Mode: RGB");
 
     private final Option<Integer> targetOption;
-    private final Consumer<Integer> onConfirm;
+    private final BiConsumer<Integer, ColorPickerOverlay> onConfirm;
     private final int originalColor;
     private LayoutConfig cachedConfig = null;
 
     private final ActionButtonWidget cancelButton = new ActionButtonWidget(BTN_CANCEL, (btn) -> cancel());
     private final ActionButtonWidget okButton = new ActionButtonWidget(BTN_OK, (btn) -> ok());
-    // private final ActionButtonWidget clearButton = new ActionButtonWidget(BTN_CLEAR, (btn) -> clear());
-    // private final ActionButtonWidget xButton = new ActionButtonWidget(BTN_X, (btn) -> x());
     private final ActionButtonWidget toggleModeButton = new ActionButtonWidget(BTN_TOGGLE_HSV, this::toggleMode);
+
+    private final SliderWidget hueSlider;
+    private final SliderWidget alphaSliderVertical;
+    private final SliderWidget alphaSliderHorizontal;
+    private final SliderWidget rSlider;
+    private final SliderWidget gSlider;
+    private final SliderWidget bSlider;
 
     // TODO: load from shelf config
     private final List<Integer> presetColors = new ArrayList<>();
     private static final List<Integer> recentColors = new ArrayList<>();
 
     private float alpha = 1.0f;
-
     private int red = 255;
     private int green = 0;
     private int blue = 0;
@@ -75,19 +76,48 @@ public class ColorPickerOverlay implements ScreenOverlay {
     private PickerMode currentMode = PickerMode.HSV;
 
     private boolean isDraggingSBSpace = false;
-    private boolean isDraggingHueSlider = false;
-    private boolean isDraggingAlphaSlider = false;
-    private boolean isDraggingRSlider = false;
-    private boolean isDraggingGSlider = false;
-    private boolean isDraggingBSlider = false;
 
-    public ColorPickerOverlay(Option<Integer> targetOption, Consumer<Integer> onConfirm) {
+    public ColorPickerOverlay(Option<Integer> targetOption, BiConsumer<Integer, ColorPickerOverlay> onConfirm) {
         this.targetOption = targetOption;
         this.onConfirm = onConfirm;
         this.originalColor = targetOption.getPendingValue();
 
         initPresets();
         initColorFromRgb(originalColor);
+
+        this.hueSlider = new SliderWidget(0.0, 1.0, 0.0, this.hue, val -> {
+            this.hue = val.floatValue();
+            updateFromHsb();
+            updatePendingValue();
+        }).setOrientation(SliderWidget.Orientation.VERTICAL);
+
+        this.alphaSliderVertical = new SliderWidget(0.0, 1.0, 0.0, this.alpha, val -> {
+            this.alpha = val.floatValue();
+            updatePendingValue();
+        }).setOrientation(SliderWidget.Orientation.VERTICAL);
+
+        this.alphaSliderHorizontal = new SliderWidget(0.0, 1.0, 0.0, this.alpha, val -> {
+            this.alpha = val.floatValue();
+            updatePendingValue();
+        }).setOrientation(SliderWidget.Orientation.HORIZONTAL);
+
+        this.rSlider = new SliderWidget(0.0, 255.0, 1.0, this.red, val -> {
+            this.red = val.intValue();
+            updateFromRgb();
+            updatePendingValue();
+        }).setOrientation(SliderWidget.Orientation.HORIZONTAL);
+
+        this.gSlider = new SliderWidget(0.0, 255.0, 1.0, this.green, val -> {
+            this.green = val.intValue();
+            updateFromRgb();
+            updatePendingValue();
+        }).setOrientation(SliderWidget.Orientation.HORIZONTAL);
+
+        this.bSlider = new SliderWidget(0.0, 255.0, 1.0, this.blue, val -> {
+            this.blue = val.intValue();
+            updateFromRgb();
+            updatePendingValue();
+        }).setOrientation(SliderWidget.Orientation.HORIZONTAL);
     }
 
     private void initPresets() {
@@ -108,6 +138,17 @@ public class ColorPickerOverlay implements ScreenOverlay {
         this.hue = hsb[0];
         this.saturation = hsb[1];
         this.brightness = hsb[2];
+
+        syncSliders();
+    }
+
+    private void syncSliders() {
+        if (this.hueSlider != null) this.hueSlider.setValue(this.hue);
+        if (this.alphaSliderVertical != null) this.alphaSliderVertical.setValue(this.alpha);
+        if (this.alphaSliderHorizontal != null) this.alphaSliderHorizontal.setValue(this.alpha);
+        if (this.rSlider != null) this.rSlider.setValue(this.red);
+        if (this.gSlider != null) this.gSlider.setValue(this.green);
+        if (this.bSlider != null) this.bSlider.setValue(this.blue);
     }
 
     private void updateFromHsb() {
@@ -115,6 +156,7 @@ public class ColorPickerOverlay implements ScreenOverlay {
         this.red = (rgb >> 16) & 0xFF;
         this.green = (rgb >> 8) & 0xFF;
         this.blue = rgb & 0xFF;
+        syncSliders();
     }
 
     private void updateFromRgb() {
@@ -122,6 +164,7 @@ public class ColorPickerOverlay implements ScreenOverlay {
         this.hue = hsb[0];
         this.saturation = hsb[1];
         this.brightness = hsb[2];
+        syncSliders();
     }
 
     private int getCurrentColor() {
@@ -130,7 +173,13 @@ public class ColorPickerOverlay implements ScreenOverlay {
     }
 
     @Override
-    public void render(Font font, GuiCompat gui, int mouseX, int mouseY, float partialTicks, LayoutEngine layout) {
+    public boolean shouldDimBackground() {
+        return true;
+    }
+
+    @Override
+    public void render(Font font, GuiCompat gui, LayoutEngine layout, int x, int y, int width, int height, int mouseX,
+                       int mouseY) {
         updateDragStates(mouseX, mouseY, layout);
 
         LayoutConfig cfg = layout.getConfig();
@@ -141,14 +190,24 @@ public class ColorPickerOverlay implements ScreenOverlay {
         gui.enableScissor(bound.x, bound.y, bound.maxX, bound.maxY);
 
         renderDialogFrame(font, gui, layout, cfg);
+
+        setupSliders(cfg);
+
         if (currentMode == PickerMode.HSV) {
             renderSbSpace(gui, layout.pickerSbSpace, cfg);
-            renderHueSlider(gui, layout.pickerHueSlider, cfg);
-        } else {
-            renderRgbSliders(gui, layout, cfg);
-        }
 
-        renderAlphaSlider(gui, layout.pickerAlphaSlider, cfg);
+            renderHueBarBackground(gui, layout.pickerHueSlider, cfg);
+            this.hueSlider.render(font, gui, layout, layout.pickerHueSlider.x, layout.pickerHueSlider.y, layout.pickerHueSlider.width, layout.pickerHueSlider.height, mouseX, mouseY);
+
+            renderAlphaBarBackground(gui, layout.pickerAlphaSliderVertical, cfg, false);
+            this.alphaSliderVertical.render(font, gui, layout, layout.pickerAlphaSliderVertical.x, layout.pickerAlphaSliderVertical.y, layout.pickerAlphaSliderVertical.width, layout.pickerAlphaSliderVertical.height, mouseX, mouseY);
+        } else {
+            renderRgbSliders(font, gui, layout, cfg, mouseX, mouseY);
+
+            Bounds aB = layout.pickerAlphaSliderHorizontal;
+            renderAlphaBarBackground(gui, aB, cfg, true);
+            this.alphaSliderHorizontal.render(font, gui, layout, aB.x, aB.y, aB.width, aB.height, mouseX, mouseY);
+        }
 
         renderColorPreviews(font, gui, layout, currentArgb);
         renderColorMetrics(font, gui, layout, cfg, currentArgb);
@@ -160,16 +219,48 @@ public class ColorPickerOverlay implements ScreenOverlay {
         Bounds okB = layout.pickerOkButton;
         okButton.renderWithBackground(font, gui, layout, okB.x, okB.y, okB.width, okB.height, mouseX, mouseY, COLOR_BTN_OK_BG);
 
-        // Bounds clearB = layout.pickerClearButton;
-        // clearButton.render(font, gui, layout, clearB.x, clearB.y, clearB.width, clearB.height, mouseX, mouseY);
-
-        // Bounds xB = layout.pickerCloseButton;
-        // xButton.render(font, gui, layout, xB.x, xB.y, xB.width, xB.height, mouseX, mouseY);
-
         Bounds b = layout.pickerModeToggleButton;
         toggleModeButton.render(font, gui, layout, b.x, b.y, b.width, b.height, mouseX, mouseY);
 
         gui.disableScissor();
+    }
+
+    private void setupSliders(LayoutConfig cfg) {
+        this.hueSlider
+            .setBarThickness(cfg.pickerSliderWidth)
+            .setKnobSize(cfg.pickerSliderIndicatorSize)
+            .setRounded(true)
+            .setColors(0x00000000, 0x00000000, Colors.WHITE);
+
+        this.alphaSliderVertical
+            .setBarThickness(cfg.pickerSliderWidth)
+            .setKnobSize(cfg.pickerSliderIndicatorSize)
+            .setRounded(true)
+            .setColors(0x00000000, 0x00000000, Colors.WHITE);
+
+        this.alphaSliderHorizontal
+            .setBarThickness(cfg.pickerSliderWidth)
+            .setKnobSize(cfg.pickerSliderIndicatorSize)
+            .setRounded(true)
+            .setColors(0x00000000, 0x00000000, Colors.WHITE);
+
+        this.rSlider
+            .setBarThickness(cfg.pickerSliderWidth)
+            .setKnobSize(cfg.pickerSliderIndicatorSize)
+            .setRounded(true)
+            .setColors(0x00000000, 0x00000000, Colors.WHITE);
+
+        this.gSlider
+            .setBarThickness(cfg.pickerSliderWidth)
+            .setKnobSize(cfg.pickerSliderIndicatorSize)
+            .setRounded(true)
+            .setColors(0x00000000, 0x00000000, Colors.WHITE);
+
+        this.bSlider
+            .setBarThickness(cfg.pickerSliderWidth)
+            .setKnobSize(cfg.pickerSliderIndicatorSize)
+            .setRounded(true)
+            .setColors(0x00000000, 0x00000000, Colors.WHITE);
     }
 
     private void renderDialogFrame(Font font, GuiCompat gui, LayoutEngine layout, LayoutConfig config) {
@@ -194,48 +285,39 @@ public class ColorPickerOverlay implements ScreenOverlay {
         RenderUtil.renderInner(gui, hX - d, hY - d, d * 2, d * 2, borderThickness, (0xFF << 24) | (red << 16) | (green << 8) | blue);
     }
 
-    private void renderHueSlider(GuiCompat gui, Bounds hueB, LayoutConfig cfg) {
+    private void renderHueBarBackground(GuiCompat gui, Bounds hueB, LayoutConfig cfg) {
         for (int i = 0; i < hueB.height; i++) {
             gui.fill(hueB.x, hueB.y + i, hueB.maxX, hueB.y + i + 1,
                 Color.HSBtoRGB(i / (float) hueB.height, 1.0f, 1.0f));
         }
-        int hThumbY = hueB.y + (int) (this.hue * hueB.height);
-        int d = cfg.pickerSliderIndicatorSize;
-        gui.fill(hueB.x - d, hThumbY - d, hueB.maxX + d, hThumbY + d, Colors.WHITE);
     }
 
-
-    private void renderRgbSliders(GuiCompat gui, LayoutEngine layout, LayoutConfig cfg) {
+    private void renderRgbSliders(Font font, GuiCompat gui, LayoutEngine layout, LayoutConfig cfg, int mouseX, int mouseY) {
         Bounds rB = layout.pickerRSlider;
         for (int i = 0; i < rB.width; i++) {
             int rStep = (int) ((i / (float) rB.width) * 255.0f);
             gui.fill(rB.x + i, rB.y, rB.x + i + 1, rB.maxY, 0xFF000000 | (rStep << 16) | (green << 8) | blue);
         }
-        int rThumbX = rB.x + (int) ((this.red / 255.0f) * rB.width);
-        final int thumbW = (int) (rB.width * 0.04f);
-        final int overflowY = (int) (rB.height * 0.175f);
-        gui.fill(rThumbX - (thumbW / 2), rB.y - overflowY, rThumbX + (thumbW / 2) + 1, rB.maxY + overflowY, Colors.WHITE);
+        this.rSlider.render(font, gui, layout, rB.x, rB.y, rB.width, rB.height, mouseX, mouseY);
 
         Bounds gB = layout.pickerGSlider;
         for (int i = 0; i < gB.width; i++) {
             int gStep = (int) ((i / (float) gB.width) * 255.0f);
             gui.fill(gB.x + i, gB.y, gB.x + i + 1, gB.maxY, 0xFF000000 | (red << 16) | (gStep << 8) | blue);
         }
-        int gThumbX = gB.x + (int) ((this.green / 255.0f) * gB.width);
-        gui.fill(gThumbX - (thumbW / 2), gB.y - overflowY, gThumbX + (thumbW / 2) + 1, gB.maxY + overflowY, Colors.WHITE);
+        this.gSlider.render(font, gui, layout, gB.x, gB.y, gB.width, gB.height, mouseX, mouseY);
 
         Bounds bB = layout.pickerBSlider;
         for (int i = 0; i < bB.width; i++) {
             int bStep = (int) ((i / (float) bB.width) * 255.0f);
             gui.fill(bB.x + i, bB.y, bB.x + i + 1, bB.maxY, 0xFF000000 | (red << 16) | (green << 8) | bStep);
         }
-        int bThumbX = bB.x + (int) ((this.blue / 255.0f) * bB.width);
-        gui.fill(bThumbX - (thumbW / 2), bB.y - overflowY, bThumbX + (thumbW / 2) + 1, bB.maxY + overflowY, Colors.WHITE);
-
+        this.bSlider.render(font, gui, layout, bB.x, bB.y, bB.width, bB.height, mouseX, mouseY);
     }
 
-    private void renderAlphaSlider(GuiCompat gui, Bounds alphaB, LayoutConfig cfg) {
+    private void renderAlphaBarBackground(GuiCompat gui, Bounds alphaB, LayoutConfig cfg, boolean isHorizontal) {
         int cellSize = (int) (cfg.pickerSliderWidth / 3.0f);
+        if (cellSize <= 0) cellSize = 4;
         for (int y = alphaB.y; y < alphaB.maxY; y += cellSize) {
             int h = Math.min(cellSize, alphaB.maxY - y);
             for (int x = alphaB.x; x < alphaB.maxX; x += cellSize) {
@@ -246,14 +328,18 @@ public class ColorPickerOverlay implements ScreenOverlay {
             }
         }
 
-        int colorTop = (255 << 24) | (red << 16) | (green << 8) | blue;
-        int colorBottom = (0 << 24) | (red << 16) | (green << 8) | blue;
-
-        gui.fillGradient(alphaB.x, alphaB.y, alphaB.maxX, alphaB.maxY, colorTop, colorBottom);
-
-        int aThumbY = alphaB.y + (int) ((1.0f - this.alpha) * alphaB.height);
-        int d = cfg.pickerSliderIndicatorSize;
-        gui.fill(alphaB.x - d, aThumbY - d, alphaB.maxX + d, aThumbY + d, Colors.WHITE);
+        if (isHorizontal) {
+            for (int i = 0; i < alphaB.width; i++) {
+                float ratio = i / (float) alphaB.width;
+                int alphaVal = (int) (ratio * 255.0f) & 0xFF;
+                int blendedColor = (alphaVal << 24) | (red << 16) | (green << 8) | blue;
+                gui.fill(alphaB.x + i, alphaB.y, alphaB.x + i + 1, alphaB.maxY, blendedColor);
+            }
+        } else {
+            int opaqueColor = (255 << 24) | (red << 16) | (green << 8) | blue;
+            int transparentColor = (0 << 24) | (red << 16) | (green << 8) | blue;
+            gui.fillGradient(alphaB.x, alphaB.y, alphaB.maxX, alphaB.maxY, opaqueColor, transparentColor);
+        }
     }
 
     private void renderColorPreviews(Font font, GuiCompat gui, LayoutEngine layout, int currentArgb) {
@@ -273,7 +359,7 @@ public class ColorPickerOverlay implements ScreenOverlay {
         int metricsY = baseBounds.maxY + cfg.pickerMetricsOffsetY;
 
         gui.text(font, LABEL_HEX, baseBounds.x, metricsY, COLOR_TEXT_MUTED, false);
-        int hexLabelWidth = TextUtil.width(font, LABEL_HEX) + 6;
+        int hexLabelWidth = ComponentCompat.width(font, LABEL_HEX) + 6;
         String hexText = String.format(Locale.ROOT, "#%08X", currentArgb);
         gui.text(font, ComponentCompat.literal(hexText), baseBounds.x + hexLabelWidth, metricsY, Colors.WHITE, false);
 
@@ -338,58 +424,15 @@ public class ColorPickerOverlay implements ScreenOverlay {
     }
 
     private void updateDragStates(int mouseX, int mouseY, LayoutEngine layout) {
-        if (currentMode == PickerMode.HSV) {
-            if (this.isDraggingSBSpace) {
-                Bounds sb = layout.pickerSbSpace;
-                if (sb.width > 0 && sb.height > 0) {
-                    float pctX = Mth.clamp((mouseX - sb.x) / (float) sb.width, 0.0f, 1.0f);
-                    float pctY = Mth.clamp(1.0f - ((mouseY - sb.y) / (float) sb.height), 0.0f, 1.0f);
+        if (currentMode == PickerMode.HSV && this.isDraggingSBSpace) {
+            Bounds sb = layout.pickerSbSpace;
+            if (sb.width > 0 && sb.height > 0) {
+                float pctX = Mth.clamp((mouseX - sb.x) / (float) sb.width, 0.0f, 1.0f);
+                float pctY = Mth.clamp(1.0f - ((mouseY - sb.y) / (float) sb.height), 0.0f, 1.0f);
 
-                    this.saturation = pctX;
-                    this.brightness = pctY;
-                    updateFromHsb();
-                    updatePendingValue();
-                }
-            }
-            if (this.isDraggingHueSlider) {
-                Bounds hueB = layout.pickerHueSlider;
-                if (hueB.height > 0) {
-                    float pctY = Mth.clamp((mouseY - hueB.y) / (float) hueB.height, 0.0f, 1.0f);
-                    this.hue = pctY;
-                    updateFromHsb();
-                    updatePendingValue();
-                }
-            }
-        } else {
-            if (this.isDraggingRSlider) {
-                Bounds rB = layout.pickerRSlider;
-                if (rB.width > 0) {
-                    this.red = (int) (Mth.clamp((mouseX - rB.x) / (float) rB.width, 0.0f, 1.0f) * 255.0f);
-                    updateFromRgb();
-                    updatePendingValue();
-                }
-            }
-            if (this.isDraggingGSlider) {
-                Bounds gB = layout.pickerGSlider;
-                if (gB.width > 0) {
-                    this.green = (int) (Mth.clamp((mouseX - gB.x) / (float) gB.width, 0.0f, 1.0f) * 255.0f);
-                    updateFromRgb();
-                    updatePendingValue();
-                }
-            }
-            if (this.isDraggingBSlider) {
-                Bounds bB = layout.pickerBSlider;
-                if (bB.width > 0) {
-                    this.blue = (int) (Mth.clamp((mouseX - bB.x) / (float) bB.width, 0.0f, 1.0f) * 255.0f);
-                    updateFromRgb();
-                    updatePendingValue();
-                }
-            }
-        }
-        if (this.isDraggingAlphaSlider) {
-            Bounds alphaB = layout.pickerAlphaSlider;
-            if (alphaB.height > 0) {
-                this.alpha = Mth.clamp(1.0f - ((mouseY - alphaB.y) / (float) alphaB.height), 0.0f, 1.0f);
+                this.saturation = pctX;
+                this.brightness = pctY;
+                updateFromHsb();
                 updatePendingValue();
             }
         }
@@ -407,7 +450,7 @@ public class ColorPickerOverlay implements ScreenOverlay {
 
     private void cancel() {
         this.targetOption.setPendingValue(originalColor);
-        this.onConfirm.accept(originalColor);
+        this.onConfirm.accept(originalColor, this);
         SoundUtil.clickSound();
     }
 
@@ -420,21 +463,10 @@ public class ColorPickerOverlay implements ScreenOverlay {
             if (recentColors.size() > cachedConfig.pickerMaxPaletteColors) {
                 recentColors.remove(recentColors.size() - 1);
             }
-            this.onConfirm.accept(finalColor);
+            this.onConfirm.accept(finalColor, this);
             SoundUtil.clickSound();
         }
     }
-
-    // private void clear() {
-    //     if (!recentColors.isEmpty()) {
-    //         recentColors.clear();
-    //         SoundUtil.clickSound();
-    //     }
-    // }
-
-    // private void x() {
-    //     cancel();
-    // }
 
     private void toggleMode(ActionButtonWidget btn) {
         this.currentMode = this.currentMode == PickerMode.HSV ? PickerMode.RGB : PickerMode.HSV;
@@ -443,11 +475,9 @@ public class ColorPickerOverlay implements ScreenOverlay {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button, LayoutEngine layout) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers, LayoutEngine layout) {
         if (cancelButton.mouseClicked(mouseX, mouseY, button, 0, layout) ||
             okButton.mouseClicked(mouseX, mouseY, button, 0, layout) ||
-            // clearButton.mouseClicked(mouseX, mouseY, button, 0, layout) ||
-            // xButton.mouseClicked(mouseX, mouseY, button, 0, layout) ||
             toggleModeButton.mouseClicked(mouseX, mouseY, button, 0, layout)) {
             return true;
         }
@@ -458,34 +488,30 @@ public class ColorPickerOverlay implements ScreenOverlay {
                 SoundUtil.clickSound();
                 return true;
             }
-            if (layout.pickerHueSlider.contains(mouseX, mouseY)) {
-                this.isDraggingHueSlider = true;
+            if (this.hueSlider.mouseClicked(mouseX, mouseY, button, 0, layout)) {
+                SoundUtil.clickSound();
+                return true;
+            }
+            if (layout.pickerAlphaSliderVertical.contains(mouseX, mouseY) &&
+                this.alphaSliderVertical.mouseClicked(mouseX, mouseY, button, 0, layout)) {
                 SoundUtil.clickSound();
                 return true;
             }
         } else {
-            if (layout.pickerRSlider.contains(mouseX, mouseY)) {
-                this.isDraggingRSlider = true;
+            if (this.rSlider.mouseClicked(mouseX, mouseY, button, 0, layout) ||
+                this.gSlider.mouseClicked(mouseX, mouseY, button, 0, layout) ||
+                this.bSlider.mouseClicked(mouseX, mouseY, button, 0, layout)) {
                 SoundUtil.clickSound();
                 return true;
             }
-            if (layout.pickerGSlider.contains(mouseX, mouseY)) {
-                this.isDraggingGSlider = true;
-                SoundUtil.clickSound();
-                return true;
-            }
-            if (layout.pickerBSlider.contains(mouseX, mouseY)) {
-                this.isDraggingBSlider = true;
+
+            if (layout.pickerAlphaSliderHorizontal.contains(mouseX, mouseY) &&
+                this.alphaSliderHorizontal.mouseClicked(mouseX, mouseY, button, 0, layout)) {
                 SoundUtil.clickSound();
                 return true;
             }
         }
 
-        if (layout.pickerAlphaSlider.contains(mouseX, mouseY)) {
-            this.isDraggingAlphaSlider = true;
-            SoundUtil.clickSound();
-            return true;
-        }
         int presetLimit = Math.min(presetColors.size(), layout.pickerPresetBounds.size());
         for (int i = 0; i < presetLimit; i++) {
             if (layout.pickerPresetBounds.get(i).contains(mouseX, mouseY)) {
@@ -502,27 +528,39 @@ public class ColorPickerOverlay implements ScreenOverlay {
             }
         }
 
-        return false;
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button, LayoutEngine layout) {
-        this.isDraggingSBSpace = false;
-        this.isDraggingHueSlider = false;
-        this.isDraggingAlphaSlider = false;
-        this.isDraggingRSlider = false;
-        this.isDraggingGSlider = false;
-        this.isDraggingBSlider = false;
         return true;
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers, LayoutEngine layout) {
-        return false;
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY, LayoutEngine layout) {
+        if (currentMode == PickerMode.HSV) {
+            if (this.hueSlider.mouseDragged(mouseX, mouseY, button, dragX, dragY, layout)) {
+                return true;
+            }
+            if (this.alphaSliderVertical.mouseDragged(mouseX, mouseY, button, dragX, dragY, layout)) {
+                return true;
+            }
+        } else {
+            if (this.rSlider.mouseDragged(mouseX, mouseY, button, dragX, dragY, layout) ||
+                this.gSlider.mouseDragged(mouseX, mouseY, button, dragX, dragY, layout) ||
+                this.bSlider.mouseDragged(mouseX, mouseY, button, dragX, dragY, layout)) {
+                return true;
+            }
+            if (this.alphaSliderHorizontal.mouseDragged(mouseX, mouseY, button, dragX, dragY, layout)) {
+                return true;
+            }
+        }
+        return true;
     }
 
     @Override
-    public boolean charTyped(int codePoint, int modifiers, LayoutEngine layout) {
-        return false;
+    public void mouseReleased(double mouseX, double mouseY, int button, LayoutEngine layout) {
+        this.isDraggingSBSpace = false;
+        this.hueSlider.mouseReleased(mouseX, mouseY, button, layout);
+        this.alphaSliderVertical.mouseReleased(mouseX, mouseY, button, layout);
+        this.alphaSliderHorizontal.mouseReleased(mouseX, mouseY, button, layout);
+        this.rSlider.mouseReleased(mouseX, mouseY, button, layout);
+        this.gSlider.mouseReleased(mouseX, mouseY, button, layout);
+        this.bSlider.mouseReleased(mouseX, mouseY, button, layout);
     }
 }
