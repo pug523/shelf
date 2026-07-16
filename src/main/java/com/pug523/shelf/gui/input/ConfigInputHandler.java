@@ -1,5 +1,6 @@
 package com.pug523.shelf.gui.input;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.mojang.blaze3d.platform.InputConstants;
@@ -16,6 +17,7 @@ import com.pug523.shelf.gui.sound.SoundUtil;
 import com.pug523.shelf.gui.widget.option.OptionWidget;
 
 import com.pug523.shelf.gui.widget.SearchBarWidget;
+import com.pug523.shelf.gui.widget.overlay.OverlayWidget;
 import net.minecraft.util.Mth;
 
 public final class ConfigInputHandler {
@@ -56,7 +58,8 @@ public final class ConfigInputHandler {
 
     public boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers, LayoutEngine layout) {
         if (overlays.hasActiveOverlay()) {
-            if (overlays.getOverlays().stream().anyMatch(o -> o.mouseClicked(mouseX, mouseY, button, modifiers, layout))) {
+            List<OverlayWidget> tempOverlays = new ArrayList<>(overlays.getOverlays());
+            if (tempOverlays.stream().anyMatch(o -> o.mouseClicked(mouseX, mouseY, button, modifiers, layout))) {
                 updateDirty();
                 return true;
             }
@@ -158,7 +161,8 @@ public final class ConfigInputHandler {
 
     public void mouseReleased(double mouseX, double mouseY, int button, LayoutEngine layout) {
         if (overlays.hasActiveOverlay()) {
-            overlays.getOverlays().forEach(o -> o.mouseReleased(mouseX, mouseY, button, layout));
+            List<OverlayWidget> tempOverlays = new ArrayList<>(overlays.getOverlays());
+            tempOverlays.forEach(o -> o.mouseReleased(mouseX, mouseY, button, layout));
             isDraggingTabScrollBar = false;
             isDraggingOptionScrollBar = false;
             updateDirty();
@@ -185,7 +189,8 @@ public final class ConfigInputHandler {
 
     public boolean mouseScrolled(double mouseX, double mouseY, double dx, double dy, LayoutEngine layout) {
         if (overlays.hasActiveOverlay()) {
-            if (overlays.getOverlays().stream().anyMatch(o -> o.mouseScrolled(mouseX, mouseY, dx, dy, layout))) {
+            List<OverlayWidget> tempOverlays = new ArrayList<>(overlays.getOverlays());
+            if (tempOverlays.stream().anyMatch(o -> o.mouseScrolled(mouseX, mouseY, dx, dy, layout))) {
                 return true;
             }
         }
@@ -224,7 +229,8 @@ public final class ConfigInputHandler {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY,
                                 LayoutEngine layout) {
         if (overlays.hasActiveOverlay()) {
-            if (overlays.getOverlays().stream().anyMatch(o -> o.mouseDragged(mouseX, mouseY, button, dragX, dragY, layout))) {
+            List<OverlayWidget> tempOverlays = new ArrayList<>(overlays.getOverlays());
+            if (tempOverlays.stream().anyMatch(o -> o.mouseDragged(mouseX, mouseY, button, dragX, dragY, layout))) {
                 updateDirty();
                 return true;
             }
@@ -286,7 +292,8 @@ public final class ConfigInputHandler {
 
     public boolean keyPressed(int keycode, int scancode, int modifiers, LayoutEngine layout) {
         if (overlays.hasActiveOverlay()) {
-            if (overlays.getOverlays().stream().anyMatch(o -> o.keyPressed(keycode, scancode, modifiers, layout))) {
+            List<OverlayWidget> tempOverlays = new ArrayList<>(overlays.getOverlays());
+            if (tempOverlays.stream().anyMatch(o -> o.keyPressed(keycode, scancode, modifiers, layout))) {
                 updateDirty();
                 return true;
             }
@@ -383,7 +390,8 @@ public final class ConfigInputHandler {
 
     public boolean charTyped(int codepoint, int modifiers, LayoutEngine layout) {
         if (overlays.hasActiveOverlay()) {
-            if (overlays.getOverlays().stream().anyMatch(o -> o.charTyped(codepoint, modifiers, layout))) {
+            List<OverlayWidget> tempOverlays = new ArrayList<>(overlays.getOverlays());
+            if (tempOverlays.stream().anyMatch(o -> o.charTyped(codepoint, modifiers, layout))) {
                 updateDirty();
                 return true;
             }
