@@ -6,7 +6,7 @@ import java.util.List;
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.gui.OptionGroup;
 import com.pug523.shelf.gui.TabNode;
-import com.pug523.shelf.gui.widget.OptionWidget;
+import com.pug523.shelf.gui.widget.option.OptionWidget;
 
 import net.minecraft.network.chat.Component;
 

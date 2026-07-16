@@ -1,6 +1,6 @@
 package com.pug523.shelf.gui.model;
 
-import com.pug523.shelf.gui.widget.OptionWidget;
+import com.pug523.shelf.gui.widget.option.OptionWidget;
 
 import net.minecraft.network.chat.Component;
 
