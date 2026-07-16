@@ -5,8 +5,6 @@ import java.util.List;
 
 import com.pug523.shelf.gui.TabNode;
 import com.pug523.shelf.gui.model.RenderableItem;
-import com.pug523.shelf.gui.overlay.ColorPickerOverlay;
-import com.pug523.shelf.gui.text.TextUtil;
 import com.pug523.shelf.gui.widget.ActionButtonWidget;
 
 import net.minecraft.client.gui.Font;
@@ -16,8 +14,11 @@ public class LayoutEngine {
 
     private int width;
     private int height;
+    private int fontLineHeight;
+
     public int optionWidgetRightMargin;
     public int totalOptionHeight;
+    public int totalTabHeight;
 
     public Bounds tabArea;
     public Bounds optionArea;
@@ -38,14 +39,13 @@ public class LayoutEngine {
     public Bounds pickerRSlider;
     public Bounds pickerGSlider;
     public Bounds pickerBSlider;
+    public Bounds pickerAlphaSliderHorizontal;
     public Bounds pickerHueSlider;
-    public Bounds pickerAlphaSlider;
+    public Bounds pickerAlphaSliderVertical;
     public Bounds pickerNewColorSwat;
     public Bounds pickerCurrentColorSwat;
     public Bounds pickerOkButton;
     public Bounds pickerCancelButton;
-    // public Bounds pickerCloseButton;
-    // public Bounds pickerClearButton;
     public Bounds pickerModeToggleButton;
     public final List<Bounds> pickerPresetBounds = new ArrayList<>();
     public final List<Bounds> pickerRecentBounds = new ArrayList<>();
@@ -63,6 +63,7 @@ public class LayoutEngine {
                         List<RenderableItem> optionItems) {
         this.width = width;
         this.height = height;
+        this.fontLineHeight = font.lineHeight;
         this.optionWidgetRightMargin = config.resetButtonWidth + config.rightMarginFromResetButton;
 
         // Base structural dimensions
@@ -101,52 +102,64 @@ public class LayoutEngine {
             }
         }
 
-        // Tab items
-        this.tabItemBounds.clear();
-        for (int i = 0; i < flatTabs.size(); i++) {
-            int y = config.topBarHeight + config.tabItemStartOffsetY + (i * config.tabItemHeight);
-            tabItemBounds.add(new Bounds(0, y, tabArea.width, config.tabItemHeight));
-        }
-        this.tabScrollbarTrack = new Bounds(tabArea.maxX - config.scrollbarWidth, tabArea.y + config.engineTrackPaddingY,
-            config.scrollbarWidth, Math.max(0, tabArea.height - config.engineTrackPaddingY));
+        performDynamicLayout(flatTabs, optionItems, config);
 
-        // Option rows
+        this.tabScrollbarTrack = new Bounds(tabArea.maxX - config.scrollbarWidth, tabArea.y + config.engineTrackPaddingY,
+                config.scrollbarWidth, Math.max(0, tabArea.height - config.engineTrackPaddingY));
+
+        this.optionScrollbarTrack = new Bounds(optionArea.maxX - config.scrollbarWidth, optionArea.y + config.engineTrackPaddingY,
+                config.scrollbarWidth, Math.max(0, optionArea.height - config.engineTrackPaddingY));
+
+        rebuildConfirmationLayout();
+        rebuildColorPickerLayout(font);
+    }
+
+    public void performDynamicLayout(List<TabNode> activeTabs, List<RenderableItem> activeOptions, LayoutConfig cfg) {
+        this.tabItemBounds.clear();
+        for (int i = 0; i < activeTabs.size(); i++) {
+            int y = cfg.topBarHeight + cfg.tabItemStartOffsetY + (i * cfg.tabItemHeight);
+            this.tabItemBounds.add(new Bounds(0, y, this.tabArea.width, cfg.tabItemHeight));
+        }
+
+        if (!this.tabItemBounds.isEmpty()) {
+            Bounds lastTab = this.tabItemBounds.get(this.tabItemBounds.size() - 1);
+            this.totalTabHeight = lastTab.maxY - this.tabArea.y;
+        } else {
+            this.totalTabHeight = 0;
+        }
+
         this.optionRows.clear();
         int extraPadding = 0;
-        int optionInnerWidth = Math.max(0, optionArea.width - config.scrollbarWidth);
+        int optionInnerWidth = Math.max(0, this.optionArea.width - cfg.scrollbarWidth);
 
-        for (int i = 0; i < optionItems.size(); i++) {
-            RenderableItem item = optionItems.get(i);
+        for (int i = 0; i < activeOptions.size(); i++) {
+            RenderableItem item = activeOptions.get(i);
+
             if (item.isHeader() && i > 0) {
-                extraPadding += config.optionHeaderOffsetY;
+                extraPadding += cfg.optionHeaderOffsetY;
             }
-            int rowY = config.topBarHeight + config.optionItemStartOffsetY + (i * config.optionItemHeight) + extraPadding;
-            Bounds rowBounds = new Bounds(optionArea.x, rowY, optionInnerWidth, config.optionItemHeight);
 
-            int tx = optionArea.x + config.optionTextOffsetX;
-            int ty = rowY + (config.optionItemHeight - font.lineHeight) / 2 + config.engineTextHeightOffset;
+            int rowY = cfg.topBarHeight + cfg.optionItemStartOffsetY + (i * cfg.optionItemHeight) + extraPadding;
+            Bounds rowBounds = new Bounds(this.optionArea.x, rowY, optionInnerWidth, cfg.optionItemHeight);
+
+            int tx = this.optionArea.x + cfg.optionTextOffsetX;
+            int ty = rowY + (cfg.optionItemHeight - this.fontLineHeight) / 2 + cfg.engineTextHeightOffset;
 
             if (item.isHeader()) {
-                optionRows.add(new OptionRowLayout(true, rowBounds, tx, ty, null));
+                this.optionRows.add(new OptionRowLayout(true, rowBounds, tx, ty, null));
             } else {
-                int rx = optionArea.maxX - config.resetButtonWidth - config.rightMarginFromResetButton + config.engineResetButtonOffsetX;
-                Bounds resetBounds = new Bounds(rx, rowY + config.resetButtonPaddingY, config.resetButtonWidth, config.resetButtonHeight);
-                optionRows.add(new OptionRowLayout(false, rowBounds, tx, ty, resetBounds));
+                int rx = this.optionArea.maxX - cfg.resetButtonWidth - cfg.rightMarginFromResetButton + cfg.engineResetButtonOffsetX;
+                Bounds resetBounds = new Bounds(rx, rowY + cfg.resetButtonPaddingY, cfg.resetButtonWidth, cfg.resetButtonHeight);
+                this.optionRows.add(new OptionRowLayout(false, rowBounds, tx, ty, resetBounds));
             }
         }
 
         if (!this.optionRows.isEmpty()) {
             OptionRowLayout lastRow = this.optionRows.get(this.optionRows.size() - 1);
-            this.totalOptionHeight = lastRow.rowBounds.maxY + config.optionItemStartOffsetY;
+            this.totalOptionHeight = lastRow.rowBounds.maxY - this.optionArea.y;
         } else {
             this.totalOptionHeight = 0;
         }
-
-        this.optionScrollbarTrack = new Bounds(optionArea.maxX - config.scrollbarWidth, optionArea.y + config.engineTrackPaddingY,
-            config.scrollbarWidth, Math.max(0, optionArea.height - config.engineTrackPaddingY));
-
-        rebuildConfirmationLayout();
-        rebuildColorPickerLayout(font);
     }
 
     private void rebuildConfirmationLayout() {
@@ -186,12 +199,6 @@ public class LayoutEngine {
 
         int titleY = this.pickerDialog.y + padding;
 
-        // Title bar buttons
-        // int xBtnWidth = TextUtil.width(font, ColorPickerOverlay.BTN_X);
-        // int xX = rightEdgeX - xBtnWidth;
-        // this.pickerCloseButton = new Bounds(xX - config.pickerXBtnPadding, titleY - config.pickerXBtnPadding,
-        //     xBtnWidth + (config.pickerXBtnPadding * 2), font.lineHeight + (config.pickerXBtnPadding * 2));
-
         int toggleW = config.pickerModeToggleWidth;
         int toggleH = config.pickerModeToggleHeight;
         int toggleX = rightEdgeX - toggleW - config.engineModeToggleSpacingX;
@@ -217,17 +224,18 @@ public class LayoutEngine {
         this.pickerHueSlider = new Bounds(hueX, sbY, sliderW, sbSize);
 
         int alphaX = hueX + sliderW + spacing;
-        this.pickerAlphaSlider = new Bounds(alphaX, sbY, sliderW, sbSize);
+        this.pickerAlphaSliderVertical = new Bounds(alphaX, sbY, sliderW, sbSize);
 
-        // RGB Sliders
+        // RGBA Sliders
         int rgbSliderW = sbSize + spacing + sliderW;
         int rgbSliderH = config.pickerRgbSliderHeight;
-        int totalSlidersH = rgbSliderH * 3;
-        int rgbSpacing = (sbSize - totalSlidersH) / 2;
+        int totalSlidersH = rgbSliderH * 4;
+        int rgbSpacing = (sbSize - totalSlidersH) / 3;
 
         this.pickerRSlider = new Bounds(sbX, sbY, rgbSliderW, rgbSliderH);
         this.pickerGSlider = new Bounds(sbX, sbY + rgbSliderH + rgbSpacing, rgbSliderW, rgbSliderH);
         this.pickerBSlider = new Bounds(sbX, sbY + (rgbSliderH + rgbSpacing) * 2, rgbSliderW, rgbSliderH);
+        this.pickerAlphaSliderHorizontal = new Bounds(sbX, sbY + (rgbSliderH + rgbSpacing) * 3, rgbSliderW, rgbSliderH);
 
         // Right side content: Top-to-bottom stack layout
         int swatW = config.pickerSwatWidth;
@@ -262,22 +270,9 @@ public class LayoutEngine {
             pickerRecentBounds.add(new Bounds(bx, recentY, boxSize, boxSize));
         }
 
-        // Right side bottom buttons: Derived from dialog's actual bottom line to ensure anchoring
+        // Right side bottom buttons
         int btnW = config.pickerButtonWidth;
         int btnH = config.pickerButtonHeight;
-
-        // int clearPadX = config.pickerClearBtnPaddingX + config.engineClearButtonSpacingX;
-        // int clearPadY = config.pickerClearBtnPaddingY + config.engineClearButtonSpacingY;
-        // int clearBoundsH = font.lineHeight + (clearPadY * 2);
-
-        // // Lock clear button to the absolute bottom inner edge of the dialog
-        // int clearBoundsY = (py + pH) - padding - clearBoundsH;
-
-        // if (!this.pickerRecentBounds.isEmpty()) {
-        //     int clearWidth = TextUtil.width(font, ColorPickerOverlay.BTN_CLEAR);
-        //     int clearX = visualRightEdgeX - (clearWidth + clearPadX * 2);
-        //     this.pickerClearButton = new Bounds(clearX, clearBoundsY, clearWidth + (clearPadX * 2), clearBoundsH);
-        // }
 
         int actionBtnY = (py + pH) - padding - btnH - config.engineActionButtonSpacingY;
 
@@ -343,5 +338,9 @@ public class LayoutEngine {
 
     public int height() {
         return height;
+    }
+
+    public int fontLineHeight() {
+        return fontLineHeight;
     }
 }
