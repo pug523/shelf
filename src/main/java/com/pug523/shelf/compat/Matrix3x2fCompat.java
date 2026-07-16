@@ -18,11 +18,17 @@ public class Matrix3x2fCompat {
     //#if MC >= 12005
     public Matrix3x2fCompat(Matrix3x2fc pose) {
     //#else
-    //$$ public Matrix3x2fCompat(Matrix3x2f pose) {
+    //$$ public Matrix3x2fCompat(PoseStack.Pose pose) {
     //#endif
     // @formatter:on
         this.pose = pose;
     }
+
+    //#if MC <= 12004
+    //$$ public Matrix3x2fCompat(PoseStack poseStack) {
+    //$$     this(poseStack.last());
+    //$$ }
+    //#endif
 
     public Matrix3x2fCompat copy() {
         return new Matrix3x2fCompat(pose);
