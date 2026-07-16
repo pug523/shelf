@@ -17,6 +17,7 @@ import org.jspecify.annotations.Nullable;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.pug523.shelf.gui.renderer.SdfParamBufferPool;
+
 import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryStack;

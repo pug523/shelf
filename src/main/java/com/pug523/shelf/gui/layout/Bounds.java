@@ -20,6 +20,6 @@ public class Bounds {
     @Override
     public String toString() {
         return String.format("[Bounds] x: %d, y: %d, width: %d, height: %d, maxX: %d, maxY: %d", x, y, width, height,
-                maxX, maxY);
+            maxX, maxY);
     }
 }

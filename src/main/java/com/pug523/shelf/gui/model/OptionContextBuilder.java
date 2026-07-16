@@ -25,7 +25,7 @@ public class OptionContextBuilder {
     private void collect(TabNode node, String path, List<RenderableItem> out) {
         for (OptionGroup group : node.getOptionGroups()) {
             Component title = path.isEmpty() ? group.getName()
-                    : ComponentCompat.literal(path + " > ").append(group.getName());
+                : ComponentCompat.literal(path + " > ").append(group.getName());
             out.add(RenderableItem.header(title));
             for (OptionWidget<?> w : group.getOptionWidgets()) {
                 out.add(RenderableItem.option(w));

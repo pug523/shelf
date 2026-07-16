@@ -1,6 +1,7 @@
 package com.pug523.shelf.gui.widget;
 
 import java.util.function.Function;
+
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
 import com.pug523.shelf.gui.layout.LayoutConfig;

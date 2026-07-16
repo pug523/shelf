@@ -18,7 +18,8 @@ public class ConfigScreenBuilder {
     private final Screen parent;
     private final List<TabNode> roots = new ArrayList<>();
     private final List<Profile> profiles = new ArrayList<>();
-    private Runnable onSave = () -> {};
+    private Runnable onSave = () -> {
+    };
     private LayoutConfig layoutConfig;
 
     private ConfigScreenBuilder(Component title, Screen parent) {

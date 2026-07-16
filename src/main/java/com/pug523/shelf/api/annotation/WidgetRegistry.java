@@ -35,12 +35,16 @@ public class WidgetRegistry {
     ) {
         if (type == boolean.class || type == Boolean.class) {
             GuiOption<Boolean> boolOpt = (GuiOption<Boolean>) option;
-            if (overrideAnnotation instanceof WidgetTypes.Toggle toggle) {
-                return (OptionWidget<E>) switch (toggle.value()) {
-                    case BOX -> new ToggleBoxOptionWidget(boolOpt);
-                    case ACTION_BUTTON -> new ToggleActionButtonOptionWidget(boolOpt);
-                    default -> new ToggleCapsuleOptionWidget(boolOpt);
-                };
+            if (overrideAnnotation instanceof WidgetTypes.Toggle) {
+                WidgetTypes.Toggle toggle = (WidgetTypes.Toggle) overrideAnnotation;
+                switch (toggle.value()) {
+                    case BOX:
+                        return (OptionWidget<E>) new ToggleBoxOptionWidget(boolOpt);
+                    case ACTION_BUTTON:
+                        return (OptionWidget<E>) new ToggleActionButtonOptionWidget(boolOpt);
+                    default:
+                        return (OptionWidget<E>) new ToggleCapsuleOptionWidget(boolOpt);
+                }
             }
             return (OptionWidget<E>) new ToggleCapsuleOptionWidget(boolOpt);
         }
@@ -50,7 +54,8 @@ public class WidgetRegistry {
             if (overrideAnnotation instanceof WidgetTypes.ColorPicker) {
                 return (OptionWidget<E>) new ColorPickerOptionWidget(intOpt);
             }
-            if (overrideAnnotation instanceof WidgetTypes.SliderInt s) {
+            if (overrideAnnotation instanceof WidgetTypes.SliderInt) {
+                WidgetTypes.SliderInt s =  (WidgetTypes.SliderInt) overrideAnnotation;
                 return (OptionWidget<E>) SliderOptionWidget.ofInt(intOpt, s.min(), s.max(), s.step());
             }
             return (OptionWidget<E>) SliderOptionWidget.ofInt(intOpt, 0, 500, 1);
@@ -58,7 +63,8 @@ public class WidgetRegistry {
 
         if (type == double.class || type == Double.class) {
             Option<Double> doubleOpt = (Option<Double>) option;
-            if (overrideAnnotation instanceof WidgetTypes.SliderDouble s) {
+            if (overrideAnnotation instanceof WidgetTypes.SliderDouble) {
+                WidgetTypes.SliderDouble s =  (WidgetTypes.SliderDouble) overrideAnnotation;
                 return (OptionWidget<E>) SliderOptionWidget.ofDouble(doubleOpt, s.min(), s.max(), s.step());
             }
             return (OptionWidget<E>) SliderOptionWidget.ofDouble(doubleOpt, 0.0d, 1.0d, 0.01d);
@@ -66,7 +72,8 @@ public class WidgetRegistry {
 
         if (type == float.class || type == Float.class) {
             Option<Float> floatOpt = (Option<Float>) option;
-            if (overrideAnnotation instanceof WidgetTypes.SliderFloat s) {
+            if (overrideAnnotation instanceof WidgetTypes.SliderFloat) {
+                WidgetTypes.SliderFloat s =  (WidgetTypes.SliderFloat) overrideAnnotation;
                 return (OptionWidget<E>) SliderOptionWidget.ofFloat(floatOpt, s.min(), s.max(), s.step());
             }
             return (OptionWidget<E>) SliderOptionWidget.ofFloat(floatOpt, 0.0f, 1.0f, 0.01f);
@@ -100,11 +107,14 @@ public class WidgetRegistry {
 
             if (field.isAnnotationPresent(WidgetTypes.Toggle.class)) {
                 WidgetTypes.Toggle toggle = field.getAnnotation(WidgetTypes.Toggle.class);
-                return switch (toggle.value()) {
-                    case BOX -> new ToggleBoxOptionWidget(boolOpt);
-                    case ACTION_BUTTON -> new ToggleActionButtonOptionWidget(boolOpt);
-                    default -> new ToggleCapsuleOptionWidget(boolOpt);
-                };
+                switch (toggle.value()) {
+                    case BOX:
+                        return new ToggleBoxOptionWidget(boolOpt);
+                    case ACTION_BUTTON:
+                        return new ToggleActionButtonOptionWidget(boolOpt);
+                    default:
+                        return new ToggleCapsuleOptionWidget(boolOpt);
+                }
             }
             return new ToggleCapsuleOptionWidget(boolOpt);
         });

@@ -2,6 +2,7 @@ package com.pug523.shelf.config;
 
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.serde.ObjectSerializer;
+
 import java.util.HashMap;
 import java.util.Map;
 

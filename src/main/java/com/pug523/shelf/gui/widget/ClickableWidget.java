@@ -27,6 +27,7 @@ public interface ClickableWidget {
     default boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY, LayoutEngine layout) {
         return false;
     }
+
     default boolean keyPressed(int keycode, int scancode, int modifiers, LayoutEngine layout) {
         return false;
     }

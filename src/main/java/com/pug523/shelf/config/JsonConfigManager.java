@@ -60,8 +60,8 @@ public class JsonConfigManager<T extends Serializable> implements ConfigManager<
             }
         } catch (Exception e) {
             Shelf.LOGGER.error(
-                    "Failed to parse user config from json cleanly. Reverting to default config.\nfile: {}\nmessage: {}",
-                    configFile.getName(), e.getMessage());
+                "Failed to parse user config from json cleanly. Reverting to default config.\nfile: {}\nmessage: {}",
+                configFile.getName(), e.getMessage());
             config = defaultSupplier.get();
             save();
         }
@@ -79,7 +79,7 @@ public class JsonConfigManager<T extends Serializable> implements ConfigManager<
             fileConfig.save();
         } catch (Exception e) {
             Shelf.LOGGER.error("Failed to save user config to json.\nfile: {}\nmessage: {}", configFile.getName(),
-                    e.getMessage());
+                e.getMessage());
             e.printStackTrace();
         }
     }

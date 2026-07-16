@@ -40,7 +40,7 @@ public class ColorGradientRenderState implements ShelfGuiElementRenderState {
     public final int x1y1Color;
 
     public ColorGradientRenderState(GuiCompat gui, int x0, int x1, int y0, int y1, int x0y0Color, int x0y1Color,
-            int x1y0Color, int x1y1Color) {
+                                    int x1y0Color, int x1y1Color) {
         this.x0 = x0;
         this.x1 = x1;
         this.y0 = y0;

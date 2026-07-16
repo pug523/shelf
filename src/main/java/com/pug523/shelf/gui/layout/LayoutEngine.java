@@ -105,10 +105,10 @@ public class LayoutEngine {
         performDynamicLayout(flatTabs, optionItems, config);
 
         this.tabScrollbarTrack = new Bounds(tabArea.maxX - config.scrollbarWidth, tabArea.y + config.engineTrackPaddingY,
-                config.scrollbarWidth, Math.max(0, tabArea.height - config.engineTrackPaddingY));
+            config.scrollbarWidth, Math.max(0, tabArea.height - config.engineTrackPaddingY));
 
         this.optionScrollbarTrack = new Bounds(optionArea.maxX - config.scrollbarWidth, optionArea.y + config.engineTrackPaddingY,
-                config.scrollbarWidth, Math.max(0, optionArea.height - config.engineTrackPaddingY));
+            config.scrollbarWidth, Math.max(0, optionArea.height - config.engineTrackPaddingY));
 
         rebuildConfirmationLayout();
         rebuildColorPickerLayout(font);

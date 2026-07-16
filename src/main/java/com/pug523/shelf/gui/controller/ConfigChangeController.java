@@ -32,8 +32,8 @@ public class ConfigChangeController {
 
     public void apply() {
         roots.stream().flatMap(TabNode::streamAllNodes).flatMap(n -> n.getOptionGroups().stream())
-                .flatMap(g -> g.getOptionWidgets().stream())
-                .filter(OptionWidget::isPendingModifiedFromActual).forEach(OptionWidget::applyPendingToActual);
+            .flatMap(g -> g.getOptionWidgets().stream())
+            .filter(OptionWidget::isPendingModifiedFromActual).forEach(OptionWidget::applyPendingToActual);
 
         dirty = false;
         onApply.run();
@@ -41,8 +41,8 @@ public class ConfigChangeController {
 
     public void undo() {
         roots.stream().flatMap(TabNode::streamAllNodes).flatMap(n -> n.getOptionGroups().stream())
-                .flatMap(g -> g.getOptionWidgets().stream())
-                .filter(OptionWidget::isPendingModifiedFromActual).forEach(OptionWidget::discardPending);
+            .flatMap(g -> g.getOptionWidgets().stream())
+            .filter(OptionWidget::isPendingModifiedFromActual).forEach(OptionWidget::discardPending);
 
         dirty = false;
     }
