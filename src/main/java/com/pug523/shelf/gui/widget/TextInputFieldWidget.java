@@ -1,0 +1,470 @@
+package com.pug523.shelf.gui.widget;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import com.mojang.blaze3d.platform.InputConstants;
+import com.pug523.shelf.compat.ComponentCompat;
+import com.pug523.shelf.compat.GuiCompat;
+import com.pug523.shelf.compat.ScreenCompat;
+import com.pug523.shelf.gui.ConfigScreen;
+import com.pug523.shelf.gui.controller.OverlayController;
+import com.pug523.shelf.gui.layout.LayoutConfig;
+import com.pug523.shelf.gui.layout.LayoutEngine;
+import com.pug523.shelf.gui.widget.overlay.DropdownOverlay;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+
+//#if MC >= 12111
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
+//#endif
+
+//#if MC >= 12109
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonInfo;
+//#endif
+import net.minecraft.network.chat.Component;
+
+public class TextInputFieldWidget<T> implements ClickableWidget {
+    protected EditBox editBox;
+    private final Predicate<String> filter;
+    private final Predicate<String> validator;
+    private final Consumer<String> onConfirm;
+    private final Function<String, Component> textFormatter;
+    private final boolean rightAlign;
+    private final Font font;
+
+    private List<T> suggestions = new ArrayList<>();
+    private boolean showSuggestions = false;
+    private Function<T, String> suggestionIdExtractor;
+    private SuggestionIconRenderer<T> suggestionIconRenderer;
+    private Consumer<T> onSuggestionSelected;
+    private boolean suggestionRightAlign = false;
+
+    private int x, y, width, height;
+    private int drawX;
+    private Component hint;
+    private boolean alwaysUnderlined = false;
+
+    public TextInputFieldWidget(
+        boolean rightAlign,
+        Predicate<String> filter,
+        Predicate<String> validator,
+        Consumer<String> onConfirm,
+        Function<String, Component> textFormatter,
+        String defaultValue
+    ) {
+        this.rightAlign = rightAlign;
+        this.filter = filter;
+        this.validator = validator;
+        this.onConfirm = onConfirm;
+        this.textFormatter = textFormatter;
+        this.font = Minecraft.getInstance().font;
+
+        rebuildEditBox(this.font, ComponentCompat.empty(), defaultValue);
+    }
+
+    public void setHint(Component hint) {
+        this.hint = hint;
+        this.editBox.setHint(hint);
+    }
+
+    public void setAlwaysUnderlined(boolean alwaysUnderlined) {
+        this.alwaysUnderlined = alwaysUnderlined;
+    }
+
+    public void setupSuggestions(
+        Function<T, String> idExtractor,
+        SuggestionIconRenderer<T> iconRenderer,
+        Consumer<T> onSelected,
+        boolean suggestionRightAlign
+    ) {
+        this.suggestionIdExtractor = idExtractor;
+        this.suggestionIconRenderer = iconRenderer;
+        this.onSuggestionSelected = onSelected;
+        this.suggestionRightAlign = suggestionRightAlign;
+    }
+
+    public void setSuggestions(List<T> suggestions) {
+        this.suggestions = suggestions;
+        this.showSuggestions = suggestions != null && !suggestions.isEmpty();
+    }
+
+    public void setShowSuggestions(boolean show) {
+        this.showSuggestions = show;
+    }
+
+    private void rebuildEditBox(Font font, Component narration, String defaultValue) {
+        //#if MC >= 11600
+        this.editBox = new EditBox(font, 0, 0, 0, 0, narration);
+        //#else
+        //$$ this.editBox = new EditBox(font, 0, 0, 0, 0, narration.getString());
+        //#endif
+
+        this.editBox.setBordered(false);
+        //#if MC >= 12106
+        this.editBox.setTextShadow(false);
+        //#endif
+
+        this.editBox.setValue(defaultValue);
+
+        if (this.textFormatter != null) {
+            // @formatter:off
+            //#if MC >= 12109
+            this.editBox.addFormatter((text, offset) -> {
+            //#else
+            //$$ this.editBox.setFormatter((text, offset) -> {
+            //#endif
+            // @formatter:on
+                Component formatted = this.textFormatter.apply(text);
+                return formatted != null ? formatted.getVisualOrderText() : null;
+            });
+        }
+
+        this.editBox.setResponder(text -> {
+            updateEditBoxBound();
+            if (this.onConfirm != null) {
+                this.onConfirm.accept(text);
+            }
+        });
+    }
+
+    public void setMaxLength(int length) {
+        this.editBox.setMaxLength(length);
+    }
+
+    public void setText(String text) {
+        if (!text.equals(this.editBox.getValue())) {
+            this.editBox.setValue(text);
+            if (this.rightAlign) {
+                this.editBox.setCursorPosition(text.length());
+                this.editBox.setHighlightPos(text.length());
+                this.editBox.moveCursor(0, false);
+            }
+            updateEditBoxBound();
+        }
+    }
+
+    public void setSuggestion(String suggestion) {
+        this.editBox.setSuggestion(suggestion);
+    }
+
+    public String getText() {
+        return this.editBox.getValue();
+    }
+
+    public boolean isFocused() {
+        return this.editBox.isFocused();
+    }
+
+    public void setFocused(boolean focus) {
+        //#if MC >= 11900
+        this.editBox.setFocused(focus);
+        //#else
+        //$$ this.editBox.setFocus(focus);
+        //#endif
+
+        if (!focus) {
+            if (this.onConfirm != null) {
+                this.onConfirm.accept(this.editBox.getValue());
+            }
+
+            if (this.rightAlign) {
+                this.editBox.setCursorPosition(this.editBox.getValue().length());
+                this.editBox.moveCursor(0, false);
+            } else {
+                this.editBox.setCursorPosition(0);
+                this.editBox.moveCursor(0, false);
+            }
+        }
+        updateEditBoxBound();
+    }
+
+    public int drawX() {
+        return this.drawX;
+    }
+
+    private boolean shouldRenderHint() {
+        return this.hint != null && this.getText().isEmpty() && !this.isFocused();
+    }
+
+    private boolean isHovered(double mouseX, double mouseY) {
+        return mouseX >= this.x && mouseX < this.x + this.width && mouseY >= this.y && mouseY < this.y + this.height;
+    }
+
+    private void updateEditBoxBound() {
+        this.editBox.setX(this.x);
+        this.editBox.setY(this.y);
+        this.editBox.setWidth(this.width);
+        this.editBox.setHeight(this.height);
+    }
+
+    @Override
+    public void render(Font font, GuiCompat gui, LayoutEngine layout, int x, int y, int width, int height, int mouseX, int mouseY) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+
+        LayoutConfig cfg = layout.getConfig();
+        updateEditBoxBound();
+
+        String rawText = this.editBox.getValue();
+        boolean isValid = this.validator.test(rawText);
+        int textColor = isValid ? cfg.colorTextSecondary : cfg.colorTextMuted;
+        int lineY = y + font.lineHeight + 1;
+        boolean underline = this.alwaysUnderlined;
+
+        if (this.rightAlign) {
+            Component text = ComponentCompat.literal(rawText);
+            int textWidth = ComponentCompat.width(font, text);
+            this.drawX = x + width - textWidth;
+
+            gui.text(font, text, drawX, y, textColor);
+
+            if (this.isFocused()) {
+                underline = true;
+                int cursorPos = this.editBox.getCursorPosition();
+                int highlightPos = this.editBox.highlightPos;
+
+                if (cursorPos != highlightPos) {
+                    int startIdx = Math.min(cursorPos, highlightPos);
+                    int endIdx = Math.max(cursorPos, highlightPos);
+
+                    String textBeforeStart = rawText.substring(0, Math.clamp(startIdx, 0, rawText.length()));
+                    int highlightStartX = drawX + ComponentCompat.width(font, textBeforeStart);
+
+                    String textBeforeEnd = rawText.substring(0, Math.clamp(endIdx, 0, rawText.length()));
+                    int highlightEndX = drawX + ComponentCompat.width(font, textBeforeEnd);
+
+                    int highlightY = y - 1;
+                    int highlightHeight = font.lineHeight + 2;
+
+                    gui.fill(highlightStartX, highlightY, highlightEndX, highlightY + highlightHeight, 0x800000FF);
+                }
+
+                String textBeforeCursor = rawText.substring(0, Math.clamp(cursorPos, 0, rawText.length()));
+                int cursorOffset = ComponentCompat.width(font, textBeforeCursor);
+                int cursorX = drawX + cursorOffset;
+
+                if ((System.currentTimeMillis() / 500) % 2 == 0) {
+                    int cursorY = y - 1;
+                    int cursorHeight = font.lineHeight + 2;
+                    gui.fill(cursorX, cursorY, cursorX + 1, cursorY + cursorHeight, textColor);
+                }
+            }
+            if (shouldRenderHint()) {
+                underline = true;
+                this.drawX = x + width - ComponentCompat.width(font, this.hint);
+                gui.text(font, this.hint, drawX, y, cfg.colorTextDisabled);
+            }
+        } else {
+            this.drawX = this.editBox.getX();
+            if (!isFocused()) {
+                this.editBox.setCursorPosition(0);
+                this.editBox.moveCursor(0, false);
+            }
+            this.editBox.setTextColor(textColor);
+            this.editBox.extractWidgetRenderState(gui.getGraphics(), mouseX, mouseY, 1.0f);
+
+            if (this.isFocused()) {
+                underline = true;
+                gui.fill(this.editBox.getX(), lineY, this.editBox.getX() + this.editBox.getWidth(), lineY + 1, textColor);
+            }
+
+            if (shouldRenderHint()) {
+                gui.fill(this.drawX, lineY, x + width, lineY + 1, textColor);
+            }
+        }
+
+        if (underline) {
+            gui.fill(this.drawX, lineY, x + width, lineY + 1, textColor);
+        }
+
+        //#if MC >= 12111
+        if (this.isHovered(mouseX, mouseY)) {
+            gui.requestCursor(CursorTypes.IBEAM);
+        }
+        //#endif
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers, LayoutEngine layout) {
+        boolean hovered = isHovered(mouseX, mouseY);
+        setFocused(hovered);
+
+        if (hovered) {
+            if (this.rightAlign) {
+                String rawText = this.editBox.getValue();
+                int textWidth = ComponentCompat.width(this.font, rawText);
+                int drawX = this.x + this.width - textWidth;
+                double relativeMouseX = mouseX - drawX;
+
+                int targetCursorPos = 0;
+                int currentWidth = 0;
+                for (int i = 0; i < rawText.length(); i++) {
+                    int charWidth = ComponentCompat.width(this.font, String.valueOf(rawText.charAt(i)));
+                    if (relativeMouseX < currentWidth + (charWidth / 2.0)) {
+                        break;
+                    }
+                    currentWidth += charWidth;
+                    targetCursorPos = i + 1;
+                }
+                this.editBox.setCursorPosition(targetCursorPos);
+                this.editBox.setHighlightPos(targetCursorPos);
+            } else {
+                //#if MC >= 12109
+                this.editBox.mouseClicked(new MouseButtonEvent(mouseX, mouseY, new MouseButtonInfo(button, modifiers)), false);
+                //#else
+                //$$ this.editBox.mouseClicked(mouseX, mouseY, button);
+                //#endif
+            }
+
+            tryTriggerSuggestionsOverlay(layout);
+
+            return true;
+        }
+        return false;
+    }
+
+    private void tryTriggerSuggestionsOverlay(LayoutEngine layout) {
+        if (!this.showSuggestions || this.suggestions.isEmpty() || this.suggestionIdExtractor == null) {
+            return;
+        }
+
+        Screen screen = ScreenCompat.getScreen(Minecraft.getInstance());
+        if (!(screen instanceof ConfigScreen)) {
+            return;
+        }
+
+        OverlayController overlayController = ((ConfigScreen) screen).getOverlayController();
+        overlayController.clear();
+
+        LayoutConfig cfg = layout.getConfig();
+        int boxX = this.x;
+        int boxY = this.y + layout.fontLineHeight() + cfg.itemInputSuggestionsOffsetY;
+        int rowHeight = cfg.itemInputRowHeight;
+
+        List<SuggestionItemWidget<T>> items = suggestions.stream()
+            .limit(cfg.itemInputMaxSuggestions)
+            .map(s -> new SuggestionItemWidget<>(s, suggestionIdExtractor, suggestionIconRenderer, suggestionRightAlign))
+            .collect(Collectors.toList());
+
+        DropdownOverlay dropdown = new DropdownOverlay(
+            boxX,
+            boxY,
+            this.width,
+            rowHeight,
+            items,
+            () -> {
+                this.showSuggestions = false;
+                overlayController.pop();
+            },
+            clickedItem -> {
+                @SuppressWarnings("unchecked")
+                SuggestionItemWidget<T> suggestionItem = (SuggestionItemWidget<T>) clickedItem;
+                selectSuggestion(suggestionItem.getValue());
+                overlayController.pop();
+            }
+        );
+
+        overlayController.push(dropdown);
+    }
+
+    @Override
+    public boolean keyPressed(int keycode, int scancode, int modifiers, LayoutEngine layout) {
+        if (!this.isFocused()) {
+            return false;
+        }
+
+        if (this.showSuggestions && !this.suggestions.isEmpty() && keycode == InputConstants.KEY_TAB) {
+            selectSuggestion(this.suggestions.get(0));
+            Screen screen = ScreenCompat.getScreen(Minecraft.getInstance());
+            if (screen instanceof ConfigScreen) {
+                ((ConfigScreen) screen).getOverlayController().clear();
+            }
+            return true;
+        }
+
+        if (keycode == InputConstants.KEY_RETURN || keycode == InputConstants.KEY_NUMPADENTER) {
+            setFocused(false);
+            return true;
+        }
+
+        boolean result;
+        //#if MC >= 12109
+        result = this.editBox.keyPressed(new KeyEvent(keycode, scancode, modifiers));
+        //#else
+        //$$ result = this.editBox.keyPressed(keycode, scancode, modifiers);
+        //#endif
+
+        updateEditBoxBound();
+        return result;
+    }
+
+    private void selectSuggestion(T suggestion) {
+        String id = suggestionIdExtractor.apply(suggestion);
+        this.setText(id);
+        if (this.onSuggestionSelected != null) {
+            this.onSuggestionSelected.accept(suggestion);
+        }
+        this.showSuggestions = false;
+    }
+
+    @Override
+    public boolean charTyped(int codepoint, int modifiers, LayoutEngine layout) {
+        if (!this.isFocused()) {
+            return false;
+        }
+
+        String currentText = this.editBox.getValue();
+        char typedChar = (char) codepoint;
+
+        String proposedText = currentText + typedChar;
+        if (!this.filter.test(proposedText)) {
+            return true;
+        }
+
+        boolean result;
+        //#if MC >= 260000
+        result = this.editBox.charTyped(new CharacterEvent(codepoint));
+        //#elseif MC >= 12109
+        //$$ result = this.editBox.charTyped(new CharacterEvent(codepoint, modifiers));
+        //#else
+        //$$ result = this.editBox.charTyped((char) codepoint, modifiers);
+        //#endif
+
+        updateEditBoxBound();
+
+        tryTriggerSuggestionsOverlay(layout);
+
+        return result;
+    }
+
+    @Override
+    public void focusChanged(boolean focus, LayoutEngine layout) {
+        setFocused(focus);
+        if (focus) {
+            tryTriggerSuggestionsOverlay(layout);
+        } else {
+            Screen screen = ScreenCompat.getScreen(Minecraft.getInstance());
+            if (screen instanceof ConfigScreen) {
+                ((ConfigScreen) screen).getOverlayController().clear();
+            }
+        }
+    }
+
+    @FunctionalInterface
+    public interface SuggestionIconRenderer<T> {
+        void render(GuiCompat gui, T value, int x, int y);
+    }
+}
