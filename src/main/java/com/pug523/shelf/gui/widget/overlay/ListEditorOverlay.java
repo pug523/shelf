@@ -23,6 +23,8 @@ import net.minecraft.util.Mth;
 
 public class ListEditorOverlay<T> extends WindowOverlay {
     public static final Component TITLE_TEXT = ComponentCompat.literal("Edit List");
+    public static final Component BTN_CANCEL = ComponentCompat.literal("Cancel");
+    public static final Component BTN_OK = ComponentCompat.literal("OK");
 
     private final List<T> workingList;
     private final List<OptionWidget<T>> itemWidgets = new ArrayList<>();
@@ -45,7 +47,7 @@ public class ListEditorOverlay<T> extends WindowOverlay {
         Function<Option<T>, OptionWidget<T>> itemWidgetFactory,
         Supplier<T> itemDefaultValueFactory,
         Runnable onFinish) {
-        super();
+        super(BTN_CANCEL, BTN_OK);
 
         this.itemWidgetFactory = itemWidgetFactory;
         this.itemDefaultValueFactory = itemDefaultValueFactory;
@@ -93,7 +95,7 @@ public class ListEditorOverlay<T> extends WindowOverlay {
                 itemDefaultValueFactory.get(),
                 () -> workingList.get(index),
                 (val) -> {
-                    if (index >= 0 && index < workingList.size()) {
+                    if (index < workingList.size()) {
                         workingList.set(index, val);
                     }
                 },

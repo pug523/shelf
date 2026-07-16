@@ -16,19 +16,15 @@ public abstract class WindowOverlay implements OverlayWidget {
     protected static final int COLOR_BG_INNER = 0xAF161923;
     protected static final int COLOR_BTN_OK_BG = 0xFF2563EB;
 
-    // TODO: i18n
-    public static final Component BTN_CANCEL = ComponentCompat.literal("Cancel");
-    public static final Component BTN_OK = ComponentCompat.literal("OK");
-
     protected final ActionButtonWidget cancelButton;
     protected final ActionButtonWidget okButton;
 
     protected Runnable onOk;
     protected Runnable onCancel;
 
-    public WindowOverlay() {
-        this.cancelButton = new ActionButtonWidget(BTN_CANCEL, (btn) -> cancel());
-        this.okButton = new ActionButtonWidget(BTN_OK, (btn) -> ok());
+    public WindowOverlay(Component cancelLabel, Component okLabel) {
+        this.cancelButton = new ActionButtonWidget(cancelLabel, (btn) -> cancel());
+        this.okButton = new ActionButtonWidget(okLabel, (btn) -> ok());
     }
 
     protected void setCallbacks(Runnable onOk, Runnable onCancel) {

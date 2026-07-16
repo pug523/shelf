@@ -23,12 +23,9 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
-public class ColorPickerOverlay implements OverlayWidget {
-    private static final int COLOR_BG_OUTLINE = 0xAF11131E;
-    private static final int COLOR_BG_INNER = 0xAF161923;
+public class ColorPickerOverlay extends WindowOverlay {
     private static final int COLOR_TEXT_MUTED = 0xFF6B7280;
     private static final int COLOR_TEXT_LABEL = 0xFF9CA3AF;
-    private static final int COLOR_BTN_OK_BG = 0xFF2563EB;
 
     // TODO: i18n
     public static final Component TITLE_TEXT = ComponentCompat.literal("Select Color");
@@ -47,8 +44,6 @@ public class ColorPickerOverlay implements OverlayWidget {
     private final int originalColor;
     private LayoutConfig cachedConfig = null;
 
-    private final ActionButtonWidget cancelButton = new ActionButtonWidget(BTN_CANCEL, (btn) -> cancel());
-    private final ActionButtonWidget okButton = new ActionButtonWidget(BTN_OK, (btn) -> ok());
     private final ActionButtonWidget toggleModeButton = new ActionButtonWidget(BTN_TOGGLE_HSV, this::toggleMode);
 
     private final SliderWidget hueSlider;
@@ -78,9 +73,12 @@ public class ColorPickerOverlay implements OverlayWidget {
     private boolean isDraggingSBSpace = false;
 
     public ColorPickerOverlay(Option<Integer> targetOption, BiConsumer<Integer, ColorPickerOverlay> onConfirm) {
+        super(BTN_CANCEL, BTN_OK);
         this.targetOption = targetOption;
         this.onConfirm = onConfirm;
         this.originalColor = targetOption.getPendingValue();
+
+        setCallbacks(this::handleOk, this::handleCancel);
 
         initPresets();
         initColorFromRgb(originalColor);
@@ -173,11 +171,6 @@ public class ColorPickerOverlay implements OverlayWidget {
     }
 
     @Override
-    public boolean shouldDimBackground() {
-        return true;
-    }
-
-    @Override
     public void render(Font font, GuiCompat gui, LayoutEngine layout, int x, int y, int width, int height, int mouseX,
                        int mouseY) {
         updateDragStates(mouseX, mouseY, layout);
@@ -189,7 +182,7 @@ public class ColorPickerOverlay implements OverlayWidget {
         Bounds bound = layout.pickerDialog;
         gui.enableScissor(bound.x, bound.y, bound.maxX, bound.maxY);
 
-        renderDialogFrame(font, gui, layout, cfg);
+        renderDialogFrame(font, gui, bound, TITLE_TEXT, cfg);
 
         setupSliders(cfg);
 
@@ -261,15 +254,6 @@ public class ColorPickerOverlay implements OverlayWidget {
             .setKnobSize(cfg.pickerSliderIndicatorSize)
             .setRounded(true)
             .setColors(0x00000000, 0x00000000, Colors.WHITE);
-    }
-
-    private void renderDialogFrame(Font font, GuiCompat gui, LayoutEngine layout, LayoutConfig config) {
-        Bounds bound = layout.pickerDialog;
-        gui.fill(bound.x, bound.y, bound.maxX, bound.maxY, COLOR_BG_OUTLINE);
-        gui.fill(bound.x + 1, bound.y + 1, bound.maxX - 1, bound.maxY - 1, COLOR_BG_INNER);
-
-        int titleY = bound.y + config.pickerPaddingInner;
-        gui.text(font, TITLE_TEXT, bound.x + config.pickerPaddingInner, titleY, Colors.WHITE, false);
     }
 
     private void renderSbSpace(GuiCompat gui, Bounds sb, LayoutConfig cfg) {
@@ -448,13 +432,12 @@ public class ColorPickerOverlay implements OverlayWidget {
         SoundUtil.clickSound();
     }
 
-    private void cancel() {
+    private void handleCancel() {
         this.targetOption.setPendingValue(originalColor);
         this.onConfirm.accept(originalColor, this);
-        SoundUtil.clickSound();
     }
 
-    private void ok() {
+    private void handleOk() {
         if (cachedConfig != null) {
             int finalColor = getCurrentColor();
             recentColors.remove((Integer) finalColor);
@@ -464,7 +447,6 @@ public class ColorPickerOverlay implements OverlayWidget {
                 recentColors.remove(recentColors.size() - 1);
             }
             this.onConfirm.accept(finalColor, this);
-            SoundUtil.clickSound();
         }
     }
 
