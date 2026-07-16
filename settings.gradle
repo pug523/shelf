@@ -26,7 +26,7 @@ pluginManagement {
     }
 }
 
-def versions = new JsonSlurper().parseText(file('versions/versions.json').text)
+def versions = new JsonSlurper().parseText(file('versions/versions.json').getText('UTF-8'))
 for (String ver : versions) {
     include(":$ver")
 
