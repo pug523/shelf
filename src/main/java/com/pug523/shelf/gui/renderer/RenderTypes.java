@@ -32,10 +32,9 @@ public class RenderTypes
     //$$     RenderType.CompositeState.builder().createCompositeState(false)
     //$$ );
     //#elseif MC >= 12102
-    //$$ // GUI = create("gui", DefaultVertexFormat.POSITION_COLOR, Mode.QUADS, 786432, RenderType.CompositeState.builder().setShaderState(RENDERTYPE_GUI_SHADER).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setDepthTestState(LEQUAL_DEPTH_TEST).createCompositeState(false));
     //$$ public static final RenderType SDF_RENDER_TYPE = RenderType.create(
     //$$     "shelf_sdf",
-    //$$     DefaultVertexFormat.POSITION_COLOR,
+    //$$     DefaultVertexFormat.POSITION_TEX_COLOR,
     //$$     VertexFormat.Mode.QUADS,
     //$$     RenderType.SMALL_BUFFER_SIZE,
     //$$     RenderType.CompositeState.builder().setShaderState(new RenderStateShard.ShaderStateShard()).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setDepthTestState(LEQUAL_DEPTH_TEST).createCompositeState(false)
