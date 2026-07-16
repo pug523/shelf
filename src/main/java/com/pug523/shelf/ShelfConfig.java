@@ -3,6 +3,7 @@ package com.pug523.shelf;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.pug523.shelf.api.annotation.ConfigEntry;
 import com.pug523.shelf.api.annotation.WidgetTypes;
+import com.pug523.shelf.gui.Colors;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 
 import net.minecraft.world.item.Item;
@@ -67,6 +68,10 @@ public class ShelfConfig implements Serializable {
     @ConfigEntry(key = OD + "integer_list", category = DS, group = OD + "primitive")
     @WidgetTypes.List(WidgetTypes.SliderInt.class)
     public List<Integer> debugIntegerList = new ArrayList<>();
+
+    @ConfigEntry(key = OD + "color", category = DS, group = OD + "primitive")
+    @WidgetTypes.ColorPicker
+    public int debugColor = Colors.GREEN1;
 
 
     @ConfigEntry(key = O + "layout")
