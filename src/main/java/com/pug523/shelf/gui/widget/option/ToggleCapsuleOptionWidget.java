@@ -2,11 +2,9 @@ package com.pug523.shelf.gui.widget.option;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.pug523.shelf.compat.GuiCompat;
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 import com.pug523.shelf.gui.renderer.RenderUtil;
-import com.pug523.shelf.gui.sound.SoundUtil;
 
 import net.minecraft.client.gui.Font;
 
@@ -14,7 +12,7 @@ public class ToggleCapsuleOptionWidget extends ToggleOptionWidget {
     private float switchX = -1.0f;
     private float switchY = -1.0f;
 
-    public ToggleCapsuleOptionWidget(Option<Boolean> option) {
+    public ToggleCapsuleOptionWidget(GuiOption<Boolean> option) {
         super(option);
     }
 

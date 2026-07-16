@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
 import com.pug523.shelf.compat.ScreenCompat;
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.ConfigScreen;
 import com.pug523.shelf.gui.controller.OverlayController;
 import com.pug523.shelf.gui.layout.Bounds;
@@ -37,7 +36,7 @@ public class SelectorOptionWidget<T, E> extends OptionWidget<T> {
     private Bounds cachedBounds;
 
     public SelectorOptionWidget(
-        Option<T> option,
+        GuiOption<T> option,
         List<E> candidates,
         Function<E, Component> labelExtractor,
         boolean multiSelect,
@@ -52,7 +51,7 @@ public class SelectorOptionWidget<T, E> extends OptionWidget<T> {
         this.fromListConverter = fromListConverter;
     }
 
-    public static <E> SelectorOptionWidget<E, E> single(Option<E> option, List<E> candidates, Function<E, Component> labelExtractor) {
+    public static <E> SelectorOptionWidget<E, E> single(GuiOption<E> option, List<E> candidates, Function<E, Component> labelExtractor) {
         return new SelectorOptionWidget<>(
             option,
             candidates,
@@ -69,7 +68,7 @@ public class SelectorOptionWidget<T, E> extends OptionWidget<T> {
         );
     }
 
-    public static <E> SelectorOptionWidget<List<E>, E> multi(Option<List<E>> option, List<E> candidates, Function<E, Component> labelExtractor) {
+    public static <E> SelectorOptionWidget<List<E>, E> multi(GuiOption<List<E>> option, List<E> candidates, Function<E, Component> labelExtractor) {
         return new SelectorOptionWidget<>(
             option,
             candidates,

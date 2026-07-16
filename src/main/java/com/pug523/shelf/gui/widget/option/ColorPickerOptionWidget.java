@@ -9,7 +9,6 @@ import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
 import com.pug523.shelf.compat.ScreenCompat;
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.ConfigScreen;
 import com.pug523.shelf.gui.controller.OverlayController;
 import com.pug523.shelf.gui.layout.Bounds;
@@ -34,7 +33,7 @@ public class ColorPickerOptionWidget extends OptionWidget<Integer> {
     private static final Component HASH_COMPONENT = ComponentCompat.literal("#");
     private static int hashWidth = -1;
 
-    public ColorPickerOptionWidget(Option<Integer> option) {
+    public ColorPickerOptionWidget(GuiOption<Integer> option) {
         super(option);
 
         int maxLen = maxLength();

@@ -7,7 +7,6 @@ import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
 import com.pug523.shelf.compat.IdentifierCompat;
 import com.pug523.shelf.compat.ProfilerCompat;
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.ConfigScreen;
 import com.pug523.shelf.gui.TabNode;
 import com.pug523.shelf.gui.controller.*;
@@ -17,6 +16,7 @@ import com.pug523.shelf.gui.layout.Bounds;
 import com.pug523.shelf.gui.layout.OptionRowLayout;
 import com.pug523.shelf.gui.model.OptionContext;
 import com.pug523.shelf.gui.model.RenderableItem;
+import com.pug523.shelf.gui.widget.option.GuiOption;
 import com.pug523.shelf.gui.widget.overlay.OverlayWidget;
 import com.pug523.shelf.gui.text.TextUtil;
 import com.pug523.shelf.gui.widget.ActionButtonWidget;
@@ -211,7 +211,7 @@ public class ConfigScreenRenderer {
             }
 
             OptionWidget<?> widget = item.widget();
-            Option<?> option = widget != null ? widget.getOption() : null;
+            GuiOption<?> option = widget != null ? widget.getOption() : null;
             if (widget == null || option == null || row.resetButtonBounds == null) continue;
 
             boolean selected = i == focusedIdx;
@@ -254,7 +254,7 @@ public class ConfigScreenRenderer {
             if (!(scrolledRow.y + scrolledRow.height < layout.optionArea.y + cfg.tabScissorClipPaddingY || scrolledRow.y > layout.optionArea.maxY)) {
                 int textY = layout.getScrolledTextY(focusedRow.textY, optionScroll);
                 OptionWidget<?> widget = focusedItem.widget();
-                Option<?> option = widget.getOption();
+                GuiOption<?> option = widget.getOption();
 
                 gui.fill(layout.optionArea.x, scrolledRow.y, layout.optionArea.x + scrolledRow.width, scrolledRow.y + scrolledRow.height, cfg.colorItemSelectedBackground);
                 gui.text(screen.getFont(), option.getName(), focusedRow.textX, textY, cfg.colorItemSelectedText, false);
@@ -317,7 +317,7 @@ public class ConfigScreenRenderer {
             return;
         }
 
-        Option<?> option = items.get(idx).widget().getOption();
+        GuiOption<?> option = items.get(idx).widget().getOption();
         int wrapW = screen.width - layout.descArea.x - cfg.descTextRightPadding;
 
         gui.text(screen.getFont(), option.getName().copy().withStyle(ChatFormatting.BOLD), x, y, cfg.colorTextPrimary, false);

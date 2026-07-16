@@ -21,7 +21,7 @@ public class RenderableItem {
     }
 
     public static RenderableItem option(OptionWidget<?> widget) {
-        return new RenderableItem(false, widget.getOption().getName(), widget);
+        return new RenderableItem(false, widget.getName(), widget);
     }
 
     public boolean isHeader() {

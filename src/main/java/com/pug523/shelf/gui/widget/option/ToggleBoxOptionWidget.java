@@ -2,7 +2,6 @@ package com.pug523.shelf.gui.widget.option;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.pug523.shelf.compat.GuiCompat;
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 import com.pug523.shelf.gui.renderer.RenderUtil;
@@ -12,7 +11,7 @@ import net.minecraft.client.gui.Font;
 public class ToggleBoxOptionWidget extends ToggleOptionWidget {
     private int cachedX, cachedY, cachedWidth, cachedHeight;
 
-    public ToggleBoxOptionWidget(Option<Boolean> option) {
+    public ToggleBoxOptionWidget(GuiOption<Boolean> option) {
         super(option);
     }
 

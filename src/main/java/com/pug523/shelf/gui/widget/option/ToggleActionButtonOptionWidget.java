@@ -2,7 +2,6 @@ package com.pug523.shelf.gui.widget.option;
 
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 
@@ -18,15 +17,15 @@ public class ToggleActionButtonOptionWidget extends ToggleOptionWidget {
     private final ActionButtonWidget buttonDelegate;
     private boolean cachedPendingValue;
 
-    public ToggleActionButtonOptionWidget(Option<Boolean> option) {
+    public ToggleActionButtonOptionWidget(GuiOption<Boolean> option) {
         this(option, "true", "false");
     }
 
-    public ToggleActionButtonOptionWidget(Option<Boolean> option, String onText, String offText) {
+    public ToggleActionButtonOptionWidget(GuiOption<Boolean> option, String onText, String offText) {
         this(option, ComponentCompat.literal(onText).withStyle(ChatFormatting.GREEN), ComponentCompat.literal(offText).withStyle(ChatFormatting.RED));
     }
 
-    public ToggleActionButtonOptionWidget(Option<Boolean> option, Component onText, Component offText) {
+    public ToggleActionButtonOptionWidget(GuiOption<Boolean> option, Component onText, Component offText) {
         super(option);
         this.onText = onText;
         this.offText = offText;

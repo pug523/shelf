@@ -31,10 +31,10 @@ public class WidgetRegistry {
     public static <E> OptionWidget<E> createWidgetForType(
         Class<E> type,
         Annotation overrideAnnotation,
-        Option<E> option
+        GuiOption<E> option
     ) {
         if (type == boolean.class || type == Boolean.class) {
-            Option<Boolean> boolOpt = (Option<Boolean>) option;
+            GuiOption<Boolean> boolOpt = (GuiOption<Boolean>) option;
             if (overrideAnnotation instanceof WidgetTypes.Toggle toggle) {
                 return (OptionWidget<E>) switch (toggle.value()) {
                     case BOX -> new ToggleBoxOptionWidget(boolOpt);

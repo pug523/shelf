@@ -5,9 +5,10 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import com.pug523.shelf.config.Option;
+
 import com.pug523.shelf.gui.TabNode;
 import com.pug523.shelf.gui.model.RenderableItem;
+import com.pug523.shelf.gui.widget.option.GuiOption;
 import com.pug523.shelf.gui.widget.option.OptionWidget;
 
 public class SearchBarController {
@@ -119,7 +120,7 @@ public class SearchBarController {
         this.onQueryChangedCallback = callback;
     }
 
-    public boolean matches(Option<?> option) {
+    public boolean matches(GuiOption<?> option) {
         if (isEmpty()) {
             return true;
         }
@@ -166,7 +167,7 @@ public class SearchBarController {
 
         for (RenderableItem item : allItems) {
             if (item.widget() != null && item.widget().getOption() != null) {
-                Option<?> opt = item.widget().getOption();
+                GuiOption<?> opt = item.widget().getOption();
                 if (matches(opt)) {
                     return true;
                 }

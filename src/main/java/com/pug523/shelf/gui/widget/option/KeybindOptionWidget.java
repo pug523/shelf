@@ -3,7 +3,6 @@ package com.pug523.shelf.gui.widget.option;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 
@@ -25,7 +24,7 @@ public class KeybindOptionWidget extends OptionWidget<List<InputConstants.Key>> 
     private final ActionButtonWidget buttonDelegate;
     private boolean recording = false;
 
-    public KeybindOptionWidget(Option<List<InputConstants.Key>> option) {
+    public KeybindOptionWidget(GuiOption<List<InputConstants.Key>> option) {
         super(option);
         this.buttonDelegate = new ActionButtonWidget(COMPONENT_UNBOUND, btn -> this.toggleRecordingStatus());
     }

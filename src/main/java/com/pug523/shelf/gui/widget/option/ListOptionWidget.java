@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
 import com.pug523.shelf.compat.ScreenCompat;
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.ConfigScreen;
 import com.pug523.shelf.gui.controller.OverlayController;
 import com.pug523.shelf.gui.layout.LayoutConfig;
@@ -23,12 +22,12 @@ import net.minecraft.network.chat.Component;
 public class ListOptionWidget<T> extends OptionWidget<List<T>> {
     private final ActionButtonWidget editButton;
 
-    private final Function<Option<T>, OptionWidget<T>> itemWidgetFactory;
+    private final Function<GuiOption<T>, OptionWidget<T>> itemWidgetFactory;
     private final Supplier<T> itemDefaultValueFactory;
 
     public ListOptionWidget(
-        Option<List<T>> option,
-        Function<Option<T>, OptionWidget<T>> itemWidgetFactory,
+        GuiOption<List<T>> option,
+        Function<GuiOption<T>, OptionWidget<T>> itemWidgetFactory,
         Supplier<T> itemDefaultValueFactory) {
         super(option);
         this.itemWidgetFactory = itemWidgetFactory;

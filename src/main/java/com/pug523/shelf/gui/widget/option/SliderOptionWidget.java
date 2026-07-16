@@ -4,7 +4,6 @@ import java.util.function.Function;
 
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 
@@ -24,7 +23,7 @@ public class SliderOptionWidget<N extends Number & Comparable<N>> extends Option
 
     private int maxTextBoundsWidth = -1;
 
-    public SliderOptionWidget(Option<N> option, N min, N max, N step, Function<Double, N> typeConverter) {
+    public SliderOptionWidget(GuiOption<N> option, N min, N max, N step, Function<Double, N> typeConverter) {
         super(option);
         this.min = min.doubleValue();
         this.max = max.doubleValue();
@@ -77,15 +76,15 @@ public class SliderOptionWidget<N extends Number & Comparable<N>> extends Option
         );
     }
 
-    public static SliderOptionWidget<Integer> ofInt(Option<Integer> option, int min, int max, int step) {
+    public static SliderOptionWidget<Integer> ofInt(GuiOption<Integer> option, int min, int max, int step) {
         return new SliderOptionWidget<>(option, min, max, step, d -> (int) Math.round(d));
     }
 
-    public static SliderOptionWidget<Double> ofDouble(Option<Double> option, double min, double max, double step) {
+    public static SliderOptionWidget<Double> ofDouble(GuiOption<Double> option, double min, double max, double step) {
         return new SliderOptionWidget<>(option, min, max, step, d -> d);
     }
 
-    public static SliderOptionWidget<Float> ofFloat(Option<Float> option, float min, float max, float step) {
+    public static SliderOptionWidget<Float> ofFloat(GuiOption<Float> option, float min, float max, float step) {
         return new SliderOptionWidget<>(option, min, max, step, Double::floatValue);
     }
 

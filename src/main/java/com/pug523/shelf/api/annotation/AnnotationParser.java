@@ -55,6 +55,15 @@ public class AnnotationParser {
         return builder.build();
     }
 
+    public static <T> ConfigScreen buildScreen(
+        Component title,
+        Screen parent,
+        T configInstance,
+        T defaultInstance,
+        Runnable onSave) {
+        return buildScreen(title, parent, configInstance, defaultInstance, onSave, LayoutConfig.createDefault());
+    }
+
     private static void parseRecursive(
         Object instance,
         Object defaultInstance,
@@ -180,7 +189,7 @@ public class AnnotationParser {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> OptionWidget<List<T>> createListWidgetForField(Field field, Option<List<T>> option) {
+    public static <T> OptionWidget<List<T>> createListWidgetForField(Field field, GuiOption<List<T>> option) {
         try {
             WidgetTypes.List listAnno = field.getAnnotation(WidgetTypes.List.class);
             if (listAnno == null) return null;
@@ -195,7 +204,7 @@ public class AnnotationParser {
             }
 
             final Annotation finalChildAnno = childAnno;
-            Function<Option<T>, OptionWidget<T>> itemWidgetFactory = (tempOpt) ->
+            Function<GuiOption<T>, OptionWidget<T>> itemWidgetFactory = (tempOpt) ->
                 WidgetRegistry.createWidgetForType(elementType, finalChildAnno, tempOpt);
 
             Supplier<T> defaultValueSupplier = () -> {

@@ -1,12 +1,11 @@
 package com.pug523.shelf.gui.widget.option;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 import com.pug523.shelf.gui.sound.SoundUtil;
 
 public abstract class ToggleOptionWidget extends OptionWidget<Boolean> {
-    public ToggleOptionWidget(Option<Boolean> option) {
+    public ToggleOptionWidget(GuiOption<Boolean> option) {
         super(option);
     }
 

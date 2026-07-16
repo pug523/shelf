@@ -8,7 +8,6 @@ import java.util.function.BiConsumer;
 
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.Colors;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
@@ -19,6 +18,7 @@ import com.pug523.shelf.gui.renderer.state.ColorGradientRenderState;
 
 import com.pug523.shelf.gui.widget.ActionButtonWidget;
 import com.pug523.shelf.gui.widget.SliderWidget;
+import com.pug523.shelf.gui.widget.option.GuiOption;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -39,7 +39,7 @@ public class ColorPickerOverlay extends WindowOverlay {
     public static final Component BTN_TOGGLE_HSV = ComponentCompat.literal("Mode: HSV");
     public static final Component BTN_TOGGLE_RGB = ComponentCompat.literal("Mode: RGB");
 
-    private final Option<Integer> targetOption;
+    private final GuiOption<Integer> targetOption;
     private final BiConsumer<Integer, ColorPickerOverlay> onConfirm;
     private final int originalColor;
     private LayoutConfig cachedConfig = null;
@@ -72,7 +72,7 @@ public class ColorPickerOverlay extends WindowOverlay {
 
     private boolean isDraggingSBSpace = false;
 
-    public ColorPickerOverlay(Option<Integer> targetOption, BiConsumer<Integer, ColorPickerOverlay> onConfirm) {
+    public ColorPickerOverlay(GuiOption<Integer> targetOption, BiConsumer<Integer, ColorPickerOverlay> onConfirm) {
         super(BTN_CANCEL, BTN_OK);
         this.targetOption = targetOption;
         this.onConfirm = onConfirm;
@@ -326,7 +326,7 @@ public class ColorPickerOverlay extends WindowOverlay {
             }
         } else {
             int opaqueColor = (255 << 24) | (red << 16) | (green << 8) | blue;
-            int transparentColor = (0 << 24) | (red << 16) | (green << 8) | blue;
+            int transparentColor = (red << 16) | (green << 8) | blue;
             gui.fillGradient(alphaB.x, alphaB.y, alphaB.maxX, alphaB.maxY, opaqueColor, transparentColor);
         }
     }

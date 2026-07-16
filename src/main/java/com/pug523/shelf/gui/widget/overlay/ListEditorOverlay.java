@@ -15,6 +15,7 @@ import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 import com.pug523.shelf.gui.sound.SoundUtil;
 import com.pug523.shelf.gui.widget.ActionButtonWidget;
+import com.pug523.shelf.gui.widget.option.GuiOption;
 import com.pug523.shelf.gui.widget.option.OptionWidget;
 
 import net.minecraft.client.gui.Font;
@@ -28,9 +29,9 @@ public class ListEditorOverlay<T> extends WindowOverlay {
 
     private final List<T> workingList;
     private final List<OptionWidget<T>> itemWidgets = new ArrayList<>();
-    private final List<Option<T>> itemOptions = new ArrayList<>();
+    private final List<GuiOption<T>> itemOptions = new ArrayList<>();
 
-    private final Function<Option<T>, OptionWidget<T>> itemWidgetFactory;
+    private final Function<GuiOption<T>, OptionWidget<T>> itemWidgetFactory;
     private final Supplier<T> itemDefaultValueFactory;
 
     private int selectedIndex = -1;
@@ -43,8 +44,8 @@ public class ListEditorOverlay<T> extends WindowOverlay {
     private final ActionButtonWidget moveDownButton = new ActionButtonWidget(ComponentCompat.literal("▼ Down"), (btn) -> moveSelected(1));
 
     public ListEditorOverlay(
-        Option<List<T>> targetOption,
-        Function<Option<T>, OptionWidget<T>> itemWidgetFactory,
+        GuiOption<List<T>> targetOption,
+        Function<GuiOption<T>, OptionWidget<T>> itemWidgetFactory,
         Supplier<T> itemDefaultValueFactory,
         Runnable onFinish) {
         super(BTN_CANCEL, BTN_OK);

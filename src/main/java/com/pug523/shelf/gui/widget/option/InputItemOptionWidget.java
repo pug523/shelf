@@ -1,6 +1,5 @@
 package com.pug523.shelf.gui.widget.option;
 
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.compat.BuiltinRegistriesCompat;
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
@@ -22,7 +21,7 @@ public class InputItemOptionWidget extends OptionWidget<Item> {
     private final TextInputFieldWidget<Item> textField;
     private LayoutConfig cachedLayoutConfig = null;
 
-    public InputItemOptionWidget(Option<Item> option) {
+    public InputItemOptionWidget(GuiOption<Item> option) {
         super(option);
 
         this.textField = new TextInputFieldWidget<>(

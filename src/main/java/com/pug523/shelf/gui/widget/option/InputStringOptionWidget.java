@@ -5,7 +5,6 @@ import java.util.function.Predicate;
 
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 
@@ -16,11 +15,11 @@ import net.minecraft.network.chat.Component;
 public class InputStringOptionWidget extends OptionWidget<String> {
     private final TextInputFieldWidget<String> textField;
 
-    public InputStringOptionWidget(Option<String> option, Predicate<String> filter, Predicate<String> validator, Consumer<String> responder) {
+    public InputStringOptionWidget(GuiOption<String> option, Predicate<String> filter, Predicate<String> validator, Consumer<String> responder) {
         // TODO: i18n
         this(option, filter, validator, responder, ComponentCompat.translatable("string..."));
     }
-    public InputStringOptionWidget(Option<String> option, Predicate<String> filter, Predicate<String> validator, Consumer<String> responder, Component hint) {
+    public InputStringOptionWidget(GuiOption<String> option, Predicate<String> filter, Predicate<String> validator, Consumer<String> responder, Component hint) {
         super(option);
 
         this.textField = new TextInputFieldWidget<>(

@@ -7,9 +7,10 @@ import java.util.function.Supplier;
 
 import com.pug523.shelf.compat.ComponentCompat;
 
+import com.pug523.shelf.gui.widget.option.GuiOption;
 import net.minecraft.network.chat.Component;
 
-public class Option<T> {
+public class Option<T> implements GuiOption<T> {
     private final Component name;
     private final String descriptionKey;
     private final T defaultValue;
@@ -20,7 +21,7 @@ public class Option<T> {
     private T pendingValue;
 
     public Option(Component name, String descriptionKey, T defaultValue, Supplier<T> getter, Consumer<T> setter,
-            List<Tag> tags) {
+                  List<Tag> tags) {
         this.name = name;
         this.descriptionKey = descriptionKey;
         this.defaultValue = defaultValue;

@@ -2,7 +2,6 @@ package com.pug523.shelf.gui.widget.option;
 
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
-import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 
@@ -24,7 +23,7 @@ public class CyclingOptionWidget<T> extends OptionWidget<T> {
     private int currentIdx = 0;
     private int longestWidthWithPadding = 0;
 
-    public CyclingOptionWidget(Option<T> option, List<Pair<Component, T>> labelAndValues) {
+    public CyclingOptionWidget(GuiOption<T> option, List<Pair<Component, T>> labelAndValues) {
         super(option);
         addWarningIfListIsEmpty(labelAndValues);
         this.labelAndValues = labelAndValues;
@@ -32,7 +31,7 @@ public class CyclingOptionWidget<T> extends OptionWidget<T> {
         updateCurrentIdxByOptionValue();
     }
 
-    public CyclingOptionWidget(Option<T> option) {
+    public CyclingOptionWidget(GuiOption<T> option) {
         this(option, new ArrayList<>());
     }
 
@@ -53,7 +52,7 @@ public class CyclingOptionWidget<T> extends OptionWidget<T> {
         }
     }
 
-    public static <E extends Enum<E>> CyclingOptionWidget<E> of(Option<E> option, Class<E> enumClass, Function<E, Component> labelFactory) {
+    public static <E extends Enum<E>> CyclingOptionWidget<E> of(GuiOption<E> option, Class<E> enumClass, Function<E, Component> labelFactory) {
         List<Pair<Component, E>> list = new ArrayList<>();
         for (E enumValue : enumClass.getEnumConstants()) {
             list.add(Pair.of(labelFactory.apply(enumValue), enumValue));
