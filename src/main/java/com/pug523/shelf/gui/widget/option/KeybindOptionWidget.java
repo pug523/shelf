@@ -1,4 +1,4 @@
-package com.pug523.shelf.gui.widget;
+package com.pug523.shelf.gui.widget.option;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.pug523.shelf.compat.ComponentCompat;
@@ -7,7 +7,7 @@ import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 
-import com.pug523.shelf.gui.text.TextUtil;
+import com.pug523.shelf.gui.widget.ActionButtonWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
@@ -16,7 +16,7 @@ import net.minecraft.network.chat.MutableComponent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KeybindWidget extends OptionWidget<List<InputConstants.Key>> {
+public class KeybindOptionWidget extends OptionWidget<List<InputConstants.Key>> {
     private static final Component COMPONENT_UNBOUND = ComponentCompat.literal("Unbound").withStyle(ChatFormatting.GRAY);
     private static final Component COMPONENT_CONCAT = ComponentCompat.literal(" + ").withStyle(ChatFormatting.GRAY);
     private static final Component COMPONENT_RECORDING_PREFIX = ComponentCompat.literal("> ").withStyle(ChatFormatting.YELLOW);
@@ -25,7 +25,7 @@ public class KeybindWidget extends OptionWidget<List<InputConstants.Key>> {
     private final ActionButtonWidget buttonDelegate;
     private boolean recording = false;
 
-    public KeybindWidget(Option<List<InputConstants.Key>> option) {
+    public KeybindOptionWidget(Option<List<InputConstants.Key>> option) {
         super(option);
         this.buttonDelegate = new ActionButtonWidget(COMPONENT_UNBOUND, btn -> this.toggleRecordingStatus());
     }
@@ -47,7 +47,7 @@ public class KeybindWidget extends OptionWidget<List<InputConstants.Key>> {
                 label.append(COMPONENT_RECORDING_PREFIX);
             }
             boolean first = true;
-            for (InputConstants.Key key : option.getPendingValue()) {
+            for (InputConstants.Key key : getPendingValue()) {
                 if (!first) {
                     label.append(COMPONENT_CONCAT);
                 } else {
@@ -63,7 +63,7 @@ public class KeybindWidget extends OptionWidget<List<InputConstants.Key>> {
     }
 
     private boolean isUnbound() {
-        return option.getPendingValue().isEmpty();
+        return getPendingValue().isEmpty();
     }
 
     @Override
@@ -71,7 +71,7 @@ public class KeybindWidget extends OptionWidget<List<InputConstants.Key>> {
         LayoutConfig cfg = layout.getConfig();
 
         updateLabel();
-        int buttonWidthWithPadding = Math.min(cfg.keybindButtonMaxWidth, TextUtil.width(font, buttonDelegate.getLabel()) + cfg.keybindButtonWidthPadding);
+        int buttonWidthWithPadding = Math.min(cfg.keybindButtonMaxWidth, ComponentCompat.width(font, buttonDelegate.getLabel()) + cfg.keybindButtonWidthPadding);
 
         int btnX = x + width - layout.optionWidgetRightMargin - buttonWidthWithPadding;
         int btnY = y + (height - cfg.keybindButtonHeight) / 2;
@@ -98,7 +98,7 @@ public class KeybindWidget extends OptionWidget<List<InputConstants.Key>> {
     private void endRecording() {
         if (recording) {
             recording = false;
-            option.setPendingValue(option.getPendingValue());
+            setPendingValue(getPendingValue());
         }
     }
 
@@ -116,15 +116,15 @@ public class KeybindWidget extends OptionWidget<List<InputConstants.Key>> {
     }
 
     private void addOneKey(InputConstants.Key key) {
-        List<InputConstants.Key> keys = option.getPendingValue();
+        List<InputConstants.Key> keys = getPendingValue();
         if (!keys.contains(key)) {
             keys.add(key);
-            option.setPendingValue(keys);
+            setPendingValue(keys);
         }
     }
 
     private void clearBind() {
-        option.setPendingValue(new ArrayList<>());
+        setPendingValue(new ArrayList<>());
     }
 
     private static InputConstants.Key getKey(int keycode, int scancode) {

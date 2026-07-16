@@ -9,6 +9,9 @@ public interface ClickableWidget {
     void render(Font font, GuiCompat gui, LayoutEngine layout, int x, int y, int width, int height, int mouseX,
                 int mouseY);
 
+    default void rebuildWidget(LayoutEngine layout) {
+    }
+
     default boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers, LayoutEngine layout) {
         return false;
     }
@@ -18,10 +21,12 @@ public interface ClickableWidget {
         return false;
     }
 
-    default boolean mouseReleased(double mouseX, double mouseY, int button, LayoutEngine layout) {
-        return false;
+    default void mouseReleased(double mouseX, double mouseY, int button, LayoutEngine layout) {
     }
 
+    default boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY, LayoutEngine layout) {
+        return false;
+    }
     default boolean keyPressed(int keycode, int scancode, int modifiers, LayoutEngine layout) {
         return false;
     }

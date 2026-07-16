@@ -1,19 +1,18 @@
-package com.pug523.shelf.gui.widget;
+package com.pug523.shelf.gui.widget.option;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.pug523.shelf.compat.GuiCompat;
 import com.pug523.shelf.config.Option;
-import com.pug523.shelf.gui.input.InputUtil;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 import com.pug523.shelf.gui.renderer.RenderUtil;
-import com.pug523.shelf.gui.sound.SoundUtil;
 
 import net.minecraft.client.gui.Font;
 
-public class ToggleBoxWidget extends OptionWidget<Boolean> {
+public class ToggleBoxOptionWidget extends ToggleOptionWidget {
     private int cachedX, cachedY, cachedWidth, cachedHeight;
 
-    public ToggleBoxWidget(Option<Boolean> option) {
+    public ToggleBoxOptionWidget(Option<Boolean> option) {
         super(option);
     }
 
@@ -28,30 +27,25 @@ public class ToggleBoxWidget extends OptionWidget<Boolean> {
         float switchX = getSwitchX(layout);
         float switchY = getSwitchY(layout);
 
-        boolean val = option.getPendingValue();
+        boolean pendingValue = getPendingValue();
         boolean isHovered = isHovered(mouseX, mouseY, layout);
 
         int color = isHovered ? cfg.colorToggleBoxHover : cfg.colorToggleBox;
         RenderUtil.renderOutline(gui, (int) switchX, (int) switchY, cfg.boxToggleWidth, cfg.boxToggleHeight, cfg.boxToggleOutlineThickness, color);
-        if (val) {
+        if (pendingValue) {
             RenderUtil.renderInner(gui, (int) switchX, (int) switchY, cfg.boxToggleWidth, cfg.boxToggleHeight, cfg.boxToggleOutlineThickness + cfg.boxToggleInnerPadding, color);
         }
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers, LayoutEngine layout) {
-        if (button == InputUtil.LEFT_MOUSE_BUTTON) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT) {
             if (isHovered(mouseX, mouseY, layout)) {
                 toggle();
-                SoundUtil.clickSound();
                 return true;
             }
         }
         return false;
-    }
-
-    private void toggle() {
-        option.setPendingValue(!option.getPendingValue());
     }
 
     private boolean isHovered(double mouseX, double mouseY, LayoutEngine layout) {

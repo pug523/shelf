@@ -1,8 +1,8 @@
-package com.pug523.shelf.gui.widget;
+package com.pug523.shelf.gui.widget.option;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.pug523.shelf.compat.GuiCompat;
 import com.pug523.shelf.config.Option;
-import com.pug523.shelf.gui.input.InputUtil;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 import com.pug523.shelf.gui.renderer.RenderUtil;
@@ -10,11 +10,11 @@ import com.pug523.shelf.gui.sound.SoundUtil;
 
 import net.minecraft.client.gui.Font;
 
-public class ToggleCapsuleWidget extends OptionWidget<Boolean> {
+public class ToggleCapsuleOptionWidget extends ToggleOptionWidget {
     private float switchX = -1.0f;
     private float switchY = -1.0f;
 
-    public ToggleCapsuleWidget(Option<Boolean> option) {
+    public ToggleCapsuleOptionWidget(Option<Boolean> option) {
         super(option);
     }
 
@@ -25,11 +25,11 @@ public class ToggleCapsuleWidget extends OptionWidget<Boolean> {
         switchX = calcSwitchX(layout, x, width);
         switchY = calcSwitchY(layout, y, height);
 
-        boolean val = option.getPendingValue();
+        boolean pendingValue = getPendingValue();
         boolean isHovered = isHovered(mouseX, mouseY, layout);
 
         int bgBoxColor;
-        if (val) {
+        if (pendingValue) {
             bgBoxColor = isHovered ? cfg.colorToggleBgOnHover : cfg.colorToggleBgOn;
         } else {
             bgBoxColor = isHovered ? cfg.colorToggleBgOffHover : cfg.colorToggleBgOff;
@@ -41,10 +41,10 @@ public class ToggleCapsuleWidget extends OptionWidget<Boolean> {
             gui.fill((int) switchX, (int) switchY, (int) (switchX + cfg.capsuleToggleWidth), (int) (switchY + cfg.capsuleToggleHeight), bgBoxColor);
         }
 
-        float knobSize = cfg.capsuleToggleHeight * cfg.capsuleToggleKnobSizeFactor;
+        float knobSize = cfg.capsuleToggleHeight * (float) cfg.capsuleToggleKnobSizeFactor;
         float knobY = switchY + (cfg.capsuleToggleHeight - knobSize) / 2.0f;
         float paddingX = (cfg.capsuleToggleHeight - knobSize) / 2.0f;
-        float knobX = val ? (switchX + cfg.capsuleToggleWidth - knobSize - paddingX) : (switchX + paddingX);
+        float knobX = pendingValue ? (switchX + cfg.capsuleToggleWidth - knobSize - paddingX) : (switchX + paddingX);
 
         if (cfg.roundedCapsule) {
             float radius = knobSize / 2.0f;
@@ -60,18 +60,13 @@ public class ToggleCapsuleWidget extends OptionWidget<Boolean> {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers, LayoutEngine layout) {
-        if (button == InputUtil.LEFT_MOUSE_BUTTON) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT) {
             if (isHovered(mouseX, mouseY, layout)) {
                 toggle();
-                SoundUtil.clickSound();
                 return true;
             }
         }
         return false;
-    }
-
-    private void toggle() {
-        option.setPendingValue(!option.getPendingValue());
     }
 
     private boolean isHovered(double mouseX, double mouseY, LayoutEngine layout) {

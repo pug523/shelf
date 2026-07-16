@@ -1,4 +1,4 @@
-package com.pug523.shelf.gui.widget;
+package com.pug523.shelf.gui.widget.option;
 
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
@@ -6,7 +6,7 @@ import com.pug523.shelf.config.Option;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 
-import com.pug523.shelf.gui.text.TextUtil;
+import com.pug523.shelf.gui.widget.ActionButtonWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
@@ -17,14 +17,14 @@ import java.util.function.Function;
 
 import com.mojang.datafixers.util.Pair;
 
-public class CyclingWidget<T> extends OptionWidget<T> {
+public class CyclingOptionWidget<T> extends OptionWidget<T> {
     private final List<Pair<Component, T>> labelAndValues;
     private final ActionButtonWidget buttonDelegate;
 
     private int currentIdx = 0;
     private int longestWidthWithPadding = 0;
 
-    public CyclingWidget(Option<T> option, List<Pair<Component, T>> labelAndValues) {
+    public CyclingOptionWidget(Option<T> option, List<Pair<Component, T>> labelAndValues) {
         super(option);
         addWarningIfListIsEmpty(labelAndValues);
         this.labelAndValues = labelAndValues;
@@ -32,7 +32,7 @@ public class CyclingWidget<T> extends OptionWidget<T> {
         updateCurrentIdxByOptionValue();
     }
 
-    public CyclingWidget(Option<T> option) {
+    public CyclingOptionWidget(Option<T> option) {
         this(option, new ArrayList<>());
     }
 
@@ -43,7 +43,7 @@ public class CyclingWidget<T> extends OptionWidget<T> {
     }
 
     private void updateCurrentIdxByOptionValue() {
-        T currentValue = option.getPendingValue();
+        T currentValue = getPendingValue();
         for (int i = 0; i < labelAndValues.size(); i++) {
             Pair<Component, T> pair = labelAndValues.get(i);
             if (pair.getSecond() == currentValue) {
@@ -53,12 +53,12 @@ public class CyclingWidget<T> extends OptionWidget<T> {
         }
     }
 
-    public static <E extends Enum<E>> CyclingWidget<E> of(Option<E> option, Class<E> enumClass, Function<E, Component> labelFactory) {
+    public static <E extends Enum<E>> CyclingOptionWidget<E> of(Option<E> option, Class<E> enumClass, Function<E, Component> labelFactory) {
         List<Pair<Component, E>> list = new ArrayList<>();
         for (E enumValue : enumClass.getEnumConstants()) {
             list.add(Pair.of(labelFactory.apply(enumValue), enumValue));
         }
-        return new CyclingWidget<>(option, list);
+        return new CyclingOptionWidget<>(option, list);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class CyclingWidget<T> extends OptionWidget<T> {
 
         if (longestWidthWithPadding == 0) {
             for (Pair<Component, T> pair : labelAndValues) {
-                longestWidthWithPadding = TextUtil.width(font, pair.getFirst()) + cfg.cyclingButtonWidthPadding;
+                longestWidthWithPadding = ComponentCompat.width(font, pair.getFirst()) + cfg.cyclingButtonWidthPadding;
             }
         }
         int btnX = x + width - layout.optionWidgetRightMargin - this.longestWidthWithPadding;
@@ -88,6 +88,6 @@ public class CyclingWidget<T> extends OptionWidget<T> {
         currentIdx = idx;
         Pair<Component, T> labelAndValue = labelAndValues.get(currentIdx);
         buttonDelegate.setLabel(labelAndValue.getFirst());
-        option.setPendingValue(labelAndValue.getSecond());
+        setPendingValue(labelAndValue.getSecond());
     }
 }
