@@ -1,5 +1,6 @@
 net.minecraft.client.gui.GuiGraphicsExtractor text() net.minecraft.client.gui.GuiGraphics drawString()
 net.minecraft.client.gui.GuiGraphicsExtractor textWithWordWrap() net.minecraft.client.gui.GuiGraphics drawWordWrap()
+net.minecraft.client.gui.GuiGraphicsExtractor fakeItem() net.minecraft.client.gui.GuiGraphics renderFakeItem()
 net.minecraft.client.gui.GuiGraphicsExtractor net.minecraft.client.gui.GuiGraphics
 
 net.minecraft.client.gui.screens.Screen extractRenderState() net.minecraft.client.gui.screens.Screen render()

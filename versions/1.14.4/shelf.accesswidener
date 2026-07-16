@@ -4,3 +4,4 @@ accessible field net/minecraft/client/gui/components/AbstractWidget width I
 accessible field net/minecraft/client/gui/components/AbstractWidget height I
 
 accessible method net/minecraft/client/gui/GuiComponent fillGradient (IIIIII)V
+accessible field net/minecraft/client/gui/components/EditBox highlightPos I

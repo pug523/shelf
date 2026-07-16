@@ -4,3 +4,4 @@ accessible field net/minecraft/client/gui/GuiGraphics guiRenderState Lnet/minecr
 accessible field net/minecraft/client/gui/GuiGraphics scissorStack Lnet/minecraft/client/gui/GuiGraphics$ScissorStack;
 accessible method net/minecraft/client/gui/GuiGraphics$ScissorStack peek ()Lnet/minecraft/client/gui/navigation/ScreenRectangle;
 accessible class net/minecraft/client/gui/render/GuiRenderer$MeshToDraw
+accessible field net/minecraft/client/gui/components/EditBox highlightPos I

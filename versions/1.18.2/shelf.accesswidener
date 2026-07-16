@@ -1,3 +1,4 @@
 accessWidener v1 named
 
 accessible method net/minecraft/client/gui/GuiComponent fillGradient (Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V
+accessible field net/minecraft/client/gui/components/EditBox highlightPos I
