@@ -8,6 +8,8 @@ apply plugin: 'com.replaymod.preprocess'
 final ArrayList<String> mixinFiles = ["shelf.mixins.json", "shelf.client.mixins.json"]
 
 final String commandApi = (11900 <= mcVersion) ? "fabric-command-api-v2" : "fabric-command-api-v1"
+final boolean useRenderingApi = 11500 <= mcVersion && mcVersion <= 12101
+final String renderingApi = useRenderingApi ? "fabric-rendering-v1" : commandApi
 
 repositories {
     maven {
@@ -41,6 +43,9 @@ dependencies {
 
     autoImplementation("net.fabricmc:fabric-loader:${project.loader_version}")
     autoImplementation(fabricApi.module(commandApi, project.fabric_api_version))
+    if (useRenderingApi) {
+        autoImplementation(fabricApi.module(renderingApi, project.fabric_api_version))
+    }
 
     autoCompileOnly("maven.modrinth:modmenu:${project.modmenu_version}")
 
@@ -163,13 +168,18 @@ version = fullProjectVersion
 processResources {
     from "${project.mod_id}.accesswidener"
 
+    String sdf = mcVersion >= 12102 ? "shelf:core/sdf" : "shelf:sdf"
+
     inputs.property "mod_id", project.mod_id
     inputs.property "mod_version", project.mod_version
     inputs.property "mod_name", project.mod_name
     inputs.property "loader_version", project.loader_version
     inputs.property "fabric_api_version", project.fabric_api_version
     inputs.property "minecraft_dependency", project.minecraft_dependency
+    inputs.property "mc_version", mcVersion
     inputs.property "command_api", commandApi
+    inputs.property "rendering_api", renderingApi
+    inputs.property "sdf", sdf
     filteringCharset = "UTF-8"
 
     filesMatching("fabric.mod.json") {
@@ -179,11 +189,15 @@ processResources {
                "loader_version": project.loader_version,
                "fabric_api_version": project.fabric_api_version,
                "minecraft_dependency": project.minecraft_dependency,
-               "command_api": commandApi
+               "command_api": commandApi,
+               "rendering_api": renderingApi
     }
 
     filesMatching(["**/*.vsh", "**/*.fsh"]) {
       expand "mc_version": mcVersion
+    }
+    filesMatching(["**/*.json"]) {
+      expand "sdf": sdf
     }
     mixinFiles.each { mixinConfigPath ->
         filesMatching(mixinConfigPath) {

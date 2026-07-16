@@ -41,13 +41,19 @@ public class RenderUtil {
         renderSdfGuiElement(gui, renderState);
     }
 
+    // @formatter:off
     //#if MC <= 12105
     //$$ public static void renderGuiElement(GuiCompat gui, ShelfGuiElementRenderState renderState, RenderType renderType) {
-    //$$     gui.getGraphics().drawSpecial(bufferSource -> {
-    //$$         renderState.buildVertices(bufferSource.getBuffer(renderType));
-    //$$     });
+             //#if MC >= 12102
+             //$$ gui.getGraphics().drawSpecial(bufferSource -> {
+             //$$     renderState.buildVertices(bufferSource.getBuffer(renderType));
+             //$$ });
+             //#else
+             //$$ renderState.buildVertices(gui.getGraphics().bufferSource().getBuffer(renderType));
+             //#endif
     //$$ }
     //#endif
+    // @formatter:on
 
     public static void renderSdfGuiElement(GuiCompat gui, SdfRenderState renderState) {
         //#if MC >= 12106

@@ -20,13 +20,7 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.system.MemoryStack;
 //#else
-//$$ import com.mojang.blaze3d.buffers.BufferType;
-//$$ import com.mojang.blaze3d.buffers.BufferUsage;
-//$$ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
-//$$ import com.mojang.blaze3d.vertex.VertexFormat;
-//$$ import net.minecraft.client.renderer.RenderStateShard;
-//$$ import net.minecraft.client.renderer.RenderType;
 //#endif
 
 //#if MC >= 12104
