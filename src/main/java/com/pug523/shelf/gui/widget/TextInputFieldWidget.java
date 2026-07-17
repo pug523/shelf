@@ -76,7 +76,9 @@ public class TextInputFieldWidget<T> implements ClickableWidget {
 
     public void setHint(Component hint) {
         this.hint = hint;
+        //#if MC >= 11900
         this.editBox.setHint(hint);
+        //#endif
     }
 
     public void setAlwaysUnderlined(boolean alwaysUnderlined) {
@@ -212,12 +214,33 @@ public class TextInputFieldWidget<T> implements ClickableWidget {
 
     private void updateEditBoxBound() {
         this.editBox.setX(this.x);
+        //#if MC >= 11900
         this.editBox.setY(this.y);
+        //#else
+        //$$ this.editBox.y = this.y;
+        //#endif
+
         this.editBox.setWidth(this.width);
         //#if MC >= 12002
         this.editBox.setHeight(this.height);
         //#else
         //$$ this.editBox.height = this.height;
+        //#endif
+    }
+
+    private int getX() {
+        //#if MC >= 11900
+        return this.editBox.getX();
+        //#else
+        //$$ return this.editBox.x;
+        //#endif
+    }
+
+    private int getY() {
+        //#if MC >= 11900
+        return this.editBox.getY();
+        //#else
+        //$$ return this.editBox.y;
         //#endif
     }
 
@@ -281,7 +304,7 @@ public class TextInputFieldWidget<T> implements ClickableWidget {
                 gui.text(font, this.hint, drawX, y, cfg.colorTextDisabled);
             }
         } else {
-            this.drawX = this.editBox.getX();
+            this.drawX = getX();
             if (!isFocused()) {
                 this.editBox.setCursorPosition(0);
                 this.moveCursor(0);
@@ -293,9 +316,16 @@ public class TextInputFieldWidget<T> implements ClickableWidget {
             //$$ this.editBox.render(gui.getPoseStack(), mouseX, mouseY, 1.0f);
             //#endif
 
+            //#if MC <= 11802
+            //$$ if (shouldRenderHint()) {
+            //$$     underline = true;
+            //$$     gui.text(font, this.hint, drawX, y, cfg.colorTextDisabled);
+            //$$ }
+            //#endif
+
             if (this.isFocused()) {
                 underline = true;
-                gui.fill(this.editBox.getX(), lineY, this.editBox.getX() + this.editBox.getWidth(), lineY + 1, textColor);
+                gui.fill(this.drawX, lineY, this.drawX + this.editBox.getWidth(), lineY + 1, textColor);
             }
 
             if (shouldRenderHint()) {

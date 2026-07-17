@@ -3,7 +3,6 @@ package com.pug523.shelf.gui.renderer;
 import com.pug523.shelf.compat.GuiCompat;
 import com.pug523.shelf.gui.renderer.state.SdfRenderState;
 import com.pug523.shelf.gui.renderer.state.ShelfGuiElementRenderState;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
 
 //#if MC <= 12105
 //$$ import com.pug523.shelf.gui.renderer.shader.SdfRenderTypeCache;
@@ -43,26 +42,32 @@ public class RenderUtil {
                                           int color) {
         SdfRenderState renderState = new SdfRenderState(
             gui, x, y, x + width, y + height, width, height, radius,
-            color, gui.peekScissorStack()
-        );
+            color);
+        //#if MC >= 11900
+        renderState.setRectangles(gui, gui.peekScissorStack());
+        //#endif
         renderSdfGuiElement(gui, renderState);
     }
 
     // @formatter:off
     //#if MC <= 12105
     //$$ private static void renderGuiElement(GuiCompat gui, ShelfGuiElementRenderState renderState, RenderType renderType) {
-             //#if MC >= 12102
-             //$$ gui.getGraphics().drawSpecial(bufferSource -> {
-             //$$     renderState.buildVertices(bufferSource.getBuffer(renderType));
-             //$$ });
-             //#elseif MC >= 12000
-             //$$ renderState.buildVertices(gui.getGraphics().bufferSource().getBuffer(renderType));
-             //#else
-             //$$ BufferBuilder builder = Tesselator.getInstance().getBuilder();
-             //$$ builder.begin(renderType.mode(), renderType.format());
-             //$$ renderState.buildVertices(builder);
-             //$$ BufferUploader.drawWithShader(builder.end());
-             //#endif
+        //#if MC >= 12102
+        //$$ gui.getGraphics().drawSpecial(bufferSource -> {
+        //$$     renderState.buildVertices(bufferSource.getBuffer(renderType));
+        //$$ });
+        //#elseif MC >= 12000
+        //$$ renderState.buildVertices(gui.getGraphics().bufferSource().getBuffer(renderType));
+        //#else
+        //$$ BufferBuilder builder = Tesselator.getInstance().getBuilder();
+        //$$ builder.begin(renderType.mode(), renderType.format());
+        //$$ renderState.buildVertices(builder);
+            //#if MC >= 11900
+            //$$ BufferUploader.drawWithShader(builder.end());
+            //#else
+            //$$ Tesselator.getInstance().end();
+            //#endif
+        //#endif
     //$$ }
     //#endif
     // @formatter:on

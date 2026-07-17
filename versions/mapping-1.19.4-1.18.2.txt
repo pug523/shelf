@@ -1,1 +1,4 @@
 net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback
+
+org.joml.Matrix4f com.mojang.math.Matrix4f
+org.joml.Vector4f com.mojang.math.Vector4f

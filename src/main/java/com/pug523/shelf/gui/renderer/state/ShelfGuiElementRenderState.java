@@ -1,7 +1,6 @@
 package com.pug523.shelf.gui.renderer.state;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -12,6 +11,10 @@ import net.minecraft.client.gui.render.TextureSetup;
 
 //#if MC >= 12104
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+//#endif
+
+//#if MC >= 11900
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 //#endif
 
 public interface ShelfGuiElementRenderState
@@ -45,6 +48,7 @@ public interface ShelfGuiElementRenderState
     }
     //#endif
 
+    //#if MC >= 11900
     //#if MC >= 12106
     @Override
     //#endif
@@ -54,4 +58,5 @@ public interface ShelfGuiElementRenderState
     @Override
     //#endif
     @Nullable ScreenRectangle bounds();
+    //#endif
 }

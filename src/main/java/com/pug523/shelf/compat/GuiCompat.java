@@ -1,7 +1,6 @@
 package com.pug523.shelf.compat;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
 
 //#if MC >= 12111
@@ -40,6 +39,10 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.joml.Matrix3x2fStack;
 //#elseif MC >= 11600
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
+//#endif
+
+//#if MC >= 11900
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 //#endif
 
 public class GuiCompat {
@@ -228,6 +231,7 @@ public class GuiCompat {
     //$$ }
     //#endif
 
+    //#if MC >= 11900
     public ScreenRectangle peekScissorStack() {
         //#if MC >= 12106
         return graphics.scissorStack.peek();
@@ -237,6 +241,7 @@ public class GuiCompat {
         //$$ return GuiComponent.SCISSOR_STACK.stack.peekLast();
         //#endif
     }
+    //#endif
 
     //#if MC >= 12111
     public void requestCursor(CursorType type) {
