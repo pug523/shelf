@@ -45,9 +45,8 @@ public class ColorGradientRenderState implements ShelfGuiElementRenderState {
         this.x1y0Color = x1y0Color;
         this.x1y1Color = x1y1Color;
 
-        GuiGraphicsExtractor graphics = gui.getGraphics();
-        this.scissorArea = RenderUtil.peekScissorStack(gui);
-        this.pose = Matrix3x2fCompat.copy(graphics.pose());
+        this.scissorArea = gui.peekScissorStack();
+        this.pose = Matrix3x2fCompat.copy(gui.getPoseStack());
         this.bounds = RenderStateUtil.bounds(this.x0, this.y0, this.x1, this.y1, this.pose, this.scissorArea);
     }
 

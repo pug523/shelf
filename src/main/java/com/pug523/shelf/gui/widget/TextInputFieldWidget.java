@@ -287,7 +287,11 @@ public class TextInputFieldWidget<T> implements ClickableWidget {
                 this.moveCursor(0);
             }
             this.editBox.setTextColor(textColor);
+            //#if MC >= 12000
             this.editBox.extractWidgetRenderState(gui.getGraphics(), mouseX, mouseY, 1.0f);
+            //#else
+            //$$ this.editBox.render(gui.getPoseStack(), mouseX, mouseY, 1.0f);
+            //#endif
 
             if (this.isFocused()) {
                 underline = true;

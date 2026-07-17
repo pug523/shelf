@@ -7,7 +7,6 @@ import com.pug523.shelf.compat.Matrix3x2fCompat;
 import com.pug523.shelf.gui.renderer.RenderPipelines;
 import com.pug523.shelf.gui.renderer.shader.UniformApplier;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import org.joml.Matrix3x2fc;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -49,7 +48,7 @@ public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplie
     public SdfRenderState(GuiCompat gui, float x0, float y0,
                           float x1, float y1, float width, float height, float radius, int color,
                           @Nullable ScreenRectangle scissorArea, @Nullable ScreenRectangle bounds) {
-        this.pose = Matrix3x2fCompat.copy(gui.getGraphics().pose());
+        this.pose = Matrix3x2fCompat.copy(gui.getPoseStack());
         this.x0 = x0;
         this.y0 = y0;
         this.x1 = x1;
@@ -77,7 +76,7 @@ public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplie
                           @Nullable ScreenRectangle scissorArea) {
 
         this(gui, x0, y0, x1, y1, width, height, radius, color, scissorArea,
-            RenderStateUtil.bounds((int) x0, (int) y0, (int) x1, (int) y1, new Matrix3x2fCompat(gui.getGraphics().pose()), scissorArea));
+            RenderStateUtil.bounds((int) x0, (int) y0, (int) x1, (int) y1, Matrix3x2fCompat.copy(gui.getPoseStack()), scissorArea));
     }
 
     //#if MC >= 12104

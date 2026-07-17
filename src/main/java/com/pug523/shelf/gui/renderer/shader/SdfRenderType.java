@@ -13,7 +13,9 @@ package com.pug523.shelf.gui.renderer.shader;
 //$$ import com.mojang.blaze3d.vertex.MeshData;
 //#else
 //$$ import com.mojang.blaze3d.vertex.BufferBuilder;
+//#if MC >= 12000
 //$$ import com.mojang.blaze3d.vertex.VertexSorting;
+//#endif
 //#endif
 //#endif
 
@@ -51,10 +53,15 @@ public class SdfRenderType {
     //$$ public void draw(MeshData meshData) {
     //$$     this.parentToken.draw(meshData);
     //$$ }
-    //#else
+    //#elseif MC >= 12000
     //$$ @Override
     //$$ public void end(BufferBuilder bufferBuilder, VertexSorting vertexSorting) {
     //$$     this.parentToken.end(bufferBuilder, vertexSorting);
+    //$$ }
+    //#else
+    //$$ @Override
+    //$$ public void end(BufferBuilder bufferBuilder, int i, int j, int k) {
+    //$$     this.parentToken.end(bufferBuilder, i, j, k);
     //$$ }
     //#endif
 
@@ -72,7 +79,8 @@ public class SdfRenderType {
     //$$ @Override
     //$$ public boolean equals(Object obj) {
     //$$     if (this == obj) return true;
-    //$$     if (!(obj instanceof SdfRenderType other)) return false;
+    //$$     if (!(obj instanceof SdfRenderType)) return false;
+    //$$     SdfRenderType other = (SdfRenderType) obj;
     //$$     return this.sdfState.equals(other.sdfState);
     //$$ }
 

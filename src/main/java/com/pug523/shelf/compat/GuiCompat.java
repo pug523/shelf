@@ -1,6 +1,7 @@
 package com.pug523.shelf.compat;
 
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
 
 //#if MC >= 12111
@@ -27,15 +28,18 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 //#else
 //$$ import com.mojang.blaze3d.platform.GlStateManager;
 //$$ import net.minecraft.client.Minecraft;
+//$$ import net.minecraft.client.gui.GuiComponent;
 // @formatter:off
-    //#if MC >= 11600
-    //$$ import com.mojang.blaze3d.vertex.PoseStack;
-    //#endif
     //#if MC >= 11500
     //$$ import net.minecraft.client.renderer.MultiBufferSource;
     //#endif
 // @formatter:on
-//$$ import net.minecraft.client.gui.GuiComponent;
+//#endif
+
+//#if MC >= 12005
+import org.joml.Matrix3x2fStack;
+//#elseif MC >= 11600
+//$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 
 public class GuiCompat {
@@ -54,11 +58,25 @@ public class GuiCompat {
         return this.graphics;
     }
 
+    //#if MC >= 12005
+    public Matrix3x2fStack getPoseStack() {
+        return this.graphics.pose();
+    }
+    //#else
+    //$$ public PoseStack getPoseStack() {
+    //$$     return this.graphics.pose();
+    //$$ }
+    //#endif
+
     //#elseif MC >= 11600
     //$$ public GuiCompat(PoseStack poseStack) {
     //$$     this.poseStack = poseStack;
     //$$ }
+    //#if MC >= 12005
+    //$$ public  getPoseStack() { return this.poseStack; }
+    //#else
     //$$ public PoseStack getPoseStack() { return this.poseStack; }
+    //#endif
     //#else
     //$$ public GuiCompat() {
     //$$ }
@@ -209,6 +227,16 @@ public class GuiCompat {
     // @formatter:on
     //$$ }
     //#endif
+
+    public ScreenRectangle peekScissorStack() {
+        //#if MC >= 12106
+        return graphics.scissorStack.peek();
+        //#elseif MC >= 12000
+        //$$ return graphics.scissorStack.stack.peekLast();
+        //#else
+        //$$ return GuiComponent.SCISSOR_STACK.stack.peekLast();
+        //#endif
+    }
 
     //#if MC >= 12111
     public void requestCursor(CursorType type) {

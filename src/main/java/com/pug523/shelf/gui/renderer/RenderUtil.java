@@ -6,9 +6,16 @@ import com.pug523.shelf.gui.renderer.state.ShelfGuiElementRenderState;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 
 //#if MC <= 12105
-//$$ import com.pug523.shelf.gui.renderer.state.ShelfGuiElementRenderState;
 //$$ import com.pug523.shelf.gui.renderer.shader.SdfRenderTypeCache;
 //$$ import net.minecraft.client.renderer.RenderType;
+//#endif
+
+//#if MC <= 11904
+//$$ import com.mojang.blaze3d.systems.RenderSystem;
+//$$ import com.mojang.blaze3d.vertex.BufferBuilder;
+//$$ import com.mojang.blaze3d.vertex.BufferUploader;
+//$$ import com.mojang.blaze3d.vertex.Tesselator;
+//$$ import net.minecraft.client.renderer.GameRenderer;
 //#endif
 
 public class RenderUtil {
@@ -36,20 +43,25 @@ public class RenderUtil {
                                           int color) {
         SdfRenderState renderState = new SdfRenderState(
             gui, x, y, x + width, y + height, width, height, radius,
-            color, peekScissorStack(gui)
+            color, gui.peekScissorStack()
         );
         renderSdfGuiElement(gui, renderState);
     }
 
     // @formatter:off
     //#if MC <= 12105
-    //$$ public static void renderGuiElement(GuiCompat gui, ShelfGuiElementRenderState renderState, RenderType renderType) {
+    //$$ private static void renderGuiElement(GuiCompat gui, ShelfGuiElementRenderState renderState, RenderType renderType) {
              //#if MC >= 12102
              //$$ gui.getGraphics().drawSpecial(bufferSource -> {
              //$$     renderState.buildVertices(bufferSource.getBuffer(renderType));
              //$$ });
-             //#else
+             //#elseif MC >= 12000
              //$$ renderState.buildVertices(gui.getGraphics().bufferSource().getBuffer(renderType));
+             //#else
+             //$$ BufferBuilder builder = Tesselator.getInstance().getBuilder();
+             //$$ builder.begin(renderType.mode(), renderType.format());
+             //$$ renderState.buildVertices(builder);
+             //$$ BufferUploader.drawWithShader(builder.end());
              //#endif
     //$$ }
     //#endif
@@ -58,7 +70,10 @@ public class RenderUtil {
     public static void renderSdfGuiElement(GuiCompat gui, SdfRenderState renderState) {
         //#if MC >= 12106
         gui.getGraphics().guiRenderState.addGuiElement(renderState);
+        //#elseif MC >= 12000
+        //$$ renderGuiElement(gui, renderState, SdfRenderTypeCache.get(RenderTypes.SDF_RENDER_TYPE, renderState));
         //#else
+        //$$ RenderSystem.setShader(RenderTypes::compiledSdfShader);
         //$$ renderGuiElement(gui, renderState, SdfRenderTypeCache.get(RenderTypes.SDF_RENDER_TYPE, renderState));
         //#endif
     }
@@ -66,8 +81,11 @@ public class RenderUtil {
     public static void renderVanillaGuiElement(GuiCompat gui, ShelfGuiElementRenderState renderState) {
         //#if MC >= 12106
         gui.getGraphics().guiRenderState.addGuiElement(renderState);
-        //#else
+        //#elseif MC >= 12000
         //$$ renderGuiElement(gui, renderState, RenderType.gui());
+        //#else
+        //$$ RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        //$$ renderGuiElement(gui, renderState, RenderType.lightning());
         //#endif
     }
 
@@ -92,13 +110,5 @@ public class RenderUtil {
         gui.fill(startX, startY, startX + 1, startY + 5, color);
         gui.fill(startX + 1, startY + 1, startX + 2, startY + 4, color);
         gui.fill(startX + 2, startY + 2, startX + 3, startY + 3, color);
-    }
-
-    public static ScreenRectangle peekScissorStack(GuiCompat gui) {
-        //#if MC >= 12106
-        return gui.getGraphics().scissorStack.peek();
-        //#else
-        //$$ return gui.getGraphics().scissorStack.stack.peekLast();
-        //#endif
     }
 }
