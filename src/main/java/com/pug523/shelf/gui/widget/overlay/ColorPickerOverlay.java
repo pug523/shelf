@@ -15,7 +15,6 @@ import com.pug523.shelf.gui.layout.LayoutEngine;
 import com.pug523.shelf.gui.layout.Bounds;
 import com.pug523.shelf.gui.renderer.RenderUtil;
 import com.pug523.shelf.gui.sound.SoundUtil;
-import com.pug523.shelf.gui.renderer.state.ColorGradientRenderState;
 
 import com.pug523.shelf.gui.widget.ActionButtonWidget;
 import com.pug523.shelf.gui.widget.SliderWidget;
@@ -84,38 +83,40 @@ public class ColorPickerOverlay extends WindowOverlay {
         initColorFromRgb(originalColor);
 
         this.hueSlider = new SliderWidget(0.0, 1.0, 0.0, this.hue, val -> {
-            this.hue = val.floatValue();
+            this.hue = 1.0f - val.floatValue();
             updateFromHsb();
             updatePendingValue();
-        }).setOrientation(SliderWidget.Orientation.VERTICAL);
+        });
 
         this.alphaSliderVertical = new SliderWidget(0.0, 1.0, 0.0, this.alpha, val -> {
             this.alpha = val.floatValue();
             updatePendingValue();
-        }).setOrientation(SliderWidget.Orientation.VERTICAL);
+        });
 
         this.alphaSliderHorizontal = new SliderWidget(0.0, 1.0, 0.0, this.alpha, val -> {
             this.alpha = val.floatValue();
             updatePendingValue();
-        }).setOrientation(SliderWidget.Orientation.HORIZONTAL);
+        });
 
         this.rSlider = new SliderWidget(0.0, 255.0, 1.0, this.red, val -> {
             this.red = val.intValue();
             updateFromRgb();
             updatePendingValue();
-        }).setOrientation(SliderWidget.Orientation.HORIZONTAL);
+        });
 
         this.gSlider = new SliderWidget(0.0, 255.0, 1.0, this.green, val -> {
             this.green = val.intValue();
             updateFromRgb();
             updatePendingValue();
-        }).setOrientation(SliderWidget.Orientation.HORIZONTAL);
+        });
 
         this.bSlider = new SliderWidget(0.0, 255.0, 1.0, this.blue, val -> {
             this.blue = val.intValue();
             updateFromRgb();
             updatePendingValue();
-        }).setOrientation(SliderWidget.Orientation.HORIZONTAL);
+        });
+
+        syncSliders();
     }
 
     private void initPresets() {
@@ -141,7 +142,7 @@ public class ColorPickerOverlay extends WindowOverlay {
     }
 
     private void syncSliders() {
-        if (this.hueSlider != null) this.hueSlider.setValue(this.hue);
+        if (this.hueSlider != null) this.hueSlider.setValue(1.0f - this.hue);
         if (this.alphaSliderVertical != null) this.alphaSliderVertical.setValue(this.alpha);
         if (this.alphaSliderHorizontal != null) this.alphaSliderHorizontal.setValue(this.alpha);
         if (this.rSlider != null) this.rSlider.setValue(this.red);
@@ -188,18 +189,17 @@ public class ColorPickerOverlay extends WindowOverlay {
 
         if (currentMode == PickerMode.HSV) {
             renderSbSpace(gui, layout.pickerSbSpace, cfg);
-
-            renderHueBarBackground(gui, layout.pickerHueSlider, cfg);
+            RenderUtil.renderRoundedRainbowGradientVertical(gui, layout.pickerHueSlider.x, layout.pickerHueSlider.y, layout.pickerHueSlider.width, layout.pickerHueSlider.height);
             this.hueSlider.render(font, gui, layout, layout.pickerHueSlider.x, layout.pickerHueSlider.y, layout.pickerHueSlider.width, layout.pickerHueSlider.height, mouseX, mouseY);
 
-            renderAlphaBarBackground(gui, layout.pickerAlphaSliderVertical, cfg, false);
+            renderAlphaBarBackground(gui, layout.pickerAlphaSliderVertical, false);
             this.alphaSliderVertical.render(font, gui, layout, layout.pickerAlphaSliderVertical.x, layout.pickerAlphaSliderVertical.y, layout.pickerAlphaSliderVertical.width, layout.pickerAlphaSliderVertical.height, mouseX, mouseY);
         } else {
             renderRgbSliders(font, gui, layout, cfg, mouseX, mouseY);
 
             Bounds aB = layout.pickerAlphaSliderHorizontal;
             gui.text(font, ComponentCompat.literal("Alpha"), aB.x, aB.y - font.lineHeight - 1, COLOR_TEXT_LABEL, false);
-            renderAlphaBarBackground(gui, aB, cfg, true);
+            renderAlphaBarBackground(gui, aB, true);
             this.alphaSliderHorizontal.render(font, gui, layout, aB.x, aB.y, aB.width, aB.height, mouseX, mouseY);
         }
 
@@ -224,114 +224,107 @@ public class ColorPickerOverlay extends WindowOverlay {
             .setBarThickness(cfg.pickerSliderWidth)
             .setKnobSize(cfg.pickerSliderIndicatorSize)
             .setRounded(true)
-            .setColors(0x00000000, 0x00000000, Colors.WHITE);
+            .setOrientation(SliderWidget.Orientation.VERTICAL)
+            .setGradientColors(Colors.INVISIBLE, Colors.INVISIBLE, Colors.INVISIBLE, Colors.INVISIBLE, Colors.WHITE);
 
         this.alphaSliderVertical
             .setBarThickness(cfg.pickerSliderWidth)
             .setKnobSize(cfg.pickerSliderIndicatorSize)
             .setRounded(true)
-            .setColors(0x00000000, 0x00000000, Colors.WHITE);
+            .setOrientation(SliderWidget.Orientation.VERTICAL)
+            .setGradientColors(Colors.INVISIBLE, Colors.INVISIBLE, Colors.INVISIBLE, Colors.INVISIBLE, Colors.WHITE);
 
         this.alphaSliderHorizontal
             .setBarThickness(cfg.pickerSliderWidth)
             .setKnobSize(cfg.pickerSliderIndicatorSize)
             .setRounded(true)
-            .setColors(0x00000000, 0x00000000, Colors.WHITE);
+            .setOrientation(SliderWidget.Orientation.HORIZONTAL)
+            .setGradientColors(Colors.INVISIBLE, Colors.INVISIBLE, Colors.INVISIBLE, Colors.INVISIBLE, Colors.WHITE);
 
         this.rSlider
             .setBarThickness(cfg.pickerSliderWidth)
             .setKnobSize(cfg.pickerSliderIndicatorSize)
             .setRounded(true)
-            .setColors(0x00000000, 0x00000000, Colors.WHITE);
+            .setOrientation(SliderWidget.Orientation.HORIZONTAL)
+            .setGradientColors(Colors.BLACK, Colors.RED, Colors.INVISIBLE, Colors.INVISIBLE, Colors.WHITE);
 
         this.gSlider
             .setBarThickness(cfg.pickerSliderWidth)
             .setKnobSize(cfg.pickerSliderIndicatorSize)
             .setRounded(true)
-            .setColors(0x00000000, 0x00000000, Colors.WHITE);
+            .setOrientation(SliderWidget.Orientation.HORIZONTAL)
+            .setGradientColors(Colors.BLACK, Colors.GREEN, Colors.INVISIBLE, Colors.INVISIBLE, Colors.WHITE);
 
         this.bSlider
             .setBarThickness(cfg.pickerSliderWidth)
             .setKnobSize(cfg.pickerSliderIndicatorSize)
             .setRounded(true)
-            .setColors(0x00000000, 0x00000000, Colors.WHITE);
+            .setOrientation(SliderWidget.Orientation.HORIZONTAL)
+            .setGradientColors(Colors.BLACK, Colors.BLUE, Colors.INVISIBLE, Colors.INVISIBLE, Colors.WHITE);
     }
 
     private void renderSbSpace(GuiCompat gui, Bounds sb, LayoutConfig cfg) {
         int baseHueRgb = Color.HSBtoRGB(hue, 1.0f, 1.0f) | 0xFF000000;
-        ColorGradientRenderState sbSpaceState = new ColorGradientRenderState(gui, sb.x, sb.maxX, sb.y, sb.maxY,
-            Colors.WHITE, Colors.BLACK, baseHueRgb, Colors.BLACK);
-        //#if MC >= 11900
-        sbSpaceState.setRectangles(gui, gui.peekScissorStack());
-        //#endif
-        RenderUtil.renderVanillaGuiElement(gui, sbSpaceState);
+        RenderUtil.renderRectHorizontal(gui, sb.x, sb.y, sb.width, sb.height, Colors.WHITE, baseHueRgb);
+        RenderUtil.renderRectVertical(gui, sb.x, sb.y, sb.width, sb.height, Colors.INVISIBLE, Colors.BLACK);
 
         int hX = sb.x + (int) (this.saturation * sb.width);
         int hY = sb.y + (int) ((1.0f - this.brightness) * sb.height);
         int d = cfg.pickerSbSpaceIndicatorSize;
+        // TODO: move this to layout config
         final int borderThickness = 1;
         RenderUtil.renderOutline(gui, hX - d, hY - d, d * 2, d * 2, borderThickness, 0xFFFFFFFF);
         RenderUtil.renderInner(gui, hX - d, hY - d, d * 2, d * 2, borderThickness, (0xFF << 24) | (red << 16) | (green << 8) | blue);
     }
 
-    private void renderHueBarBackground(GuiCompat gui, Bounds hueB, LayoutConfig cfg) {
-        for (int i = 0; i < hueB.height; i++) {
-            gui.fill(hueB.x, hueB.y + i, hueB.maxX, hueB.y + i + 1,
-                Color.HSBtoRGB(i / (float) hueB.height, 1.0f, 1.0f));
-        }
-    }
-
     private void renderRgbSliders(Font font, GuiCompat gui, LayoutEngine layout, LayoutConfig cfg, int mouseX, int mouseY) {
         final int labelColor = COLOR_TEXT_LABEL;
+
+        // TODO: move this to layout config
+        final int textOffsetFromSlider = 4;
+
         Bounds rB = layout.pickerRSlider;
-        gui.text(font, ComponentCompat.literal("Red"), rB.x, rB.y - font.lineHeight - 1, labelColor, false);
-        for (int i = 0; i < rB.width; i++) {
-            int rStep = (int) ((i / (float) rB.width) * 255.0f);
-            gui.fill(rB.x + i, rB.y, rB.x + i + 1, rB.maxY, 0xFF000000 | (rStep << 16) | (green << 8) | blue);
-        }
+        gui.text(font, ComponentCompat.literal("Red"), rB.x, rB.y - font.lineHeight - textOffsetFromSlider, labelColor, false);
         this.rSlider.render(font, gui, layout, rB.x, rB.y, rB.width, rB.height, mouseX, mouseY);
 
         Bounds gB = layout.pickerGSlider;
-        gui.text(font, ComponentCompat.literal("Green"), gB.x, gB.y - font.lineHeight - 1, labelColor, false);
-        for (int i = 0; i < gB.width; i++) {
-            int gStep = (int) ((i / (float) gB.width) * 255.0f);
-            gui.fill(gB.x + i, gB.y, gB.x + i + 1, gB.maxY, 0xFF000000 | (red << 16) | (gStep << 8) | blue);
-        }
+        gui.text(font, ComponentCompat.literal("Green"), gB.x, gB.y - font.lineHeight - textOffsetFromSlider, labelColor, false);
         this.gSlider.render(font, gui, layout, gB.x, gB.y, gB.width, gB.height, mouseX, mouseY);
 
         Bounds bB = layout.pickerBSlider;
-        gui.text(font, ComponentCompat.literal("Blue"), bB.x, bB.y - font.lineHeight - 1, labelColor, false);
-        for (int i = 0; i < bB.width; i++) {
-            int bStep = (int) ((i / (float) bB.width) * 255.0f);
-            gui.fill(bB.x + i, bB.y, bB.x + i + 1, bB.maxY, 0xFF000000 | (red << 16) | (green << 8) | bStep);
-        }
+        gui.text(font, ComponentCompat.literal("Blue"), bB.x, bB.y - font.lineHeight - textOffsetFromSlider, labelColor, false);
         this.bSlider.render(font, gui, layout, bB.x, bB.y, bB.width, bB.height, mouseX, mouseY);
     }
 
-    private void renderAlphaBarBackground(GuiCompat gui, Bounds alphaB, LayoutConfig cfg, boolean isHorizontal) {
-        int cellSize = (int) (cfg.pickerSliderWidth / 3.0f);
+    private void renderAlphaBarBackground(GuiCompat gui, Bounds alphaB, boolean isHorizontal) {
+        renderAlphaGrids(gui, alphaB);
+        int opaqueColor = (255 << 24) | (red << 16) | (green << 8) | blue;
+        int transparentColor = (red << 16) | (green << 8) | blue;
+        if (isHorizontal) {
+            RenderUtil.renderCapsuleHorizontal(gui, alphaB.x, alphaB.y, alphaB.width, alphaB.height, transparentColor, opaqueColor);
+        } else {
+            RenderUtil.renderCapsuleVertical(gui, alphaB.x, alphaB.y, alphaB.width, alphaB.height, opaqueColor, transparentColor);
+        }
+    }
+
+    private void renderAlphaGrids(GuiCompat gui, Bounds alphaB) {
+        // TODO: move this to layout config
+        int cellSize = (int) (Math.min(alphaB.width, alphaB.height) / 3.0f);
         if (cellSize <= 0) cellSize = 4;
         for (int y = alphaB.y; y < alphaB.maxY; y += cellSize) {
             int h = Math.min(cellSize, alphaB.maxY - y);
             for (int x = alphaB.x; x < alphaB.maxX; x += cellSize) {
                 int w = Math.min(cellSize, alphaB.maxX - x);
                 boolean isEven = ((x - alphaB.x) / cellSize + (y - alphaB.y) / cellSize) % 2 == 0;
+                // TODO: move this to layout config
                 int gridColor = isEven ? 0xFFFFFFFF : 0xFFD0D0D0;
-                gui.fill(x, y, x + w, y + h, gridColor);
+                RenderUtil.renderCapsulePartFlat(
+                    gui,
+                    (float) x, (float) y, (float) (x + w), (float) (y + h), // Piece footprint
+                    (float) alphaB.x, (float) alphaB.y, (float) alphaB.width, (float) alphaB.height, // Global bounds
+                    gridColor
+                );
             }
-        }
-
-        if (isHorizontal) {
-            for (int i = 0; i < alphaB.width; i++) {
-                float ratio = i / (float) alphaB.width;
-                int alphaVal = (int) (ratio * 255.0f) & 0xFF;
-                int blendedColor = (alphaVal << 24) | (red << 16) | (green << 8) | blue;
-                gui.fill(alphaB.x + i, alphaB.y, alphaB.x + i + 1, alphaB.maxY, blendedColor);
-            }
-        } else {
-            int opaqueColor = (255 << 24) | (red << 16) | (green << 8) | blue;
-            int transparentColor = (red << 16) | (green << 8) | blue;
-            gui.fillGradient(alphaB.x, alphaB.y, alphaB.maxX, alphaB.maxY, opaqueColor, transparentColor);
         }
     }
 
@@ -462,7 +455,7 @@ public class ColorPickerOverlay extends WindowOverlay {
     private void toggleMode(ActionButtonWidget btn) {
         this.currentMode = this.currentMode == PickerMode.HSV ? PickerMode.RGB : PickerMode.HSV;
         btn.setLabel(this.currentMode == PickerMode.HSV ? BTN_TOGGLE_HSV : BTN_TOGGLE_RGB);
-        SoundUtil.clickSound();
+        syncSliders();
     }
 
     @Override

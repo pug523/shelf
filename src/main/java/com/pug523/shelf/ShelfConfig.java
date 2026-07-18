@@ -24,6 +24,14 @@ public class ShelfConfig implements Serializable {
     @WidgetTypes.Toggle(WidgetTypes.Toggle.Style.CAPSULE)
     public boolean debugBoolean = false;
 
+    @ConfigEntry(key = OD + "action_button_boolean", category = DS, group = OD + "primitive")
+    @WidgetTypes.Toggle(WidgetTypes.Toggle.Style.ACTION_BUTTON)
+    public boolean debugActionButtonBoolean = false;
+
+    @ConfigEntry(key = OD + "box_boolean", category = DS, group = OD + "primitive")
+    @WidgetTypes.Toggle(WidgetTypes.Toggle.Style.BOX)
+    public boolean debugBoxBoolean = false;
+
     @ConfigEntry(key = OD + "integer", category = DS, group = OD + "primitive")
     @WidgetTypes.SliderInt(min = 0, max = 168)
     public int debugInteger = 3;
@@ -72,6 +80,14 @@ public class ShelfConfig implements Serializable {
     @ConfigEntry(key = OD + "color", category = DS, group = OD + "primitive")
     @WidgetTypes.ColorPicker
     public int debugColor = Colors.GREEN1;
+
+    @ConfigEntry(key = OD + "sdf_enabled", category = DS, group = OD + "primitive")
+    @WidgetTypes.Toggle(WidgetTypes.Toggle.Style.BOX)
+    //#if MC >= 12103
+    public boolean sdfEnabled = true;
+    //#else
+    //$$ public boolean sdfEnabled = false;
+    //#endif
 
 
     @ConfigEntry(key = O + "layout")

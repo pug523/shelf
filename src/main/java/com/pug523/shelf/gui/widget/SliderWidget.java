@@ -29,8 +29,12 @@ public class SliderWidget implements ClickableWidget {
     private int barThickness = 4;
     private int knobSize = 8;
     private boolean rounded = true;
-    private int colorTrack = 0xFF4B5563;
-    private int colorProgress = 0xFF3B82F6;
+
+    private int colorTrackStart = 0xFF4B5563;
+    private int colorTrackEnd = 0xFF4B5563;
+    private int colorProgressStart = 0xFF3B82F6;
+    private int colorProgressEnd = 0xFF3B82F6;
+
     private int colorKnob = 0xFFFFFFFF;
 
     public SliderWidget(double min, double max, double step, double initialValue, Consumer<Double> valueConsumer) {
@@ -62,8 +66,19 @@ public class SliderWidget implements ClickableWidget {
     }
 
     public SliderWidget setColors(int track, int progress, int knob) {
-        this.colorTrack = track;
-        this.colorProgress = progress;
+        this.colorTrackStart = track;
+        this.colorTrackEnd = track;
+        this.colorProgressStart = progress;
+        this.colorProgressEnd = progress;
+        this.colorKnob = knob;
+        return this;
+    }
+
+    public SliderWidget setGradientColors(int trackStart, int trackEnd, int progressStart, int progressEnd, int knob) {
+        this.colorTrackStart = trackStart;
+        this.colorTrackEnd = trackEnd;
+        this.colorProgressStart = progressStart;
+        this.colorProgressEnd = progressEnd;
         this.colorKnob = knob;
         return this;
     }
@@ -85,32 +100,40 @@ public class SliderWidget implements ClickableWidget {
 
         if (orientation == Orientation.HORIZONTAL) {
             int sliderY = y + (height - barThickness) / 2;
-            int progressEnd = x + (int) (width * progress);
+            int progressLength = (int) (width * progress);
+            int progressEnd = x + progressLength;
+            int currentProgressEndColor = RenderUtil.linearInterpolateColors(colorProgressStart, colorProgressEnd, (float) progress);
 
             if (rounded) {
-                RenderUtil.renderCapsule(gui, x, sliderY, width, barThickness, colorTrack);
-                RenderUtil.renderCapsule(gui, x, sliderY, progressEnd - x, barThickness, colorProgress);
+                RenderUtil.renderCapsuleHorizontal(gui, x, sliderY, width, barThickness, colorTrackStart, colorTrackEnd);
+                if (progressLength > 0) {
+                    RenderUtil.renderCapsuleHorizontal(gui, x, sliderY, progressLength, barThickness, colorProgressStart, currentProgressEndColor);
+                }
                 RenderUtil.renderCircle(gui, progressEnd, sliderY + (barThickness / 2.0f), knobSize / 2.25f, colorKnob);
             } else {
-                gui.fill(x, sliderY, x + width, sliderY + barThickness, colorTrack);
-                gui.fill(x, sliderY, progressEnd, sliderY + barThickness, colorProgress);
+                RenderUtil.renderRectHorizontal(gui, x, sliderY, width, barThickness, colorTrackStart, colorTrackEnd);
+                RenderUtil.renderRectHorizontal(gui, x, sliderY, progressEnd, barThickness, colorProgressStart, currentProgressEndColor);
                 int knobX = progressEnd - (knobSize / 2);
                 int knobY = sliderY + (barThickness / 2) - (knobSize / 2);
                 gui.fill(knobX, knobY, knobX + knobSize, knobY + knobSize, colorKnob);
             }
         } else {
             int sliderX = x + (width - barThickness) / 2;
-            int progressStart = y + height - (int) (height * progress);
+            int progressLength = (int) (height * progress);
+            int progressStart = y + height - progressLength;
+            int currentProgressStartColor = RenderUtil.linearInterpolateColors(colorProgressEnd, colorProgressStart, (float) progress);
 
             if (rounded) {
-                RenderUtil.renderCapsule(gui, sliderX, y, barThickness, height, colorTrack);
-                RenderUtil.renderCapsule(gui, sliderX, progressStart, barThickness, (y + height) - progressStart,
-                        colorProgress);
-                RenderUtil.renderCircle(gui, sliderX + (barThickness / 2.0f), progressStart, knobSize / 2.25f,
-                        colorKnob);
+                RenderUtil.renderCapsuleVertical(gui, sliderX, y, barThickness, height, colorTrackStart, colorTrackEnd);
+                if (progressLength > 0) {
+                    RenderUtil.renderCapsuleVertical(gui, sliderX, progressStart, barThickness, progressLength, currentProgressStartColor, colorProgressEnd);
+                }
+                RenderUtil.renderCircle(gui, sliderX + (barThickness / 2.0f), progressStart, knobSize / 2.25f, colorKnob);
             } else {
-                gui.fill(sliderX, y, sliderX + barThickness, y + height, colorTrack);
-                gui.fill(sliderX, progressStart, sliderX + barThickness, y + height, colorProgress);
+                RenderUtil.renderRectVertical(gui, sliderX, y, barThickness, height, colorTrackStart, colorTrackEnd);
+                if (progressLength > 0) {
+                    RenderUtil.renderRectVertical(gui, sliderX, y, barThickness, height, currentProgressStartColor, colorProgressEnd);
+                }
                 int knobX = sliderX + (barThickness / 2) - (knobSize / 2);
                 int knobY = progressStart - (knobSize / 2);
                 gui.fill(knobX, knobY, knobX + knobSize, knobY + knobSize, colorKnob);

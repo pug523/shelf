@@ -44,15 +44,32 @@ public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplie
     public final float width;
     public final float height;
     public final float radius;
-    public final int color;
+
+    private final float u0;
+    private final float v0;
+    private final float u1;
+    private final float v1;
+
+    public final int x0y0Color;
+    public final int x0y1Color;
+    public final int x1y0Color;
+    public final int x1y1Color;
 
     //#if MC >= 11900
     private @Nullable ScreenRectangle scissorArea;
     private @Nullable ScreenRectangle bounds;
     //#endif
 
-    public SdfRenderState(GuiCompat gui, float x0, float y0,
-                          float x1, float y1, float width, float height, float radius, int color) {
+    public SdfRenderState(GuiCompat gui, float x0, float y0, float x1, float y1,
+                          float width, float height, float radius,
+                          int x0y0Color, int x0y1Color, int x1y0Color, int x1y1Color) {
+        this(gui, x0, y0, x1, y1, width, height, radius, 0.0f, 0.0f, 1.0f, 1.0f, x0y0Color, x0y1Color, x1y0Color, x1y1Color);
+    }
+
+    public SdfRenderState(GuiCompat gui, float x0, float y0, float x1, float y1,
+                          float width, float height, float radius,
+                          float u0, float v0, float u1, float v1,
+                          int x0y0Color, int x0y1Color, int x1y0Color, int x1y1Color) {
         this.pose = Matrix3x2fCompat.copy(gui.getPoseStack());
         this.x0 = x0;
         this.y0 = y0;
@@ -61,7 +78,15 @@ public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplie
         this.width = width;
         this.height = height;
         this.radius = radius;
-        this.color = color;
+        this.u0 = u0;
+        this.v0 = v0;
+        this.u1 = u1;
+        this.v1 = v1;
+
+        this.x0y0Color = x0y0Color;
+        this.x0y1Color = x0y1Color;
+        this.x1y0Color = x1y0Color;
+        this.x1y1Color = x1y1Color;
 
         //#if MC >= 12106
         this.sdfParamsBufferSlice = SdfParamBufferPool.allocate();
@@ -104,14 +129,14 @@ public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplie
 
     @Override
     public void buildVertices(@NonNull VertexConsumer vertices) {
-        writeVertex(vertices, x0, y0, 0.0f, 0.0f);
-        writeVertex(vertices, x0, y1, 0.0f, 1.0f);
-        writeVertex(vertices, x1, y1, 1.0f, 1.0f);
-        writeVertex(vertices, x1, y0, 1.0f, 0.0f);
+        writeVertex(vertices, x0, y0, u0, v0, this.x0y0Color);
+        writeVertex(vertices, x0, y1, u0, v1, this.x0y1Color);
+        writeVertex(vertices, x1, y1, u1, v1, this.x1y1Color);
+        writeVertex(vertices, x1, y0, u1, v0, this.x1y0Color);
     }
 
-    private void writeVertex(@NonNull VertexConsumer vertices, float x, float y, float u, float v) {
-        RenderStateUtil.addVertexWith2DPose(vertices, this.pose, x, y).setUv(u, v).setColor(this.color);
+    private void writeVertex(@NonNull VertexConsumer vertices, float x, float y, float u, float v, int cornerColor) {
+        RenderStateUtil.addVertexWith2DPose(vertices, this.pose, x, y).setUv(u, v).setColor(cornerColor);
     }
 
     //#if MC >= 12104
@@ -125,9 +150,9 @@ public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplie
     }
     //#else
     //$$ @Override
-    //$$ public void applyUniforms(Uniform sdfParams) {
-    //$$     sdfParams.set(this.width, this.height, this.radius, 0.0f);
-    //$$     sdfParams.upload();
+    //$$ public void applyUniforms(Uniform uniform) {
+    //$$     uniform.set(this.width, this.height, this.radius, 0.0f);
+    //$$     // uniform.upload();
     //$$ }
     //#endif
 }

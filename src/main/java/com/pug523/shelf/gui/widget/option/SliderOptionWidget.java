@@ -31,7 +31,7 @@ public class SliderOptionWidget<N extends Number & Comparable<N>> extends Option
         this.typeConverter = typeConverter;
 
         this.slider = new SliderWidget(this.min, this.max, this.step, this.getPendingValue().doubleValue(),
-                this::updateFromSlider);
+            this::updateFromSlider);
 
         this.textField = new TextInputFieldWidget<>(true, str -> {
             if (str.isEmpty() || str.equals("-") || str.equals(".") || str.equals("-.")) {
@@ -78,7 +78,7 @@ public class SliderOptionWidget<N extends Number & Comparable<N>> extends Option
 
     @Override
     public void render(Font font, GuiCompat gui, LayoutEngine layout, int x, int y, int width, int height, int mouseX,
-            int mouseY) {
+                       int mouseY) {
         if (!this.textField.isFocused()) {
             double currentValue = getPendingValue().doubleValue();
             String formatted = formatValue(currentValue);
@@ -87,9 +87,13 @@ public class SliderOptionWidget<N extends Number & Comparable<N>> extends Option
         }
 
         LayoutConfig cfg = layout.getConfig();
-        this.slider.setOrientation(SliderWidget.Orientation.HORIZONTAL).setBarThickness(cfg.sliderHeight)
-                .setKnobSize(cfg.sliderKnobSize).setRounded(cfg.roundedSlider)
-                .setColors(cfg.colorSliderTrack, cfg.colorSliderProgress, cfg.colorSliderKnob);
+
+        // TODO: support gradient slider colors
+        this.slider.setOrientation(SliderWidget.Orientation.HORIZONTAL)
+            .setBarThickness(cfg.sliderHeight)
+            .setKnobSize(cfg.sliderKnobSize)
+            .setRounded(cfg.roundedSlider)
+            .setColors(cfg.colorSliderTrack, cfg.colorSliderProgress, cfg.colorSliderKnob);
 
         int sliderX = x + width - cfg.sliderWidth - layout.optionWidgetRightMargin;
 
@@ -100,7 +104,7 @@ public class SliderOptionWidget<N extends Number & Comparable<N>> extends Option
             String minStr = formatValue(this.min);
             String maxStr = formatValue(this.max);
             this.maxTextBoundsWidth = Math.max(ComponentCompat.width(font, minStr),
-                    ComponentCompat.width(font, maxStr));
+                ComponentCompat.width(font, maxStr));
         }
 
         String currentText = this.textField.getText();
@@ -158,7 +162,7 @@ public class SliderOptionWidget<N extends Number & Comparable<N>> extends Option
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY,
-            LayoutEngine layout) {
+                                LayoutEngine layout) {
         if (this.textField.isFocused()) {
             return false;
         }

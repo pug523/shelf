@@ -12,6 +12,11 @@ public final class Colors {
     // public static final int GRAY = 0xFF8B8B8B;
     public static final int MUTED_GRAY = 0xFF808080;
 
+    // RGB
+    public static final int RED = 0xFFFF0000;
+    public static final int GREEN = 0xFF00FF00;
+    public static final int BLUE = 0xFF0000FF;
+
     // Dark & Grayscale (Solid)
     // public static final int MIDDLE_GRAY = 0xFF3F3F43;
     public static final int MIDDLE_GRAY = 0xFF5A5A5C;
@@ -41,4 +46,6 @@ public final class Colors {
     public static final int ALPHA_WHITE_27 = 0x45FFFFFF;
     public static final int ALPHA_WHITE_53 = 0x88DDDDDD;
     public static final int ALPHA_WHITE_60 = 0x99DDDDDD;
+
+    public static final int INVISIBLE = 0x00000000;
 }

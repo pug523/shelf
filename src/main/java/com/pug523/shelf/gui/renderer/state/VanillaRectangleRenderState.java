@@ -16,7 +16,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 //#endif
 
-public class ColorGradientRenderState implements ShelfGuiElementRenderState {
+public class VanillaRectangleRenderState implements ShelfGuiElementRenderState {
     public final int x0;
     public final int x1;
     public final int y0;
@@ -36,8 +36,8 @@ public class ColorGradientRenderState implements ShelfGuiElementRenderState {
     private ScreenRectangle scissorArea;
     //#endif
 
-    public ColorGradientRenderState(GuiCompat gui, int x0, int x1, int y0, int y1, int x0y0Color, int x0y1Color,
-                                    int x1y0Color, int x1y1Color) {
+    public VanillaRectangleRenderState(GuiCompat gui, int x0, int x1, int y0, int y1, int x0y0Color, int x0y1Color,
+                                       int x1y0Color, int x1y1Color) {
         this.x0 = x0;
         this.x1 = x1;
         this.y0 = y0;

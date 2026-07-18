@@ -14,6 +14,7 @@ import com.pug523.shelf.gui.controller.OverlayController;
 import com.pug523.shelf.gui.layout.Bounds;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
+import com.pug523.shelf.gui.sound.SoundUtil;
 import com.pug523.shelf.gui.widget.overlay.ColorPickerOverlay;
 
 import com.pug523.shelf.gui.widget.TextInputFieldWidget;
@@ -161,6 +162,7 @@ public class ColorPickerOptionWidget extends OptionWidget<Integer> {
             overlayController.clear();
             ColorPickerOverlay pickerOverlay = new ColorPickerOverlay(this.option, (finalColor, overlay) -> overlayController.pop());
             overlayController.push(pickerOverlay);
+            SoundUtil.clickSound();
         }
         return false;
     }

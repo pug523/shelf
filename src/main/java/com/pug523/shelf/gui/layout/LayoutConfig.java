@@ -487,7 +487,7 @@ public class LayoutConfig {
 
     @ConfigEntry(key = "picker_max_palette_colors", category = C + "color_picker_overlay", group = C + "dialog_constraints")
     @WidgetTypes.SliderInt(min = 1, max = 50)
-    public int pickerMaxPaletteColors = 10;
+    public int pickerMaxPaletteColors = 8;
 
     @ConfigEntry(key = "picker_title_offset_y", category = C + "color_picker_overlay", group = C + "dialog_offsets")
     @WidgetTypes.SliderInt(min = 0, max = 200)
