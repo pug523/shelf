@@ -61,6 +61,8 @@ public class RenderUtil {
         gui.fill(startX + 2, startY + 2, startX + 3, startY + 3, color);
     }
 
+    // TODO: add renderRainbowGradientHorizontal() / renderRainbowGradientVertical
+
     public static void renderSdfGuiElement(GuiCompat gui, SdfRenderState renderState) {
         //#if MC >= 12106
         gui.getGraphics().guiRenderState.addGuiElement(renderState);

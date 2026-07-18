@@ -6,7 +6,7 @@ import org.jspecify.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-//#if MC <= 12108
+//#if 12106 <= MC && MC <= 12108
 //$$ import org.joml.Matrix3x2f;
 //#endif
 
