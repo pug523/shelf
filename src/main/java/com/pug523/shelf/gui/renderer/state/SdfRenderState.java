@@ -127,6 +127,7 @@ public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplie
     //$$ @Override
     //$$ public void applyUniforms(Uniform sdfParams) {
     //$$     sdfParams.set(this.width, this.height, this.radius, 0.0f);
+    //$$     sdfParams.upload();
     //$$ }
     //#endif
 }

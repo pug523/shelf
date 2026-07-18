@@ -35,7 +35,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 // @formatter:on
 //#endif
 
-//#if MC >= 12005
+//#if MC >= 12105
 import org.joml.Matrix3x2fStack;
 //#elseif MC >= 11600
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
@@ -61,7 +61,7 @@ public class GuiCompat {
         return this.graphics;
     }
 
-    //#if MC >= 12005
+    //#if MC >= 12105
     public Matrix3x2fStack getPoseStack() {
         return this.graphics.pose();
     }
@@ -75,11 +75,7 @@ public class GuiCompat {
     //$$ public GuiCompat(PoseStack poseStack) {
     //$$     this.poseStack = poseStack;
     //$$ }
-    //#if MC >= 12005
-    //$$ public  getPoseStack() { return this.poseStack; }
-    //#else
     //$$ public PoseStack getPoseStack() { return this.poseStack; }
-    //#endif
     //#else
     //$$ public GuiCompat() {
     //$$ }

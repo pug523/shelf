@@ -6,6 +6,10 @@ import org.jspecify.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
+//#if MC <= 12108
+//$$ import org.joml.Matrix3x2f;
+//#endif
+
 //#if MC >= 12106
 import org.joml.Vector2f;
 //#else
@@ -24,7 +28,12 @@ public class RenderStateUtil {
                                                    final Matrix3x2fCompat pose, final @Nullable ScreenRectangle scissorArea) {
         //#if MC >= 12106
         Matrix3x2fCompat m = pose.copy();
-        ScreenRectangle bounds = new ScreenRectangle(x0, y0, x1 - x0, y1 - y0).transformMaxBounds(m.pose);
+        ScreenRectangle bounds = new ScreenRectangle(x0, y0, x1 - x0, y1 - y0)
+            //#if MC >= 12109
+            .transformMaxBounds(m.pose);
+            //#else
+            //$$ .transformMaxBounds((Matrix3x2f) m.pose);
+            //#endif
         return scissorArea != null ? scissorArea.intersection(bounds) : bounds;
         //#else
         //$$ Matrix4f matrix = pose.pose.pose();

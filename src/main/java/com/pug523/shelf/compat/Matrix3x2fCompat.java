@@ -1,6 +1,6 @@
 package com.pug523.shelf.compat;
 
-//#if MC >= 12005
+//#if MC >= 12105
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fc;
 //#else
@@ -8,14 +8,14 @@ import org.joml.Matrix3x2fc;
 //#endif
 
 public class Matrix3x2fCompat {
-    //#if MC >= 12005
+    //#if MC >= 12105
     public final Matrix3x2fc pose;
     //#else
     //$$ public final PoseStack.Pose pose;
     //#endif
 
     // @formatter:off
-    //#if MC >= 12005
+    //#if MC >= 12105
     public Matrix3x2fCompat(Matrix3x2fc pose) {
     //#else
     //$$ public Matrix3x2fCompat(PoseStack.Pose pose) {
@@ -35,7 +35,7 @@ public class Matrix3x2fCompat {
     }
 
     // @formatter:off
-    //#if MC >= 12005
+    //#if MC >= 12105
     public static Matrix3x2fCompat copy(Matrix3x2fc src) {
     //#else
     //$$ public static Matrix3x2fCompat copy(PoseStack src) {
@@ -43,7 +43,7 @@ public class Matrix3x2fCompat {
     // @formatter:on
         //#if MC >= 12106
         return new Matrix3x2fCompat(new Matrix3x2f(src));
-        //#elseif MC >= 12005
+        //#elseif MC >= 12105
         //$$ return new Matrix3x2fCompat(src.last().copy());
         //#else
         //$$ PoseStack.Pose p = src.last();
