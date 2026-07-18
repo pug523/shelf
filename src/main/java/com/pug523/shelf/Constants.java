@@ -4,7 +4,7 @@ public class Constants {
     private Constants() {
     }
 
-    //#if MC >= 12103
+    //#if MC >= 12100
     public static boolean SDF_SHADER_AVAILABLE = true;
     //#else
     //$$ public static boolean SDF_SHADER_AVAILABLE = false;

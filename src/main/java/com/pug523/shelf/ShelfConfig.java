@@ -11,7 +11,9 @@ import net.minecraft.world.item.Items;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class ShelfConfig implements Serializable {
     private static final String O = "shelf.mod.config.option.";
@@ -81,14 +83,20 @@ public class ShelfConfig implements Serializable {
     @WidgetTypes.ColorPicker
     public int debugColor = Colors.GREEN1;
 
-    @ConfigEntry(key = OD + "sdf_enabled", category = DS, group = OD + "primitive")
-    @WidgetTypes.Toggle(WidgetTypes.Toggle.Style.BOX)
-    //#if MC >= 12103
-    public boolean sdfEnabled = true;
-    //#else
-    //$$ public boolean sdfEnabled = false;
-    //#endif
+    @ConfigEntry(key = OD + "selector_enum", category = DS, group = OD + "primitive")
+    @WidgetTypes.Selector(enumClass = DebugEnum.class)
+    public DebugEnum debugSelectorEnum = DebugEnum.EnumMember2;
 
+    public static class MultiSelectorCandidatesSupplier implements Supplier<List<String>> {
+        @Override
+        public List<String> get() {
+            return Arrays.asList("minecraft:dirt", "minecraft:stone", "minecraft:diamond_block", "minecraft:bedrock");
+        }
+    }
+
+    @ConfigEntry(key = OD + "multi_selector_string_list", category = DS, group = OD + "primitive")
+    @WidgetTypes.MultiSelector(candidates = MultiSelectorCandidatesSupplier.class)
+    public List<String> debugMultiSelectorStringList = new ArrayList<>();
 
     @ConfigEntry(key = O + "layout")
     public LayoutConfig layoutConfig = LayoutConfig.createDefault();

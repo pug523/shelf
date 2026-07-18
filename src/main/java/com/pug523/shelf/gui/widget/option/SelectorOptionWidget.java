@@ -14,6 +14,7 @@ import com.pug523.shelf.gui.layout.Bounds;
 import com.pug523.shelf.gui.layout.LayoutConfig;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 import com.pug523.shelf.gui.renderer.RenderUtil;
+import com.pug523.shelf.gui.sound.SoundUtil;
 import com.pug523.shelf.gui.widget.SelectorItemWidget;
 import com.pug523.shelf.gui.widget.overlay.DropdownOverlay;
 
@@ -105,8 +106,9 @@ public class SelectorOptionWidget<T, E> extends OptionWidget<T> {
 
         List<E> selected = toListConverter.apply(this.getPendingValue());
         Component displayText;
+        // TODO: i18n
         if (selected.isEmpty()) {
-            displayText = ComponentCompat.literal("None");
+            displayText = ComponentCompat.literal("None selected");
         } else if (selected.size() == 1) {
             displayText = labelExtractor.apply(selected.get(0));
         } else {
@@ -118,6 +120,8 @@ public class SelectorOptionWidget<T, E> extends OptionWidget<T> {
         }
 
         int textY = selectorY + (selectorHeight - font.lineHeight) / 2 + 1;
+        int centerY = selectorY + selectorHeight / 2;
+        int arrowY = centerY - 1;
         int maxTextWidth = selectorWidth - 25;
 
         String rawString = font.plainSubstrByWidth(displayText.getString(), maxTextWidth);
@@ -125,7 +129,7 @@ public class SelectorOptionWidget<T, E> extends OptionWidget<T> {
 
         gui.text(font, finalDrawText, selectorX + 8, textY, cfg.colorTextSecondary);
 
-        RenderUtil.renderDownwardArrow(gui, selectorX + selectorWidth - 8, textY, cfg.colorTextSecondary);
+        RenderUtil.renderDownwardArrow(gui, selectorX + selectorWidth - 8, arrowY, cfg.colorTextSecondary);
     }
 
     @Override
@@ -133,7 +137,13 @@ public class SelectorOptionWidget<T, E> extends OptionWidget<T> {
         if (this.cachedBounds != null && this.cachedBounds.contains(mouseX, mouseY)) {
             Screen screen = ScreenCompat.getScreen(Minecraft.getInstance());
             if (screen instanceof ConfigScreen) {
-                triggerDropdown((ConfigScreen) screen, layout);
+                ConfigScreen configScreen = ((ConfigScreen) screen);
+                OverlayController overlayController = configScreen.getOverlayController();
+                if (!overlayController.hasActiveOverlay()) {
+                    triggerDropdown(configScreen, layout);
+                } else {
+                    closeDropdown(overlayController);
+                }
                 return true;
             }
         }
@@ -163,7 +173,7 @@ public class SelectorOptionWidget<T, E> extends OptionWidget<T> {
             boxWidth,
             rowHeight,
             items,
-            overlayController::pop,
+            () -> this.closeDropdown(overlayController),
             clickedWidget -> {
                 @SuppressWarnings("unchecked")
                 SelectorItemWidget<E> clickedItem = (SelectorItemWidget<E>) clickedWidget;
@@ -185,11 +195,17 @@ public class SelectorOptionWidget<T, E> extends OptionWidget<T> {
                     nextSelected.add(value);
                     this.setPendingValue(fromListConverter.apply(nextSelected));
 
-                    overlayController.pop();
+                    closeDropdown(overlayController);
                 }
             }
         );
 
         overlayController.push(dropdown);
+        SoundUtil.clickSound();
+    }
+
+    private void closeDropdown(OverlayController overlayController) {
+        overlayController.pop();
+        SoundUtil.clickSound();
     }
 }

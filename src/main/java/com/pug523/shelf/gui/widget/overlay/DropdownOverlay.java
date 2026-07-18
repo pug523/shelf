@@ -65,6 +65,7 @@ public class DropdownOverlay implements OverlayWidget {
             if (onDismiss != null) {
                 onDismiss.run();
             }
+            return true;
         }
         return false;
     }

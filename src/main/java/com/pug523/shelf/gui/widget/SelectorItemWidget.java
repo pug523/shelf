@@ -57,6 +57,7 @@ public class SelectorItemWidget<E> implements ClickableWidget {
             gui.text(font, text, textX, textY, finalColor, false);
 
             if (this.selected) {
+                // TODO: replace this with texture or something
                 Component check = ComponentCompat.literal("✓");
                 int checkWidth = ComponentCompat.width(font, check);
                 gui.text(font, check, x + width - checkWidth - 6, textY, cfg.colorTextSecondary, false);

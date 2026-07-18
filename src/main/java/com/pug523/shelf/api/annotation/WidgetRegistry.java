@@ -8,7 +8,9 @@ import com.pug523.shelf.gui.widget.option.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class WidgetRegistry {
@@ -55,7 +57,7 @@ public class WidgetRegistry {
                 return (OptionWidget<E>) new ColorPickerOptionWidget(intOpt);
             }
             if (overrideAnnotation instanceof WidgetTypes.SliderInt) {
-                WidgetTypes.SliderInt s =  (WidgetTypes.SliderInt) overrideAnnotation;
+                WidgetTypes.SliderInt s = (WidgetTypes.SliderInt) overrideAnnotation;
                 return (OptionWidget<E>) SliderOptionWidget.ofInt(intOpt, s.min(), s.max(), s.step());
             }
             return (OptionWidget<E>) SliderOptionWidget.ofInt(intOpt, 0, 500, 1);
@@ -64,7 +66,7 @@ public class WidgetRegistry {
         if (type == double.class || type == Double.class) {
             Option<Double> doubleOpt = (Option<Double>) option;
             if (overrideAnnotation instanceof WidgetTypes.SliderDouble) {
-                WidgetTypes.SliderDouble s =  (WidgetTypes.SliderDouble) overrideAnnotation;
+                WidgetTypes.SliderDouble s = (WidgetTypes.SliderDouble) overrideAnnotation;
                 return (OptionWidget<E>) SliderOptionWidget.ofDouble(doubleOpt, s.min(), s.max(), s.step());
             }
             return (OptionWidget<E>) SliderOptionWidget.ofDouble(doubleOpt, 0.0d, 1.0d, 0.01d);
@@ -73,7 +75,7 @@ public class WidgetRegistry {
         if (type == float.class || type == Float.class) {
             Option<Float> floatOpt = (Option<Float>) option;
             if (overrideAnnotation instanceof WidgetTypes.SliderFloat) {
-                WidgetTypes.SliderFloat s =  (WidgetTypes.SliderFloat) overrideAnnotation;
+                WidgetTypes.SliderFloat s = (WidgetTypes.SliderFloat) overrideAnnotation;
                 return (OptionWidget<E>) SliderOptionWidget.ofFloat(floatOpt, s.min(), s.max(), s.step());
             }
             return (OptionWidget<E>) SliderOptionWidget.ofFloat(floatOpt, 0.0f, 1.0f, 0.01f);
@@ -92,6 +94,50 @@ public class WidgetRegistry {
                 (Option<Enum>) option,
                 (Class<Enum>) type,
                 e -> ComponentCompat.literal(e.name())
+            );
+        }
+
+        if (overrideAnnotation instanceof WidgetTypes.Selector) {
+            WidgetTypes.Selector anno = (WidgetTypes.Selector) overrideAnnotation;
+            List<Object> candidates = new ArrayList<>();
+
+            if (anno.enumClass() != WidgetTypes.Selector.DefaultEnum.class) {
+                candidates.addAll(Arrays.asList(anno.enumClass().getEnumConstants()));
+            } else if (anno.candidates() != WidgetTypes.Selector.DefaultCandidates.class) {
+                try {
+                    Supplier<? extends List<?>> supplier = anno.candidates().getDeclaredConstructor().newInstance();
+                    candidates.addAll(supplier.get());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else if (type.isEnum()) {
+                candidates.addAll(Arrays.asList(type.getEnumConstants()));
+            }
+
+            return (OptionWidget<E>) SelectorOptionWidget.single(
+                (GuiOption<Object>) option,
+                candidates,
+                e -> e instanceof Enum ? ComponentCompat.literal(((Enum<?>) e).name()) : ComponentCompat.literal(String.valueOf(e))
+            );
+        }
+
+        if (overrideAnnotation instanceof WidgetTypes.MultiSelector) {
+            WidgetTypes.MultiSelector anno = (WidgetTypes.MultiSelector) overrideAnnotation;
+            List<Object> candidates = new ArrayList<>();
+
+            if (anno.candidates() != WidgetTypes.MultiSelector.DefaultCandidates.class) {
+                try {
+                    Supplier<? extends List<?>> supplier = anno.candidates().getDeclaredConstructor().newInstance();
+                    candidates.addAll(supplier.get());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return (OptionWidget<E>) SelectorOptionWidget.multi(
+                (GuiOption<List<Object>>) option,
+                candidates,
+                e -> e instanceof Enum ? ComponentCompat.literal(((Enum<?>) e).name()) : ComponentCompat.literal(String.valueOf(e))
             );
         }
 
@@ -201,5 +247,65 @@ public class WidgetRegistry {
             }
             return AnnotationParser.createListWidgetForField(field, (Option<List<Object>>) (Object) option);
         });
+
+        // Selector
+        register((field, option) -> {
+            if (!field.isAnnotationPresent(WidgetTypes.Selector.class)) return null;
+
+            WidgetTypes.Selector anno = field.getAnnotation(WidgetTypes.Selector.class);
+            List<Object> candidates = resolveCandidates(anno, field);
+
+            return SelectorOptionWidget.single(
+                option,
+                candidates,
+                e -> e instanceof Enum ? ComponentCompat.literal(((Enum<?>) e).name()) : ComponentCompat.literal(String.valueOf(e))
+            );
+        });
+
+        // MultiSelector
+        register((field, option) -> {
+            if (!field.isAnnotationPresent(WidgetTypes.MultiSelector.class) || !List.class.isAssignableFrom(field.getType())) {
+                return null;
+            }
+
+            WidgetTypes.MultiSelector anno = field.getAnnotation(WidgetTypes.MultiSelector.class);
+            List<Object> candidates = new ArrayList<>();
+            if (anno.candidates() != WidgetTypes.MultiSelector.DefaultCandidates.class) {
+                try {
+                    Supplier<? extends List<?>> supplier = anno.candidates().getDeclaredConstructor().newInstance();
+                    candidates.addAll(supplier.get());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return SelectorOptionWidget.multi(
+                (GuiOption<List<Object>>) (Object) option,
+                candidates,
+                e -> e instanceof Enum ? ComponentCompat.literal(((Enum<?>) e).name()) : ComponentCompat.literal(String.valueOf(e))
+            );
+        });
+    }
+
+    private static List<Object> resolveCandidates(WidgetTypes.Selector annotation, Field field) {
+        if (annotation.enumClass() != WidgetTypes.Selector.DefaultEnum.class) {
+            // Needs cast to Object[].
+            return Arrays.asList((Object[]) annotation.enumClass().getEnumConstants());
+        }
+
+        if (annotation.candidates() != WidgetTypes.Selector.DefaultCandidates.class) {
+            try {
+                Supplier<? extends List<?>> supplier = annotation.candidates().getDeclaredConstructor().newInstance();
+                return (List<Object>) supplier.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (field.getType().isEnum()) {
+            return Arrays.asList(field.getType().getEnumConstants());
+        }
+
+        return new ArrayList<>();
     }
 }

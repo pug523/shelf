@@ -19,6 +19,10 @@
 
   "shelf.mod.config.option.debug.boolean": "Debug Boolean",
   "shelf.mod.config.option.debug.boolean.desc": "A sample boolean toggle option used for debugging.",
+  "shelf.mod.config.option.debug.action_button_boolean": "Debug Action Button Boolean",
+  "shelf.mod.config.option.debug.action_button_boolean.desc": "A sample action button toggle option used for debugging.",
+  "shelf.mod.config.option.debug.box_boolean": "Debug Box Boolean",
+  "shelf.mod.config.option.debug.box_boolean.desc": "A sample checkbox style toggle option used for debugging.",
   "shelf.mod.config.option.debug.integer": "Debug Integer",
   "shelf.mod.config.option.debug.integer.desc": "A sample integer range option used for debugging.",
   "shelf.mod.config.option.debug.float": "Debug Float",
@@ -39,6 +43,10 @@
   "shelf.mod.config.option.debug.integer_list.desc": "A list of integer options used for debugging.",
   "shelf.mod.config.option.debug.color": "Debug Color",
   "shelf.mod.config.option.debug.color.desc": "A color option used for debugging.",
+  "shelf.mod.config.option.debug.selector_enum": "Debug Selector Enum",
+  "shelf.mod.config.option.debug.selector_enum.desc": "A drop-down single selector option based on an Enum structure used for debugging.",
+  "shelf.mod.config.option.debug.multi_selector_string_list": "Debug Multi-Selector String List",
+  "shelf.mod.config.option.debug.multi_selector_string_list.desc": "A dynamic multi-choice checklist dropdown selector option used for debugging.",
 
   "shelf.mod.config.option.layout": "Layout Settings",
 
