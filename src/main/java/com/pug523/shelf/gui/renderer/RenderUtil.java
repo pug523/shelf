@@ -38,39 +38,28 @@ public class RenderUtil {
         addSdfRenderState(gui, x, y, width, height, radius, color);
     }
 
-    private static void addSdfRenderState(GuiCompat gui, float x, float y, float width, float height, float radius,
-                                          int color) {
-        SdfRenderState renderState = new SdfRenderState(
-            gui, x, y, x + width, y + height, width, height, radius,
-            color);
-        //#if MC >= 11900
-        renderState.setRectangles(gui, gui.peekScissorStack());
-        //#endif
-        renderSdfGuiElement(gui, renderState);
+    public static void renderOutline(GuiCompat gui, int x, int y, int width, int height, int borderThickness, int color) {
+        gui.fill(x, y, x + borderThickness, y + height, color);
+        gui.fill(x + width - borderThickness, y, x + width, y + height, color);
+        gui.fill(x + borderThickness, y, x + width - borderThickness, y + borderThickness, color);
+        gui.fill(x + borderThickness, y + height - borderThickness, x + width - borderThickness, y + height, color);
     }
 
-    // @formatter:off
-    //#if MC <= 12105
-    //$$ private static void renderGuiElement(GuiCompat gui, ShelfGuiElementRenderState renderState, RenderType renderType) {
-        //#if MC >= 12102
-        //$$ gui.getGraphics().drawSpecial(bufferSource -> {
-        //$$     renderState.buildVertices(bufferSource.getBuffer(renderType));
-        //$$ });
-        //#elseif MC >= 12000
-        //$$ renderState.buildVertices(gui.getGraphics().bufferSource().getBuffer(renderType));
-        //#else
-        //$$ BufferBuilder builder = Tesselator.getInstance().getBuilder();
-        //$$ builder.begin(renderType.mode(), renderType.format());
-        //$$ renderState.buildVertices(builder);
-            //#if MC >= 11900
-            //$$ BufferUploader.drawWithShader(builder.end());
-            //#else
-            //$$ Tesselator.getInstance().end();
-            //#endif
-        //#endif
-    //$$ }
-    //#endif
-    // @formatter:on
+    public static void renderInner(GuiCompat gui, int x, int y, int width, int height, int borderThickness, int color) {
+        gui.fill(x + borderThickness, y + borderThickness, x + width - borderThickness, y + height - borderThickness, color);
+    }
+
+    public static void renderDownwardArrow(GuiCompat gui, int startX, int startY, int color) {
+        gui.fill(startX, startY, startX + 5, startY + 1, color);
+        gui.fill(startX + 1, startY + 1, startX + 4, startY + 2, color);
+        gui.fill(startX + 2, startY + 2, startX + 3, startY + 3, color);
+    }
+
+    public static void renderRightwardArrow(GuiCompat gui, int startX, int startY, int color) {
+        gui.fill(startX, startY, startX + 1, startY + 5, color);
+        gui.fill(startX + 1, startY + 1, startX + 2, startY + 4, color);
+        gui.fill(startX + 2, startY + 2, startX + 3, startY + 3, color);
+    }
 
     public static void renderSdfGuiElement(GuiCompat gui, SdfRenderState renderState) {
         //#if MC >= 12106
@@ -94,26 +83,38 @@ public class RenderUtil {
         //#endif
     }
 
-    public static void renderOutline(GuiCompat gui, int x, int y, int width, int height, int borderThickness, int color) {
-        gui.fill(x, y, x + borderThickness, y + height, color);
-        gui.fill(x + width - borderThickness, y, x + width, y + height, color);
-        gui.fill(x + borderThickness, y, x + width - borderThickness, y + borderThickness, color);
-        gui.fill(x + borderThickness, y + height - borderThickness, x + width - borderThickness, y + height, color);
+    private static void addSdfRenderState(GuiCompat gui, float x, float y, float width, float height, float radius,
+                                          int color) {
+        SdfRenderState renderState = new SdfRenderState(
+            gui, x, y, x + width, y + height, width, height, radius,
+            color);
+        //#if MC >= 11900
+        renderState.setRectangles(gui, gui.peekScissorStack());
+        //#endif
+        renderSdfGuiElement(gui, renderState);
     }
 
-    public static void renderInner(GuiCompat gui, int x, int y, int width, int height, int borderThickness, int color) {
-        gui.fill(x + borderThickness, y + borderThickness, x + width - borderThickness, y + height - borderThickness, color);
-    }
+    // @formatter:off
+    //#if MC <= 12105
+    //$$ private static void renderGuiElement(GuiCompat gui, ShelfGuiElementRenderState renderState, RenderType renderType) {
+    //#if MC >= 12102
+    //$$ gui.getGraphics().drawSpecial(bufferSource -> {
+    //$$     renderState.buildVertices(bufferSource.getBuffer(renderType));
+    //$$ });
+    //#elseif MC >= 12000
+    //$$ renderState.buildVertices(gui.getGraphics().bufferSource().getBuffer(renderType));
+    //#else
+    //$$ BufferBuilder builder = Tesselator.getInstance().getBuilder();
+    //$$ builder.begin(renderType.mode(), renderType.format());
+    //$$ renderState.buildVertices(builder);
+    //#if MC >= 11900
+    //$$ BufferUploader.drawWithShader(builder.end());
+    //#else
+    //$$ Tesselator.getInstance().end();
+    //#endif
+    //#endif
+    //$$ }
+    //#endif
+    // @formatter:on
 
-    public static void renderDownwardArrow(GuiCompat gui, int startX, int startY, int color) {
-        gui.fill(startX, startY, startX + 5, startY + 1, color);
-        gui.fill(startX + 1, startY + 1, startX + 4, startY + 2, color);
-        gui.fill(startX + 2, startY + 2, startX + 3, startY + 3, color);
-    }
-
-    public static void renderRightwardArrow(GuiCompat gui, int startX, int startY, int color) {
-        gui.fill(startX, startY, startX + 1, startY + 5, color);
-        gui.fill(startX + 1, startY + 1, startX + 2, startY + 4, color);
-        gui.fill(startX + 2, startY + 2, startX + 3, startY + 3, color);
-    }
 }

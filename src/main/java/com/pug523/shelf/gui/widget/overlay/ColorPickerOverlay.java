@@ -259,8 +259,12 @@ public class ColorPickerOverlay extends WindowOverlay {
 
     private void renderSbSpace(GuiCompat gui, Bounds sb, LayoutConfig cfg) {
         int baseHueRgb = Color.HSBtoRGB(hue, 1.0f, 1.0f) | 0xFF000000;
-        RenderUtil.renderVanillaGuiElement(gui, new ColorGradientRenderState(gui, sb.x, sb.maxX, sb.y, sb.maxY,
-            Colors.WHITE, Colors.BLACK, baseHueRgb, Colors.BLACK));
+        ColorGradientRenderState sbSpaceState = new ColorGradientRenderState(gui, sb.x, sb.maxX, sb.y, sb.maxY,
+            Colors.WHITE, Colors.BLACK, baseHueRgb, Colors.BLACK);
+        //#if MC >= 11900
+        sbSpaceState.setRectangles(gui, gui.peekScissorStack());
+        //#endif
+        RenderUtil.renderVanillaGuiElement(gui, sbSpaceState);
 
         int hX = sb.x + (int) (this.saturation * sb.width);
         int hY = sb.y + (int) ((1.0f - this.brightness) * sb.height);
