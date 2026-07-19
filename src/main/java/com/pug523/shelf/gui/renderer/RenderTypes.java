@@ -55,7 +55,7 @@ public class RenderTypes {
     //#if MC >= 12102
     //$$         .setShaderState(new RenderStateShard.ShaderStateShard(SDF_SHADER))
     //#else
-    //$$         .setShaderState(new RenderStateShard.ShaderStateShard(() -> compiledSdfShader()))
+    //$$         .setShaderState(new RenderStateShard.ShaderStateShard(RenderTypes::compiledSdfShader))
     //#endif
     //$$         .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
     //$$         .setDepthTestState(RenderStateShard.LEQUAL_DEPTH_TEST)

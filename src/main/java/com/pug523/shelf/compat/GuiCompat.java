@@ -151,23 +151,8 @@ public class GuiCompat {
         //#if MC >= 12000
         this.graphics.enableScissor(minX, minY, maxX, maxY);
         //#else
-        // @formatter:off
-            //#if MC >= 11500
-            //$$ int scale = (int) Minecraft.getInstance().getWindow().getGuiScale();
-            //$$ int windowHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
-            //#else
-            //$$ int scale = (int) Minecraft.getInstance().window.getGuiScale();
-            //$$ int windowHeight = Minecraft.getInstance().window.getGuiScaledHeight();
-            //#endif
-
-            //#if MC >= 11600
-            //$$ GlStateManager._enableScissorTest();
-            //$$ GlStateManager._scissorBox(minX * scale, (windowHeight - maxY) * scale, (maxX - minX) * scale, (maxY - minY) * scale);
-            //#else
-            //$$ org.lwjgl.opengl.GL11.glEnable(org.lwjgl.opengl.GL11.GL_SCISSOR_TEST);
-            //$$ org.lwjgl.opengl.GL11.glScissor(minX * scale, (windowHeight - maxY) * scale, (maxX - minX) * scale, (maxY - minY) * scale);
-            //#endif
-        // @formatter:on
+        // TODO
+        //$$ RenderSystem.enableScissor(minX, minY, maxX, maxY);
         //#endif
     }
 
@@ -175,13 +160,8 @@ public class GuiCompat {
         //#if MC >= 12000
         this.graphics.disableScissor();
         //#else
-        // @formatter:off
-        //#if MC >= 11600
-        //$$ GlStateManager._disableScissorTest();
-        //#else
-        //$$ org.lwjgl.opengl.GL11.glDisable(org.lwjgl.opengl.GL11.GL_SCISSOR_TEST);
-        //#endif
-        // @formatter:on
+        // TODO
+        //$$ RenderSystem.disableScissor();
         //#endif
     }
 
