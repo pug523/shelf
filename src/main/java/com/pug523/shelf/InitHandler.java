@@ -19,7 +19,7 @@ public class InitHandler {
         Command controllCommand = new ConfigControlCommand.Builder<>
             (Shelf.MOD_ID, ShelfConfigManager.getConfig(), ShelfConfig.createDefault())
             .subCommandName("config")
-            .onSave(ShelfConfigManager::save)
+            .onUpdate(ShelfConfigManager::save)
             .build();
 
         CommandManager.registerCommand(openCommand);
