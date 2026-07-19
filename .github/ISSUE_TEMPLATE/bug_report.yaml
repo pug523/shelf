@@ -11,8 +11,7 @@ body:
     attributes:
       label: Bug Description
       description: A clear and concise description of what the bug is.
-      placeholder: |
-        e.g., When opening the ColorPickerOverlay on Minecraft 1.21.11, the game crashes with a NullPointerException...
+      placeholder: e.g., When opening the ColorPickerOverlay on Minecraft 26.2, the game crashes with a NullPointerException...
     validations:
       required: true
   - type: textarea
@@ -37,18 +36,21 @@ body:
     id: fabric-version
     attributes:
       label: Fabric Loader / API Version
-      placeholder: e.g., Loader 0.16.0, API 0.102.0+1.21.11
+      placeholder: e.g., Loader 0.19.3, API 0.141.4
     validations:
       required: false
+  - type: textarea
+    id: mod-list
+    attributes:
+      label: Other Installed Mods (Optional)
+      description: Mention any relevant mods (like ModMenu, Sodium, or other UI/rendering mods) that were active when the bug occurred.
+      placeholder: e.g., ModMenu v11.0.0, Sodium v0.6.0
   - type: textarea
     id: crash-report
     attributes:
       label: Logs or Crash Reports
-      description: Please paste relevant log files, crash reports, or stack traces here (use code blocks).
-      placeholder: |
-        ```
-        [Paste your logs here]
-        ```
+      description: Please paste your complete log files (`latest.log`) or crash reports here. Wrap them inside triple backticks to format them cleanly as a code block!
+      placeholder: Paste log/stacktrace contents directly here...
   - type: textarea
     id: screenshots
     attributes:

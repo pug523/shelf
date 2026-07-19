@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Ask a Question / Support
-    url: https://github.com/pug523/shelf/discussions
-    about: Please use GitHub Discussions for support, questions, or general help.
+  - name: Ask a Question / Community Support
+    url: https://discord.gg/pZvWDF32jw
+    about: Join our Discord community server to ask questions, chat, or get setup support.
