@@ -2,8 +2,10 @@ package com.pug523.shelf;
 
 import com.pug523.shelf.compat.ComponentCompat;
 
+import com.pug523.shelf.i18n.TranslatorEngine;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 
 /// Only for Shelf mod config screen.
 /// Library common text handling is in com.pug523.shelf.gui.text.TextUtil.

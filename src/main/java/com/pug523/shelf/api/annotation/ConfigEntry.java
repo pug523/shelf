@@ -8,15 +8,17 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 public @interface ConfigEntry {
 
-    /// The unique localization translation string identifier key used to display the readable name
-    /// and descriptions for this property layout entry (e.g., `mymod.config.option.debug_mode`).
+    /// The unique localized string snippet (or absolute path if category is missing)
+    /// used to resolve translation strings.
     String key();
 
-    /// Assigns this configuration property element to a specific top-level category navigation tab
-    /// layout identifier grouping inside the UI window panel.
+    /// The local key modifier matching group elements hierarchy. Relies on relative paths if category is present.
+    String group() default "";
+
+    /// Assigns this configuration property element to a specific top-level category navigation tab.
+    /// If empty, the root category `All Settings` is assumed and absolute lookups are used instead.
     String category() default "";
 
-    /// Places this configuration entry node into a distinct visual sub-section or card list box grouping panel
-    /// nested right underneath its assigned parent category dashboard tab.
-    String group() default "";
+    /// Explicit translation identifier overriding the automatic fallback behavior (`key() + "_desc"`).
+    String description() default "";
 }

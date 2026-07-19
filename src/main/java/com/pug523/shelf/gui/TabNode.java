@@ -23,6 +23,8 @@ public class TabNode {
         return this.name;
     }
 
+    // TODO: add flatten options without option group
+
     public List<OptionGroup> getOptionGroups() {
         return this.optionGroups;
     }
@@ -55,13 +57,13 @@ public class TabNode {
         return !children.isEmpty();
     }
 
-    // Fluent API helper to easily add sub-directories or categories.
+    // Fluent API helper to easily add sub-categories.
     public TabNode addNode(TabNode child) {
         this.children.add(child);
         return this;
     }
 
-    // Fluent API helper to add option groupings directly to this directory node.
+    // Fluent API helper to add option groupings directly to this node.
     public TabNode addGroup(OptionGroup group) {
         this.optionGroups.add(group);
         return this;
