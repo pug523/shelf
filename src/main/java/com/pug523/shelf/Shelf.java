@@ -1,6 +1,6 @@
 package com.pug523.shelf;
 
-import com.pug523.shelf.gui.renderer.RenderTypes;
+import com.pug523.shelf.gui.renderer.shader.ShaderManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -44,7 +44,7 @@ public class Shelf implements ClientModInitializer {
         CONFIG.load();
 
         ShelfCommand.register();
-        RenderTypes.registerEvent();
+        ShaderManager.registerEvent();
 
         LOGGER.info("Shelf has initialized.");
     }

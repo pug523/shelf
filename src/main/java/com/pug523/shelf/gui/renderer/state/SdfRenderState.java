@@ -119,7 +119,7 @@ public class SdfRenderState implements ShelfGuiElementRenderState {
             .setUv2((int) this.width, (int) this.height);
         //#else
         //$$ RenderStateUtil.addVertexWith2DPose(vertices, this.pose, x, y);
-        //$$ vertices.color(cornerColor);
+        //$$ RenderStateUtil.color(vertices, cornerColor);
         //$$ vertices.uv(u, v);
         //$$ vertices.overlayCoords(cornerRadiusU, cornerRadiusV);  // sets uv1
         //$$ vertices.uv2((int) this.width, (int) this.height);

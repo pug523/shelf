@@ -36,7 +36,9 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 public class ConfigScreenRenderer {
-    private static final Identifier RESET_BUTTON_TEXTURE = IdentifierCompat.ofShelf("textures/gui/reset_button.png");
+    private static final String RESET_BUTTON_PATH = "textures/gui/reset_button.png";
+    private static final Identifier RESET_BUTTON_TEXTURE = IdentifierCompat.ofShelf(RESET_BUTTON_PATH);
+
     private static final int INVALID_MOUSE_POSITION = -8000;
 
     public void render(GuiCompat gui, ConfigScreen screen, LayoutEngine layout, int mouseX, int mouseY, float partialTick, TabTreeController tabs, OptionContext context, OptionFocusController focus, ScrollController scrolls, ConfigChangeController change, OverlayController overlay, SearchBarController searchBar) {

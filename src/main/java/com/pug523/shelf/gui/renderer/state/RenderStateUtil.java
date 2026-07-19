@@ -53,6 +53,18 @@ public class RenderStateUtil {
     }
     //#endif
 
+    public static @NonNull VertexConsumer color(@NonNull VertexConsumer vertices, int color) {
+        //#if MC >= 11800
+        return vertices.setColor(color);
+        //#else
+        //$$ int a = (color >> 24) & 0xFF;
+        //$$ int r = (color >> 16) & 0xFF;
+        //$$ int g = (color >> 8) & 0xFF;
+        //$$ int b = color & 0xFF;
+        //$$ return vertices.color(a, r, g, b);
+        //#endif
+    }
+
     public static @NonNull VertexConsumer addVertexWith2DPose(@NonNull VertexConsumer vertices, Matrix3x2fCompat pose,
                                                               float x, float y) {
         //#if MC >= 12106

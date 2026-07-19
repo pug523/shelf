@@ -7,6 +7,7 @@ import com.pug523.shelf.gui.renderer.state.VanillaRectangleRenderState;
 import com.pug523.shelf.Constants;
 
 //#if MC <= 12105
+//$$ import com.pug523.shelf.gui.renderer.shader.ShaderManager;
 //$$ import com.mojang.blaze3d.systems.RenderSystem;
 //$$ import net.minecraft.client.renderer.RenderType;
 //#endif
@@ -432,7 +433,7 @@ public class RenderUtil {
         //#elseif MC >= 12000
         //$$ renderGuiElement(gui, renderState, RenderTypes.SDF_RENDER_TYPE);
         //#else
-        //$$ RenderSystem.setShader(RenderTypes::compiledSdfShader);
+        //$$ RenderSystem.setShader(ShaderManager::compiledSdfShader);
         //$$ renderGuiElement(gui, renderState, RenderTypes.SDF_RENDER_TYPE);
         //#endif
     }

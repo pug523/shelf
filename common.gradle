@@ -8,7 +8,7 @@ apply plugin: 'com.replaymod.preprocess'
 final ArrayList<String> mixinFiles = ["shelf.mixins.json", "shelf.client.mixins.json"]
 
 final String commandApi = (11900 <= mcVersion) ? "fabric-command-api-v2" : "fabric-command-api-v1"
-final boolean useRenderingApi = 11500 <= mcVersion && mcVersion <= 12101
+final boolean useRenderingApi = 11800 <= mcVersion && mcVersion <= 12101
 final String renderingApi = useRenderingApi ? "fabric-rendering-v1" : commandApi
 
 repositories {
@@ -49,6 +49,7 @@ dependencies {
 
     autoCompileOnly("maven.modrinth:modmenu:${project.modmenu_version}")
 
+    // 1.17.1 or below fails to launch test client if local runtime of modmenu is included.
     if (11800 <= mcVersion) {
         // autoLocalRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}")
         // autoLocalRuntime(fabricApi.module(commandApi, project.fabric_api_version))

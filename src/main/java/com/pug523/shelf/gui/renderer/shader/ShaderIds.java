@@ -8,17 +8,21 @@ public class ShaderIds {
     private ShaderIds() {
     }
 
-    public static final Identifier SDF = IdentifierCompat.ofShelf(shaderPath("sdf"));
+    public static final String SDF_PATH = shaderPath("sdf");
 
-    private static String shaderPath(String s) {
+    public static final Identifier SDF = IdentifierCompat.ofShelf(SDF_PATH);
+
+    public static String shaderPath(String s) {
         //#if MC >= 12104
         return "core/" + s;
         //#elseif MC >= 12102
         //$$ return "core/" + s + "_1.21.3";
         //#elseif MC >= 12100
         //$$ return s + "_1.21.1";
+        //#elseif MC >= 11802
+        //$$ return s + "_1.20.6";
         //#else
-        //$$ return s;
+        //$$ return s + "_1.17.1";
         //#endif
     }
 }
