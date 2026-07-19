@@ -2,18 +2,21 @@ package com.pug523.shelf.gui.widget;
 
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
-import com.pug523.shelf.compat.ScreenCompat;
-import com.pug523.shelf.gui.ConfigScreen;
 import com.pug523.shelf.gui.controller.SearchBarController;
 import com.pug523.shelf.gui.layout.LayoutEngine;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 
 public class SearchBarWidget implements ClickableWidget {
     private final SearchBarController controller;
     private final TextInputFieldWidget<String> textField;
+
+    private static final Style SEARCH_STYLE = Style.EMPTY.applyFormats(new ChatFormatting[]{ChatFormatting.GRAY, ChatFormatting.ITALIC});
+    // TODO: i18n
+    private static final Component SEARCH_COMPONENT = ComponentCompat.translatable("search...").withStyle(SEARCH_STYLE);
 
     public SearchBarWidget(SearchBarController controller) {
         this.controller = controller;
@@ -26,8 +29,7 @@ public class SearchBarWidget implements ClickableWidget {
             ""
         );
         this.textField.setAlwaysUnderlined(true);
-        // TODO: i18n
-        this.textField.setHint(ComponentCompat.translatable("search..."));
+        this.textField.setHint(SEARCH_COMPONENT);
 
         this.setFocused(true);
     }
