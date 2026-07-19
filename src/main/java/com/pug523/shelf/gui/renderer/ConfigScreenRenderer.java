@@ -2,7 +2,7 @@ package com.pug523.shelf.gui.renderer;
 
 import java.util.List;
 
-import com.pug523.shelf.Shelf;
+import com.pug523.shelf.ShelfConfigManager;
 import com.pug523.shelf.compat.ComponentCompat;
 import com.pug523.shelf.compat.GuiCompat;
 import com.pug523.shelf.compat.IdentifierCompat;
@@ -80,7 +80,7 @@ public class ConfigScreenRenderer {
         profiler.pop();
 
         // For debug
-        if (Shelf.CONFIG.getConfig().debugBoolean) {
+        if (ShelfConfigManager.getConfig().debugBoolean) {
             profiler.push("debug");
             RenderUtil.renderCircle(gui, 300.0f, 150.0f, 20.0f, 0xC000FF00);
             profiler.pop();

@@ -12,10 +12,10 @@ public class ShelfConfigScreen {
         return AnnotationParser.buildScreen(
             confText("title"),
             parent,
-            Shelf.CONFIG.getConfig(),
+            ShelfConfigManager.getConfig(),
             ShelfConfig.createDefault(),
-            Shelf.CONFIG::save,
-            Shelf.CONFIG.getConfig().layoutConfig
+            ShelfConfigManager::save,
+            ShelfConfigManager.getConfig().layoutConfig
         );
     }
 }

@@ -1,4 +1,5 @@
-net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback
-
+net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback net.fabricmc.fabric.api.client.command.v1.ClientCommandRegistrationCallback
+net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource
+net.fabricmc.fabric.api.client.command.v2.ClientCommands literal() net.fabricmc.fabric.api.client.command.v1.ClientCommandManager literal()
 org.joml.Matrix4f com.mojang.math.Matrix4f
 org.joml.Vector4f com.mojang.math.Vector4f
