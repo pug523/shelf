@@ -17,5 +17,3 @@ accessible method com/mojang/blaze3d/vertex/PoseStack$Pose <init> (Lorg/joml/Mat
 
 accessible field net/minecraft/client/gui/components/AbstractWidget height I
 accessible field net/minecraft/client/gui/components/EditBox highlightPos I
-
-accessible field net/minecraft/client/renderer/GameRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
