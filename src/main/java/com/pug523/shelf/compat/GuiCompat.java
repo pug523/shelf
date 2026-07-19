@@ -152,7 +152,7 @@ public class GuiCompat {
         this.graphics.enableScissor(minX, minY, maxX, maxY);
         //#else
         // TODO
-        //$$ RenderSystem.enableScissor(minX, minY, maxX, maxY);
+        //$$ // RenderSystem.enableScissor(minX, minY, maxX, maxY);
         //#endif
     }
 
@@ -161,7 +161,7 @@ public class GuiCompat {
         this.graphics.disableScissor();
         //#else
         // TODO
-        //$$ RenderSystem.disableScissor();
+        //$$ // RenderSystem.disableScissor();
         //#endif
     }
 
