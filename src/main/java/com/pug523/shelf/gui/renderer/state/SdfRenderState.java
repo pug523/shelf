@@ -1,41 +1,22 @@
 package com.pug523.shelf.gui.renderer.state;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.pug523.shelf.compat.GuiCompat;
 import com.pug523.shelf.compat.Matrix3x2fCompat;
 import com.pug523.shelf.gui.renderer.RenderPipelines;
-import com.pug523.shelf.gui.renderer.shader.UniformApplier;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-//#if MC >= 12106
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.buffers.Std140Builder;
-import com.pug523.shelf.gui.renderer.SdfParamBufferPool;
-
-import java.nio.ByteBuffer;
-
-import org.lwjgl.system.MemoryStack;
-//#endif
-
 //#if MC >= 12104
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.RenderPass;
-//#else
-//$$ import com.mojang.blaze3d.shaders.Uniform;
 //#endif
 
 //#if MC >= 11900
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 //#endif
 
-public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplier {
-    //#if MC >= 12106
-    private final GpuBufferSlice sdfParamsBufferSlice;
-    //#endif
-
+public class SdfRenderState implements ShelfGuiElementRenderState {
     public final Matrix3x2fCompat pose;
     public final float x0;
     public final float y0;
@@ -87,16 +68,6 @@ public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplie
         this.x0y1Color = x0y1Color;
         this.x1y0Color = x1y0Color;
         this.x1y1Color = x1y1Color;
-
-        //#if MC >= 12106
-        this.sdfParamsBufferSlice = SdfParamBufferPool.allocate();
-
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            ByteBuffer byteBuffer = Std140Builder.onStack(stack, SdfParamBufferPool.ELEMENT_SIZE)
-                .putVec4(this.width, this.height, this.radius, 0.0f).get();
-            RenderSystem.getDevice().createCommandEncoder().writeToBuffer(this.sdfParamsBufferSlice, byteBuffer);
-        }
-        //#endif
     }
 
     //#if MC >= 11900
@@ -129,30 +100,31 @@ public class SdfRenderState implements ShelfGuiElementRenderState, UniformApplie
 
     @Override
     public void buildVertices(@NonNull VertexConsumer vertices) {
-        writeVertex(vertices, x0, y0, u0, v0, this.x0y0Color);
-        writeVertex(vertices, x0, y1, u0, v1, this.x0y1Color);
-        writeVertex(vertices, x1, y1, u1, v1, this.x1y1Color);
-        writeVertex(vertices, x1, y0, u1, v0, this.x1y0Color);
+        writeVertex(vertices, this.x0, this.y0, this.u0, this.v0, this.x0y0Color, this.radius);
+        writeVertex(vertices, this.x0, this.y1, this.u0, this.v1, this.x0y1Color, this.radius);
+        writeVertex(vertices, this.x1, this.y1, this.u1, this.v1, this.x1y1Color, this.radius);
+        writeVertex(vertices, this.x1, this.y0, this.u1, this.v0, this.x1y0Color, this.radius);
     }
 
-    private void writeVertex(@NonNull VertexConsumer vertices, float x, float y, float u, float v, int cornerColor) {
-        RenderStateUtil.addVertexWith2DPose(vertices, this.pose, x, y).setUv(u, v).setColor(cornerColor);
-    }
+    private void writeVertex(@NonNull VertexConsumer vertices, float x, float y, float u, float v, int cornerColor, float cornerRadius) {
+        int cornerRadiusPackedBits = Float.floatToIntBits(cornerRadius);
+        int cornerRadiusU = cornerRadiusPackedBits & 0xFFFF;
+        int cornerRadiusV = (cornerRadiusPackedBits >> 16) & 0xFFFF;
 
-    //#if MC >= 12104
-    @Override
-    public void applyUniforms(RenderPass renderPass) {
-        //#if MC >= 12106
-        renderPass.setUniform(RenderPipelines.SDF_PARAMS_UBO_NAME, this.sdfParamsBufferSlice);
+        //#if MC >= 12100
+        RenderStateUtil.addVertexWith2DPose(vertices, this.pose, x, y)
+            .setColor(cornerColor)
+            .setUv(u, v)
+            .setUv1(cornerRadiusU, cornerRadiusV)
+            .setUv2((int) this.width, (int) this.height);
         //#else
-        //$$ renderPass.setUniform(RenderPipelines.SDF_PARAMS_UNIFORM_NAME, this.width, this.height, this.radius, 0.0f);
+        //$$ RenderStateUtil.addVertexWith2DPose(vertices, this.pose, x, y);
+        //$$ vertices.color(cornerColor);
+        //$$ vertices.uv(u, v);
+        //$$ vertices.overlayCoords(cornerRadiusU, cornerRadiusV);  // sets uv1
+        //$$ vertices.uv2((int) this.width, (int) this.height);
+        //$$ // vertices.normal(0, 0, 0);
+        //$$ vertices.endVertex();
         //#endif
     }
-    //#else
-    //$$ @Override
-    //$$ public void applyUniforms(Uniform uniform) {
-    //$$     uniform.set(this.width, this.height, this.radius, 0.0f);
-    //$$     // uniform.upload();
-    //$$ }
-    //#endif
 }

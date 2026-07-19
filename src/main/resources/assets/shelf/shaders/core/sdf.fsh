@@ -12,17 +12,14 @@ layout(std140) uniform DynamicTransforms {
     float LineWidth;
     #endif
 };
-
-layout(std140) uniform SdfParamsUbo {
-  vec4 SdfParams;
-};
 #else
 uniform vec4 ColorModulator;
-uniform vec4 SdfParams;
 #endif
 
 in vec2 texCoord0;
 in vec4 vertexColor;
+in float cornerRadius;
+in vec2 rawSize;
 
 out vec4 fragColor;
 
@@ -34,9 +31,6 @@ float sdfRoundedRect(vec2 p, vec2 halfSize, float r) {
 }
 
 void main() {
-  vec2 rawSize = SdfParams.xy;
-  float CornerRadius = SdfParams.z;
-
   // 0.5 ~ 1.5 is good
   float edgeThickness = 0.75;
 
@@ -45,7 +39,7 @@ void main() {
 
   vec2 p = (texCoord0 - 0.5) * rawSize;
 
-  float d = sdfRoundedRect(p, halfSize, CornerRadius);
+  float d = sdfRoundedRect(p, halfSize, cornerRadius);
 
   float alpha = smoothstep(edgeThickness, 0.0, d);
 

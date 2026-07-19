@@ -2,7 +2,6 @@ package com.pug523.shelf.gui.renderer;
 
 // @formatter:off
 //#if MC <= 12105
-//$$ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 //$$ import com.mojang.blaze3d.vertex.VertexFormat;
 //$$ import net.minecraft.client.renderer.*;
     //#if MC >= 12104
@@ -10,7 +9,6 @@ package com.pug523.shelf.gui.renderer;
     //$$ import com.mojang.blaze3d.buffers.BufferUsage;
     //$$ import com.mojang.blaze3d.vertex.PoseStack;
     //#else
-    //$$ import com.mojang.blaze3d.shaders.Uniform;
     //$$ import com.pug523.shelf.gui.renderer.shader.ShaderIds;
     //$$ import net.minecraft.client.Minecraft;
     //#endif
@@ -32,29 +30,25 @@ public class RenderTypes {
     //$$ );
     //#else
     //#if MC >= 12102
-    //$$ private static final ShaderProgram SDF_SHADER = new ShaderProgram(ShaderIds.SDF, DefaultVertexFormat.POSITION_TEX_COLOR, ShaderDefines.EMPTY);
+    //$$ private static final ShaderProgram SDF_SHADER = new ShaderProgram(ShaderIds.SDF, VertexFormats.POSITION_COLOR_TEX_CORNER_RADIUS_RAW_SIZE, ShaderDefines.EMPTY);
     //#endif
     //$$ private static CompiledShaderProgram COMPILED_SDF_SHADER = null;
-    //$$ private static Uniform SDF_PARAMS_UNIFORM = null;
-    //$$ private static boolean initialized = false;
     // @formatter:off
-    //$$ private static void init() {
-    //$$     if (!initialized) {
-                 //#if MC >= 12102
-                 //$$ COMPILED_SDF_SHADER = Minecraft.getInstance().getShaderManager().getProgram(SDF_SHADER);
-                 //#endif
-    //$$         if (COMPILED_SDF_SHADER != null) {
-    //$$             SDF_PARAMS_UNIFORM = COMPILED_SDF_SHADER.getUniform(RenderPipelines.SDF_PARAMS_UNIFORM_NAME);
-    //$$         }
-    //$$         if (SDF_PARAMS_UNIFORM != null) {
-    //$$             initialized = true;
-    //$$         }
-    //$$     }
-    //$$ }
+        //#if MC >= 12102
+        //$$ private static boolean initialized = false;
+        //$$ private static void init() {
+        //$$     if (!initialized) {
+        //$$         COMPILED_SDF_SHADER = Minecraft.getInstance().getShaderManager().getProgram(SDF_SHADER);
+        //$$         if (COMPILED_SDF_SHADER != null) {
+        //$$             initialized = true;
+        //$$         }
+        //$$     }
+        //$$ }
+        //#endif
     // @formatter:on
     //$$ public static final RenderType SDF_RENDER_TYPE = RenderType.create(
     //$$     "shelf_sdf",
-    //$$     DefaultVertexFormat.POSITION_TEX_COLOR,
+    //$$     VertexFormats.POSITION_COLOR_TEX_CORNER_RADIUS_RAW_SIZE,
     //$$     VertexFormat.Mode.QUADS,
     //$$     RenderType.SMALL_BUFFER_SIZE,
     //$$     RenderType.CompositeState.builder()
@@ -68,12 +62,10 @@ public class RenderTypes {
     //$$         .createCompositeState(false)
     //$$ );
     //$$ public static CompiledShaderProgram compiledSdfShader() {
-    //$$     init();
+        //#if MC >= 12102
+        //$$ init();
+        //#endif
     //$$     return COMPILED_SDF_SHADER;
-    //$$ }
-    //$$ public static Uniform sdfParamsUniform() {
-    //$$     init();
-    //$$     return SDF_PARAMS_UNIFORM;
     //$$ }
     //#endif
     //#endif
@@ -83,10 +75,9 @@ public class RenderTypes {
     //$$     CoreShaderRegistrationCallback.EVENT.register((context) -> {
     //$$         context.register(
     //$$             ShaderIds.SDF,
-    //$$             DefaultVertexFormat.POSITION_TEX_COLOR,
+    //$$             VertexFormats.POSITION_COLOR_TEX_CORNER_RADIUS_RAW_SIZE,
     //$$             (shaderProgram) -> {
     //$$                 COMPILED_SDF_SHADER = shaderProgram;
-    //$$                 init();
     //$$             }
     //$$         );
     //$$     });

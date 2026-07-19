@@ -7,12 +7,12 @@ import com.pug523.shelf.gui.renderer.state.VanillaRectangleRenderState;
 import com.pug523.shelf.Constants;
 
 //#if MC <= 12105
+//$$ import com.mojang.blaze3d.systems.RenderSystem;
 //$$ import com.pug523.shelf.gui.renderer.shader.SdfRenderTypeCache;
 //$$ import net.minecraft.client.renderer.RenderType;
 //#endif
 
 //#if MC <= 11904
-//$$ import com.mojang.blaze3d.systems.RenderSystem;
 //$$ import com.mojang.blaze3d.vertex.BufferBuilder;
 //$$ import com.mojang.blaze3d.vertex.BufferUploader;
 //$$ import com.mojang.blaze3d.vertex.Tesselator;
@@ -54,7 +54,7 @@ public class RenderUtil {
         float diameter = radius * 2.0f;
         float x = centerX - radius;
         float y = centerY - radius;
-        addRenderState(gui, createRectState(gui, x, y, x + diameter, y + diameter, radius, color, color, color, color));
+        renderGuiElementDispatcher(gui, createRectState(gui, x, y, x + diameter, y + diameter, radius, color, color, color, color));
     }
 
     /**
@@ -124,7 +124,7 @@ public class RenderUtil {
         float radius = globalHeight / 2.0f;
 
         if (!Constants.SDF_SHADER_AVAILABLE) {
-            addRenderState(gui, createRectState(gui, sliceX0, sliceY0, sliceX1, sliceY1, 0, color, color, color, color));
+            renderGuiElementDispatcher(gui, createRectState(gui, sliceX0, sliceY0, sliceX1, sliceY1, 0, color, color, color, color));
             return;
         }
 
@@ -169,7 +169,7 @@ public class RenderUtil {
      * @param color  The packed ARGB color
      */
     public static void renderRoundedRect(GuiCompat gui, float x, float y, float width, float height, float radius, int color) {
-        addRenderState(gui, createRectState(gui, x, y, x + width, y + height, radius, color, color, color, color));
+        renderGuiElementDispatcher(gui, createRectState(gui, x, y, x + width, y + height, radius, color, color, color, color));
     }
 
     /**
@@ -200,7 +200,7 @@ public class RenderUtil {
      * @param endColor   The ending packed ARGB color (right side)
      */
     public static void renderRoundedRectHorizontal(GuiCompat gui, float x, float y, float width, float height, float radius, int startColor, int endColor) {
-        addRenderState(gui, createRectState(gui, x, y, x + width, y + height, radius, startColor, startColor, endColor, endColor));
+        renderGuiElementDispatcher(gui, createRectState(gui, x, y, x + width, y + height, radius, startColor, startColor, endColor, endColor));
     }
 
     /**
@@ -231,7 +231,7 @@ public class RenderUtil {
      * @param endColor   The ending packed ARGB color (bottom side)
      */
     public static void renderRoundedRectVertical(GuiCompat gui, float x, float y, float width, float height, float radius, int startColor, int endColor) {
-        addRenderState(gui, createRectState(gui, x, y, x + width, y + height, radius, startColor, endColor, startColor, endColor));
+        renderGuiElementDispatcher(gui, createRectState(gui, x, y, x + width, y + height, radius, startColor, endColor, startColor, endColor));
     }
 
     /**
@@ -366,7 +366,7 @@ public class RenderUtil {
             int x1y1 = endColor;
 
             if (!Constants.SDF_SHADER_AVAILABLE) {
-                addRenderState(gui, createRectState(gui, x0, y0, x1, y1, radius, x0y0, x0y1, x1y0, x1y1));
+                renderGuiElementDispatcher(gui, createRectState(gui, x0, y0, x1, y1, radius, x0y0, x0y1, x1y0, x1y1));
                 continue;
             }
 
@@ -456,28 +456,30 @@ public class RenderUtil {
         //#endif
     }
 
-    private static void addRenderState(GuiCompat gui, ShelfGuiElementRenderState renderState) {
-        renderGuiElementDispatcher(gui, renderState);
-    }
-
     // @formatter:off
     //#if MC <= 12105
     //$$ private static void renderGuiElement(GuiCompat gui, ShelfGuiElementRenderState renderState, RenderType renderType) {
-    //#if MC >= 12102
-    //$$ gui.getGraphics().drawSpecial(bufferSource -> {
-    //$$     renderState.buildVertices(bufferSource.getBuffer(renderType));
-    //$$ });
-    //#elseif MC >= 12000
-    //$$ renderState.buildVertices(gui.getGraphics().bufferSource().getBuffer(renderType));
-    //#else
-    //$$ BufferBuilder builder = Tesselator.getInstance().getBuilder();
-    //$$ builder.begin(renderType.mode(), renderType.format());
-    //$$ renderState.buildVertices(builder);
-    //#if MC >= 11900
-    //$$ BufferUploader.drawWithShader(builder.end());
-    //#else
-    //$$ Tesselator.getInstance().end();
+    //#if MC <= 12103
+    //$$     RenderSystem.enableBlend();
     //#endif
+    //#if MC >= 12102
+    //$$     gui.getGraphics().drawSpecial(bufferSource -> {
+    //$$         renderState.buildVertices(bufferSource.getBuffer(renderType));
+    //$$     });
+    //#elseif MC >= 12000
+    //$$     renderState.buildVertices(gui.getGraphics().bufferSource().getBuffer(renderType));
+    //#else
+    //$$     BufferBuilder builder = Tesselator.getInstance().getBuilder();
+    //$$     builder.begin(renderType.mode(), renderType.format());
+    //$$     renderState.buildVertices(builder);
+    //#if MC >= 11900
+    //$$     BufferUploader.drawWithShader(builder.end());
+    //#else
+    //$$     Tesselator.getInstance().end();
+    //#endif
+    //#endif
+    //#if MC <= 12103
+    //$$     RenderSystem.disableBlend();
     //#endif
     //$$ }
     //#endif
