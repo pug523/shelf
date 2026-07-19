@@ -74,10 +74,17 @@ public class VanillaRectangleRenderState implements ShelfGuiElementRenderState {
 
     @Override
     public void buildVertices(@NonNull VertexConsumer vertices) {
-        RenderStateUtil.addVertexWith2DPose(vertices, this.pose, this.x1, this.y0).setColor(this.x1y0Color);
-        RenderStateUtil.addVertexWith2DPose(vertices, this.pose, this.x0, this.y0).setColor(this.x0y0Color);
-        RenderStateUtil.addVertexWith2DPose(vertices, this.pose, this.x0, this.y1).setColor(this.x0y1Color);
-        RenderStateUtil.addVertexWith2DPose(vertices, this.pose, this.x1, this.y1).setColor(this.x1y1Color);
+        this.writeVertex(vertices, this.x1, this.y0, this.x1y0Color);
+        this.writeVertex(vertices, this.x0, this.y0, this.x0y0Color);
+        this.writeVertex(vertices, this.x0, this.y1, this.x0y1Color);
+        this.writeVertex(vertices, this.x1, this.y1, this.x1y1Color);
+    }
+
+    private void writeVertex(@NonNull VertexConsumer vertices, int x, int y, int color) {
+        RenderStateUtil.addVertexWith2DPose(vertices, this.pose, x, y).setColor(color);
+        //#if MC <= 12006
+        //$$ vertices.endVertex();
+        //#endif
     }
 
     //#if MC >= 12104
