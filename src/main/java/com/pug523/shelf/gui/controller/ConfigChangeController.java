@@ -46,14 +46,4 @@ public class ConfigChangeController {
 
         dirty = false;
     }
-
-    public void closeOrConfirm(ConfigScreen screen) {
-        if (dirty) {
-            OverlayController overlayController = screen.getOverlayController();
-            overlayController.clear();
-            overlayController.push(new ConfirmationOverlay(o -> screen.close(), o -> overlayController.pop()));
-        } else {
-            screen.close();
-        }
-    }
 }

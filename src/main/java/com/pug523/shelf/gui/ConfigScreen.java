@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.pug523.shelf.gui.controller.*;
 import com.pug523.shelf.gui.widget.SearchBarWidget;
+import com.pug523.shelf.gui.widget.overlay.ConfirmationOverlay;
 import org.jspecify.annotations.NonNull;
 
 import com.pug523.shelf.compat.GuiCompat;
@@ -72,17 +73,26 @@ public class ConfigScreen extends Screen {
 
         this.contextBuilder = new OptionContextBuilder();
         this.renderer = new ConfigScreenRenderer();
-        this.input = new ConfigInputHandler(tabController, scrollController, optionContextController, focusController, overlayController, changeController, searchBarWidget);
+        this.input = new ConfigInputHandler(this, tabController, scrollController, optionContextController, focusController, overlayController, changeController, searchBarWidget);
 
         ActionButtonWidget undoButton = new ActionButtonWidget(TextUtil.guiText("undo"), btn -> this.changeController.undo());
         ActionButtonWidget applyButton = new ActionButtonWidget(TextUtil.guiText("apply"), btn -> this.changeController.apply());
-        ActionButtonWidget doneButton = new ActionButtonWidget(TextUtil.guiText("done"), btn -> this.changeController.closeOrConfirm(this));
+        ActionButtonWidget doneButton = new ActionButtonWidget(TextUtil.guiText("done"), btn -> this.closeOrConfirm());
 
         this.footerButtons = JavaCompat.listOf(undoButton, applyButton, doneButton);
     }
 
     public void close() {
         ScreenCompat.setScreen(this.minecraft, this.parent);
+    }
+
+    public void closeOrConfirm() {
+        if (changeController.isDirty()) {
+            overlayController.clear();
+            overlayController.push(new ConfirmationOverlay(o -> this.close(), o -> overlayController.pop()));
+        } else {
+            this.close();
+        }
     }
 
     public OverlayController getOverlayController() {

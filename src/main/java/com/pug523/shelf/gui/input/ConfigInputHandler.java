@@ -6,6 +6,7 @@ import java.util.List;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import com.pug523.shelf.compat.JavaCompat;
+import com.pug523.shelf.gui.ConfigScreen;
 import com.pug523.shelf.gui.controller.*;
 import com.pug523.shelf.gui.TabNode;
 import com.pug523.shelf.gui.layout.LayoutConfig;
@@ -21,6 +22,8 @@ import com.pug523.shelf.gui.widget.SearchBarWidget;
 import com.pug523.shelf.gui.widget.overlay.OverlayWidget;
 
 public final class ConfigInputHandler {
+    private final ConfigScreen screen;
+
     private final TabTreeController tabs;
     private final ScrollController scrolls;
     private final OptionContextController options;
@@ -33,8 +36,9 @@ public final class ConfigInputHandler {
     private boolean isDraggingTabScrollBar = false;
     private boolean isDraggingOptionScrollBar = false;
 
-    public ConfigInputHandler(TabTreeController tabs, ScrollController scrolls, OptionContextController options,
+    public ConfigInputHandler(ConfigScreen screen, TabTreeController tabs, ScrollController scrolls, OptionContextController options,
                               OptionFocusController focus, OverlayController overlays, ConfigChangeController change, SearchBarWidget searchBar) {
+        this.screen = screen;
         this.tabs = tabs;
         this.scrolls = scrolls;
         this.options = options;
@@ -385,6 +389,11 @@ public final class ConfigInputHandler {
             }
         }
         updateDirty();
+
+        if (!result && keycode == InputConstants.KEY_ESCAPE) {
+            screen.closeOrConfirm();
+            result = true;
+        }
         return result;
     }
 
