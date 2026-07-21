@@ -23,6 +23,9 @@ import static com.pug523.shelf.compat.JavaCompat.listOf;
 
 public class AnnotationParser {
 
+    private static final String TITLE_SUFFIX = ".title";
+    private static final String DESCRIPTION_SUFFIX = "_desc";
+
     private static class ParsingContext {
         private final ConfigScreenBuilder.CategoryBuilder builder;
         private final Map<String, ConfigScreenBuilder.GroupBuilder> groupCache;
@@ -51,39 +54,73 @@ public class AnnotationParser {
             contextStack.push(new ParsingContext(rootBuilder));
 
             ConfigTreeWalker.walk(configInstance, defaultInstance, ctx -> {
-                String groupName = ctx.entry() != null && !ctx.entry().group().isEmpty() ? ctx.entry().group() : "default_group";
+                ConfigEntry entry = ctx.entry();
                 ParsingContext activeContext = contextStack.peek();
 
+                String categoryStr = (entry != null) ? entry.category() : "";
+                boolean hasCategory = !categoryStr.isEmpty();
+
+                ParsingContext targetContext = activeContext;
+                if (hasCategory) {
+                    targetContext = categoryCache.get(categoryStr);
+                    if (targetContext == null) {
+                        ParsingContext[] holder = new ParsingContext[1];
+                        String titleKey = categoryStr + TITLE_SUFFIX;
+
+                        activeContext.getBuilder().subCategory(ComponentCompat.translatable(titleKey), b -> holder[0] = new ParsingContext(b));
+                        targetContext = holder[0];
+                        categoryCache.put(categoryStr, targetContext);
+                    }
+                }
+
+                String optionKey;
+                String groupKey;
+                String descKey;
+
+                if (hasCategory) {
+                    String localKey = !entry.key().isEmpty() ? entry.key() : ConfigTreeWalker.camelToSnake(ctx.field().getName());
+                    optionKey = categoryStr + "." + localKey;
+
+                    String localGroup = !entry.group().isEmpty() ? entry.group() : "default_group";
+                    groupKey = categoryStr + "." + localGroup;
+
+                    if (!entry.description().isEmpty()) {
+                        descKey = entry.description();
+                    } else {
+                        descKey = optionKey + DESCRIPTION_SUFFIX;
+                    }
+                } else {
+                    // Absolute path mode fallback tracking system
+                    optionKey = (entry != null && !entry.key().isEmpty()) ? entry.key() : ctx.keyPath();
+                    groupKey = (entry != null && !entry.group().isEmpty()) ? entry.group() : "all_settings.default_group";
+
+                    if (entry != null && !entry.description().isEmpty()) {
+                        descKey = entry.description();
+                    } else {
+                        descKey = optionKey + DESCRIPTION_SUFFIX;
+                    }
+                }
+
                 if (ctx.isLeaf()) {
-                    OptionWidget<?> widget = createWidgetForField(ctx.field(), ctx.instance(), ctx.defaultInstance(), ctx.keyPath());
+                    OptionWidget<?> widget = createWidgetForField(ctx.field(), ctx.instance(), ctx.defaultInstance(), optionKey, descKey);
                     if (widget != null) {
-                        // Safe Map lookup optimization via lambda context
-                        ConfigScreenBuilder.GroupBuilder groupBuilder = activeContext.getGroupCache().get(groupName);
+                        ConfigScreenBuilder.GroupBuilder groupBuilder = targetContext.getGroupCache().get(groupKey);
                         if (groupBuilder == null) {
                             ConfigScreenBuilder.GroupBuilder[] holder = new ConfigScreenBuilder.GroupBuilder[1];
-                            activeContext.getBuilder().group(ComponentCompat.translatable(groupName), b -> holder[0] = b);
+                            targetContext.getBuilder().group(ComponentCompat.translatable(groupKey), b -> holder[0] = b);
                             groupBuilder = holder[0];
-                            activeContext.getGroupCache().put(groupName, groupBuilder);
+                            targetContext.getGroupCache().put(groupKey, groupBuilder);
                         }
                         groupBuilder.add(widget);
                     }
                 } else {
-                    String categoryName = ctx.entry() != null ? ctx.entry().category() : "";
-
-                    if (!categoryName.isEmpty()) {
-                        ParsingContext targetCategory = categoryCache.get(categoryName);
-                        if (targetCategory == null) {
-                            ParsingContext[] holder = new ParsingContext[1];
-                            rootBuilder.subCategory(ComponentCompat.translatable(categoryName), b -> holder[0] = new ParsingContext(b));
-                            targetCategory = holder[0];
-                            categoryCache.put(categoryName, targetCategory);
-                        }
-                        contextStack.push(targetCategory);
+                    if (hasCategory) {
+                        contextStack.push(targetContext);
                         ctx.recurse();
                         contextStack.pop();
                     } else {
-                        String localKey = ctx.entry() != null && !ctx.entry().key().isEmpty() ? ctx.entry().key() : ConfigTreeWalker.camelToSnake(ctx.field().getName());
-                        activeContext.getBuilder().subCategory(ComponentCompat.translatable(localKey), subBuilder -> {
+                        String subCategoryTitleKey = optionKey + TITLE_SUFFIX;
+                        targetContext.getBuilder().subCategory(ComponentCompat.translatable(subCategoryTitleKey), subBuilder -> {
                             contextStack.push(new ParsingContext(subBuilder));
                             ctx.recurse();
                             contextStack.pop();
@@ -105,9 +142,9 @@ public class AnnotationParser {
         return buildScreen(title, parent, configInstance, defaultInstance, onSave, LayoutConfig.createDefault());
     }
 
-    private static OptionWidget<?> createWidgetForField(Field field, Object instance, Object defaultInstance, String optKey) {
+    private static OptionWidget<?> createWidgetForField(Field field, Object instance, Object defaultInstance, String optKey, String descKey) {
         try {
-            Option<Object> option = new Option<>(optKey, field.get(defaultInstance),
+            Option<Object> option = new Option<>(optKey, descKey, field.get(defaultInstance),
                 () -> { try { return field.get(instance); } catch (Exception e) { throw new RuntimeException(e); } },
                 val -> { try { field.set(instance, val); } catch (Exception e) { throw new RuntimeException(e); } },
                 listOf()

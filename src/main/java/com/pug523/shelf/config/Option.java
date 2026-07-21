@@ -31,8 +31,13 @@ public class Option<T> implements GuiOption<T> {
         this.pendingValue = getter.get();
     }
 
+    public Option(String nameKey, String descriptionKey, T defaultValue, Supplier<T> getter, Consumer<T> setter,
+                  List<Tag> tags) {
+        this(ComponentCompat.translatable(nameKey), descriptionKey, defaultValue, getter, setter, tags);
+    }
+
     public Option(String nameKey, T defaultValue, Supplier<T> getter, Consumer<T> setter, List<Tag> tags) {
-        this(ComponentCompat.translatable(nameKey), nameKey + ".desc", defaultValue, getter, setter, tags);
+        this(nameKey, nameKey + "_desc", defaultValue, getter, setter, tags);
     }
 
     public Component getName() {

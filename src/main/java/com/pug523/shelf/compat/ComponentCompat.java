@@ -1,5 +1,6 @@
 package com.pug523.shelf.compat;
 
+import com.pug523.shelf.ShelfTranslator;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 
@@ -34,11 +35,14 @@ public class ComponentCompat {
     //$$ public static Component translatable(String message) {
     //#endif
     // @formatter:on
+        return literal(ShelfTranslator.engine().translate(message));
+        /*
         //#if MC >= 11900
         return Component.translatable(message);
         //#else
         //$$ return new TranslatableComponent(message);
         //#endif
+        */
     }
 
     // @formatter:off
