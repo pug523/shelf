@@ -1,0 +1,71 @@
+package com.pug523.shelf.gui.widget;
+
+import java.util.function.Function;
+
+import com.pug523.shelf.common.compat.ComponentCompat;
+import com.pug523.shelf.common.compat.GuiCompat;
+import com.pug523.shelf.gui.layout.LayoutConfig;
+import com.pug523.shelf.gui.layout.LayoutEngine;
+import com.pug523.shelf.ui.view.widget.Widget;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
+
+public class SuggestionItemWidget<T> implements Widget {
+    private final T value;
+    private final Function<T, String> idExtractor;
+    private final TextInputFieldWidget.SuggestionIconRenderer<T> iconRenderer;
+    private final boolean rightAlign;
+
+    public SuggestionItemWidget(
+        T value,
+        Function<T, String> idExtractor,
+        TextInputFieldWidget.SuggestionIconRenderer<T> iconRenderer,
+        boolean rightAlign
+    ) {
+        this.value = value;
+        this.idExtractor = idExtractor;
+        this.iconRenderer = iconRenderer;
+        this.rightAlign = rightAlign;
+    }
+
+    public T getValue() {
+        return value;
+    }
+
+    @Override
+    public void render(Font font, GuiCompat gui, LayoutEngine layout, int x, int y, int width, int height, int mouseX, int mouseY) {
+        LayoutConfig cfg = layout.getConfig();
+        boolean isHovered = mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+
+        int bgColor = isHovered ? cfg.colorItemInputSuggestionHover : cfg.colorItemInputSuggestionBg;
+        gui.fill(x, y, x + width, y + height, bgColor);
+
+        String idStr = idExtractor.apply(value);
+        Component text = ComponentCompat.literal(idStr);
+        int textWidth = ComponentCompat.width(font, text);
+
+        int textX;
+        if (rightAlign) {
+            textX = x + width - textWidth;
+        } else {
+            int iconSize = cfg.itemInputIconSize;
+            textX = x + iconSize + (cfg.itemInputIconSpacing * 2);
+        }
+        int textY = y + (height - font.lineHeight) / 2 + 1;
+
+        int textColor = isHovered ? cfg.colorItemInputSuggestionTextHover : cfg.colorItemInputSuggestionTextDefault;
+        gui.text(font, text, textX, textY, textColor, false);
+
+        if (iconRenderer != null) {
+            int iconSize = cfg.itemInputIconSize;
+            int iconX = textX - iconSize - cfg.itemInputSuggestionIconSpacing;
+            int iconY = y + (height - iconSize) / 2;
+            iconRenderer.render(gui, value, iconX, iconY);
+        }
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button, int modifiers, LayoutEngine layout) {
+        return true;
+    }
+}
