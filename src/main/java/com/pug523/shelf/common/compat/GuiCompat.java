@@ -1,4 +1,4 @@
-package com.pug523.shelf.compat;
+package com.pug523.shelf.common.compat;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
@@ -133,6 +133,13 @@ public class GuiCompat {
 
     public void text(Font font, Component text, int x, int y, int color) {
         text(font, text, x, y, color, false);
+    }
+
+    public void centeredText(Font font, Component text, int x, int y, int width, int height, int color, boolean shadow) {
+        int textWidth = ComponentCompat.width(font, text);
+        int centeredX = x + (width - textWidth) / 2 + 1;
+        int centeredY = y + (height - font.lineHeight) / 2 + 1;
+        this.text(font, text, centeredX, centeredY, color, shadow);
     }
 
     public void textWithWordWrap(Font font, Component text, int x, int y, int width, int color) {

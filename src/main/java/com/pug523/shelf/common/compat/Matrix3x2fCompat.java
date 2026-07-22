@@ -1,4 +1,4 @@
-package com.pug523.shelf.compat;
+package com.pug523.shelf.common.compat;
 
 //#if MC >= 12106
 import org.joml.Matrix3x2f;

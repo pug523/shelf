@@ -1,4 +1,4 @@
-package com.pug523.shelf.compat.modmenu;
+package com.pug523.shelf.common.compat.modmenu;
 
 import com.pug523.shelf.ShelfConfigScreen;
 

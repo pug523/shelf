@@ -1,4 +1,4 @@
-package com.pug523.shelf.compat;
+package com.pug523.shelf.common.compat;
 
 import com.pug523.shelf.ShelfTranslator;
 import net.minecraft.client.gui.Font;

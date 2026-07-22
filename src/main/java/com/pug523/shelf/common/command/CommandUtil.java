@@ -1,4 +1,4 @@
-package com.pug523.shelf.command;
+package com.pug523.shelf.common.command;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;

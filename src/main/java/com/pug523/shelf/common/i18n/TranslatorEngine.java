@@ -1,4 +1,4 @@
-package com.pug523.shelf.i18n;
+package com.pug523.shelf.common.i18n;
 
 import net.fabricmc.loader.api.FabricLoader;
 import org.jspecify.annotations.NonNull;

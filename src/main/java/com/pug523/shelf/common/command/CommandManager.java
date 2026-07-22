@@ -1,4 +1,4 @@
-package com.pug523.shelf.command;
+package com.pug523.shelf.common.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.pug523.shelf.api.command.Command;

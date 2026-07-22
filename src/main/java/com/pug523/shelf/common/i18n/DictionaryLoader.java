@@ -1,4 +1,4 @@
-package com.pug523.shelf.i18n;
+package com.pug523.shelf.common.i18n;
 
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.file.FileConfig;

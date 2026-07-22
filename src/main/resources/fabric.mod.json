@@ -17,7 +17,7 @@
       "com.pug523.shelf.Shelf"
     ],
     "modmenu": [
-      "com.pug523.shelf.compat.modmenu.ModMenuApiImpl"
+      "com.pug523.shelf.common.compat.modmenu.ModMenuApiImpl"
     ]
   },
   "mixins": [

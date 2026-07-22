@@ -1,4 +1,4 @@
-package com.pug523.shelf.compat;
+package com.pug523.shelf.common.compat;
 
 import java.util.List;
 
