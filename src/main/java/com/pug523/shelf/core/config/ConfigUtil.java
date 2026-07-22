@@ -1,4 +1,4 @@
-package com.pug523.shelf.config;
+package com.pug523.shelf.core.config;
 
 import java.io.File;
 
@@ -6,8 +6,8 @@ import com.electronwill.nightconfig.core.serde.ObjectDeserializer;
 import com.electronwill.nightconfig.core.serde.ObjectDeserializerBuilder;
 import com.electronwill.nightconfig.core.serde.ObjectSerializer;
 import com.electronwill.nightconfig.core.serde.ObjectSerializerBuilder;
-import com.pug523.shelf.compat.BuiltinRegistriesCompat;
-import com.pug523.shelf.compat.IdentifierCompat;
+import com.pug523.shelf.common.compat.BuiltinRegistriesCompat;
+import com.pug523.shelf.common.compat.IdentifierCompat;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;

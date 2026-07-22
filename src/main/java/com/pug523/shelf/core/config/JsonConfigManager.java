@@ -1,4 +1,4 @@
-package com.pug523.shelf.config;
+package com.pug523.shelf.core.config;
 
 import java.io.File;
 import java.io.Serializable;
@@ -19,7 +19,8 @@ public class JsonConfigManager<T extends Serializable> implements ConfigManager<
 
     private T config;
 
-    public JsonConfigManager(File configFile, Supplier<T> defaultSupplier, Migrator migrator, ObjectSerializer serializer, ObjectDeserializer deserializer) {
+    public JsonConfigManager(File configFile, Supplier<T> defaultSupplier, Migrator migrator,
+            ObjectSerializer serializer, ObjectDeserializer deserializer) {
         this.configFile = configFile;
         this.defaultSupplier = defaultSupplier;
         this.migrator = migrator;
@@ -60,8 +61,8 @@ public class JsonConfigManager<T extends Serializable> implements ConfigManager<
             }
         } catch (Exception e) {
             Shelf.LOGGER.error(
-                "Failed to parse user config from json cleanly. Reverting to default config.\nfile: {}\nmessage: {}",
-                configFile.getName(), e.getMessage());
+                    "Failed to parse user config from json cleanly. Reverting to default config.\nfile: {}\nmessage: {}",
+                    configFile.getName(), e.getMessage());
             config = defaultSupplier.get();
             save();
         }
@@ -79,7 +80,7 @@ public class JsonConfigManager<T extends Serializable> implements ConfigManager<
             fileConfig.save();
         } catch (Exception e) {
             Shelf.LOGGER.error("Failed to save user config to json.\nfile: {}\nmessage: {}", configFile.getName(),
-                e.getMessage());
+                    e.getMessage());
             e.printStackTrace();
         }
     }

@@ -1,4 +1,4 @@
-package com.pug523.shelf.config;
+package com.pug523.shelf.core.config;
 
 import java.io.Serializable;
 

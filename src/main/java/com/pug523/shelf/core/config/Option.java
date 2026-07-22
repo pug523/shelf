@@ -1,11 +1,11 @@
-package com.pug523.shelf.config;
+package com.pug523.shelf.core.config;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import com.pug523.shelf.compat.ComponentCompat;
+import com.pug523.shelf.common.compat.ComponentCompat;
 
 import com.pug523.shelf.gui.widget.option.GuiOption;
 import net.minecraft.network.chat.Component;
@@ -21,7 +21,7 @@ public class Option<T> implements GuiOption<T> {
     private T pendingValue;
 
     public Option(Component name, String descriptionKey, T defaultValue, Supplier<T> getter, Consumer<T> setter,
-                  List<Tag> tags) {
+            List<Tag> tags) {
         this.name = name;
         this.descriptionKey = descriptionKey;
         this.defaultValue = defaultValue;
@@ -32,7 +32,7 @@ public class Option<T> implements GuiOption<T> {
     }
 
     public Option(String nameKey, String descriptionKey, T defaultValue, Supplier<T> getter, Consumer<T> setter,
-                  List<Tag> tags) {
+            List<Tag> tags) {
         this(ComponentCompat.translatable(nameKey), descriptionKey, defaultValue, getter, setter, tags);
     }
 

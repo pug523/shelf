@@ -1,4 +1,4 @@
-package com.pug523.shelf.config;
+package com.pug523.shelf.core.config;
 
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.serde.ObjectSerializer;
