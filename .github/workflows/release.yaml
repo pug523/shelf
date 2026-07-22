@@ -21,8 +21,8 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Get github release information
-        uses: cardinalby/git-get-release-action@1.2.6
+      - name: Get GitHub Release Information
+        uses: cardinalby/git-get-release-action@2ab178299eecb253f820dcf2cce11f62be1178f7
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
@@ -48,18 +48,18 @@ jobs:
       matrix: ${{ fromJson(needs.matrix_prepare.outputs.matrix) }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: build-artifacts
           path: build-artifacts
 
-      - name: Get Github Release Information
+      - name: Get GitHub Release Information
         if: ${{ github.event_name == 'workflow_dispatch' }}
         id: get_release
-        uses: cardinalby/git-get-release-action@1.2.6
+        uses: cardinalby/git-get-release-action@2ab178299eecb253f820dcf2cce11f62be1178f7
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
@@ -76,14 +76,14 @@ jobs:
 
       - name: Read Common Properties
         id: properties_g
-        uses: BrycensRanch/read-properties-action@v1
+        uses: BrycensRanch/read-properties-action@6b75d8ab70d5abeb5211f96b660c45c911732b6e
         with:
           file: gradle.properties
           all: true
 
       - name: Read Version-Specific Properties
         id: properties_v
-        uses: BrycensRanch/read-properties-action@v1
+        uses: BrycensRanch/read-properties-action@6b75d8ab70d5abeb5211f96b660c45c911732b6e
         with:
           file: ${{ format('versions/{0}/gradle.properties', matrix.subproject) }}
           all: true
@@ -105,7 +105,7 @@ jobs:
           echo "hash=$(sha256sum $FILE_PATH | awk '{ print $1 }')" >> $GITHUB_OUTPUT
 
       - name: Prepare Changelog
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         id: changelog
         with:
           script: return process.env.CHANGELOG
@@ -123,7 +123,7 @@ jobs:
             - Built from: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: Publish Mods to Modrinth
-        uses: Kir-Antipov/mc-publish@v3.3
+        uses: Kir-Antipov/mc-publish@52307b03863581dec6b652b83e597aec02ebb075
         with:
           MODRINTH_PROJECT_ID: ysmYXPgd  # https://modrinth.com/mod/shelf
           modrinth-token: ${{ secrets.MODRINTH_API_TOKEN }}
