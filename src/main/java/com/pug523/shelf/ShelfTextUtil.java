@@ -1,14 +1,12 @@
 package com.pug523.shelf;
 
-import com.pug523.shelf.compat.ComponentCompat;
+import com.pug523.shelf.common.compat.ComponentCompat;
 
-import com.pug523.shelf.i18n.TranslatorEngine;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import org.jspecify.annotations.Nullable;
 
 /// Only for Shelf mod config screen.
-/// Library common text handling is in com.pug523.shelf.gui.text.TextUtil.
+/// Library common text handling is in com.pug523.shelf.ui.text.TextUtil.
 public class ShelfTextUtil {
     public static final String MOD_LANG_KEY_PREFIX = Shelf.MOD_ID + ".mod.";
     public static final String CONFIG_LANG_KEY_PREFIX = MOD_LANG_KEY_PREFIX + "config.";

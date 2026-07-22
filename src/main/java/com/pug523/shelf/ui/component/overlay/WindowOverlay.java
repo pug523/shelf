@@ -1,14 +1,14 @@
-package com.pug523.shelf.gui.widget.overlay;
+package com.pug523.shelf.ui.component.overlay;
 
-import com.pug523.shelf.gui.Colors;
+import com.pug523.shelf.core.Colors;
 import com.pug523.shelf.gui.layout.Bounds;
-import com.pug523.shelf.gui.layout.LayoutConfig;
-import com.pug523.shelf.gui.widget.ActionButtonWidget;
+import com.pug523.shelf.ui.layout.LayoutConfig;
 import com.pug523.shelf.common.compat.GuiCompat;
-import com.pug523.shelf.gui.sound.SoundUtil;
+import com.pug523.shelf.ui.sound.SoundUtil;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 
+// TODO: refactor
 public abstract class WindowOverlay implements OverlayWidget {
     // TODO: move to layout config
     protected static final int COLOR_BG_OUTLINE = 0xAF11131E;

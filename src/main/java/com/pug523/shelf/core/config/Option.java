@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 
 import com.pug523.shelf.common.compat.ComponentCompat;
 
-import com.pug523.shelf.gui.widget.option.GuiOption;
+import com.pug523.shelf.ui.option.GuiOption;
 import net.minecraft.network.chat.Component;
 
 public class Option<T> implements GuiOption<T> {

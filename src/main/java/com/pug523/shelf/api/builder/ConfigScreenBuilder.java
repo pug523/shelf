@@ -1,11 +1,11 @@
 package com.pug523.shelf.api.builder;
 
-import com.pug523.shelf.config.Profile;
-import com.pug523.shelf.gui.ConfigScreen;
-import com.pug523.shelf.gui.OptionGroup;
-import com.pug523.shelf.gui.TabNode;
-import com.pug523.shelf.gui.layout.LayoutConfig;
-import com.pug523.shelf.gui.widget.option.OptionWidget;
+import com.pug523.shelf.core.config.Profile;
+import com.pug523.shelf.ui.screen.ConfigScreen;
+import com.pug523.shelf.ui.screen.OptionGroup;
+import com.pug523.shelf.ui.screen.TabNode;
+import com.pug523.shelf.ui.layout.LayoutConfig;
+import com.pug523.shelf.ui.option.OptionWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 

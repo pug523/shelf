@@ -1,7 +1,7 @@
 package com.pug523.shelf.api.annotation;
 
-import com.pug523.shelf.config.Option;
-import com.pug523.shelf.gui.widget.option.OptionWidget;
+import com.pug523.shelf.core.config.Option;
+import com.pug523.shelf.ui.option.OptionWidget;
 import java.lang.reflect.Field;
 
 @FunctionalInterface

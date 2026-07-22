@@ -1,4 +1,4 @@
-package com.pug523.shelf.gui.widget.overlay;
+package com.pug523.shelf.ui.component.overlay;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,18 +10,18 @@ import com.pug523.shelf.common.compat.ComponentCompat;
 import com.pug523.shelf.common.compat.GuiCompat;
 import com.pug523.shelf.common.compat.JavaCompat;
 import com.pug523.shelf.core.config.Option;
-import com.pug523.shelf.gui.Colors;
+import com.pug523.shelf.core.Colors;
 import com.pug523.shelf.gui.layout.Bounds;
-import com.pug523.shelf.gui.layout.LayoutConfig;
-import com.pug523.shelf.gui.layout.LayoutEngine;
-import com.pug523.shelf.gui.sound.SoundUtil;
-import com.pug523.shelf.gui.widget.ActionButtonWidget;
-import com.pug523.shelf.gui.widget.option.GuiOption;
-import com.pug523.shelf.gui.widget.option.OptionWidget;
+import com.pug523.shelf.ui.layout.LayoutConfig;
+import com.pug523.shelf.ui.layout.LayoutEngine;
+import com.pug523.shelf.ui.sound.SoundUtil;
+import com.pug523.shelf.ui.option.GuiOption;
+import com.pug523.shelf.ui.option.OptionWidget;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 
+// TODO: refactor
 public class ListEditorOverlay<T> extends WindowOverlay {
     public static final Component TITLE_TEXT = ComponentCompat.literal("Edit List");
     public static final Component BTN_CANCEL = ComponentCompat.literal("Cancel");

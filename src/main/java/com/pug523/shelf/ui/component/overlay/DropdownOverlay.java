@@ -1,14 +1,15 @@
-package com.pug523.shelf.gui.widget.overlay;
+package com.pug523.shelf.ui.component.overlay;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 import com.pug523.shelf.common.compat.GuiCompat;
-import com.pug523.shelf.gui.layout.LayoutEngine;
+import com.pug523.shelf.ui.layout.LayoutEngine;
 import com.pug523.shelf.ui.view.widget.Widget;
 
 import net.minecraft.client.gui.Font;
 
+// TODO: refactor
 public class DropdownOverlay implements OverlayWidget {
     private final int x, y, width, height;
     private final List<? extends Widget> items;

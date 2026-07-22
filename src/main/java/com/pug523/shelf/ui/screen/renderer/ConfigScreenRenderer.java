@@ -1,4 +1,4 @@
-package com.pug523.shelf.gui.renderer;
+package com.pug523.shelf.ui.screen.renderer;
 
 import java.util.List;
 
@@ -7,21 +7,21 @@ import com.pug523.shelf.common.compat.ComponentCompat;
 import com.pug523.shelf.common.compat.GuiCompat;
 import com.pug523.shelf.common.compat.IdentifierCompat;
 import com.pug523.shelf.common.compat.ProfilerCompat;
+import com.pug523.shelf.ui.render.RenderUtil;
 import com.pug523.shelf.ui.screen.ConfigScreen;
-import com.pug523.shelf.gui.TabNode;
-import com.pug523.shelf.gui.controller.*;
-import com.pug523.shelf.gui.layout.LayoutConfig;
-import com.pug523.shelf.gui.layout.LayoutEngine;
+import com.pug523.shelf.ui.screen.TabNode;
+import com.pug523.shelf.ui.layout.LayoutConfig;
+import com.pug523.shelf.ui.layout.LayoutEngine;
 import com.pug523.shelf.gui.layout.Bounds;
 import com.pug523.shelf.gui.layout.OptionRowLayout;
-import com.pug523.shelf.gui.model.OptionContext;
-import com.pug523.shelf.gui.model.RenderableItem;
-import com.pug523.shelf.gui.widget.option.GuiOption;
-import com.pug523.shelf.gui.widget.overlay.OverlayWidget;
-import com.pug523.shelf.gui.text.TextUtil;
-import com.pug523.shelf.gui.widget.ActionButtonWidget;
-import com.pug523.shelf.gui.widget.option.OptionWidget;
-import com.pug523.shelf.gui.widget.SearchBarWidget;
+import com.pug523.shelf.ui.model.OptionContext;
+import com.pug523.shelf.ui.model.RenderableItem;
+import com.pug523.shelf.ui.option.GuiOption;
+import com.pug523.shelf.ui.component.overlay.OverlayWidget;
+import com.pug523.shelf.ui.screen.controller.*;
+import com.pug523.shelf.ui.text.TextUtil;
+import com.pug523.shelf.ui.option.OptionWidget;
+import com.pug523.shelf.ui.component.SearchBarWidget;
 
 import net.minecraft.ChatFormatting;
 //#if MC >= 12106
@@ -35,6 +35,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.profiling.ProfilerFiller;
 
+// TODO: refactor
 public class ConfigScreenRenderer {
     private static final String RESET_BUTTON_PATH = "textures/gui/reset_button.png";
     private static final Identifier RESET_BUTTON_TEXTURE = IdentifierCompat.ofShelf(RESET_BUTTON_PATH);

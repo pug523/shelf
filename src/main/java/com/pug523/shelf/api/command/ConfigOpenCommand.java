@@ -2,14 +2,14 @@ package com.pug523.shelf.api.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
-import com.pug523.shelf.compat.ScreenCompat;
+import com.pug523.shelf.common.compat.ScreenCompat;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 
 import java.util.function.Function;
 
-import static com.pug523.shelf.command.CommandUtil.literal;
+import static com.pug523.shelf.common.command.CommandUtil.literal;
 
 /// A generic command definition that opens a configuration GUI screen.
 public class ConfigOpenCommand implements Command {

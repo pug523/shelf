@@ -1,4 +1,4 @@
-package com.pug523.shelf.gui.widget.overlay;
+package com.pug523.shelf.ui.component.overlay;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -9,19 +9,18 @@ import java.util.function.BiConsumer;
 import com.pug523.shelf.common.compat.ComponentCompat;
 import com.pug523.shelf.common.compat.GuiCompat;
 import com.pug523.shelf.common.compat.JavaCompat;
-import com.pug523.shelf.gui.Colors;
-import com.pug523.shelf.gui.layout.LayoutConfig;
-import com.pug523.shelf.gui.layout.LayoutEngine;
+import com.pug523.shelf.core.Colors;
+import com.pug523.shelf.ui.layout.LayoutConfig;
+import com.pug523.shelf.ui.layout.LayoutEngine;
 import com.pug523.shelf.gui.layout.Bounds;
-import com.pug523.shelf.gui.renderer.RenderUtil;
-import com.pug523.shelf.gui.sound.SoundUtil;
+import com.pug523.shelf.ui.render.RenderUtil;
+import com.pug523.shelf.ui.sound.SoundUtil;
 
-import com.pug523.shelf.gui.widget.ActionButtonWidget;
-import com.pug523.shelf.gui.widget.SliderWidget;
-import com.pug523.shelf.gui.widget.option.GuiOption;
+import com.pug523.shelf.ui.option.GuiOption;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 
+// TODO: refactor
 public class ColorPickerOverlay extends WindowOverlay {
     private static final int COLOR_TEXT_MUTED = 0xFF6B7280;
     private static final int COLOR_TEXT_LABEL = 0xFF9CA3AF;

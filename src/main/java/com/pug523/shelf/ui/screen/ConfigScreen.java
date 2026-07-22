@@ -6,7 +6,7 @@ import org.jspecify.annotations.NonNull;
 
 import com.pug523.shelf.common.compat.GuiCompat;
 import com.pug523.shelf.common.compat.ScreenCompat;
-import com.pug523.shelf.gui.layout.LayoutEngine;
+import com.pug523.shelf.ui.layout.LayoutEngine;
 import com.pug523.shelf.ui.screen.renderer.ConfigScreenRenderer;
 
 import net.minecraft.client.gui.Font;

@@ -1,16 +1,17 @@
-package com.pug523.shelf.gui.widget.overlay;
+package com.pug523.shelf.ui.component.overlay;
 
 import com.pug523.shelf.common.compat.ComponentCompat;
 import com.pug523.shelf.common.compat.GuiCompat;
 import com.pug523.shelf.gui.layout.Bounds;
-import com.pug523.shelf.gui.layout.LayoutConfig;
-import com.pug523.shelf.gui.layout.LayoutEngine;
+import com.pug523.shelf.ui.layout.LayoutConfig;
+import com.pug523.shelf.ui.layout.LayoutEngine;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
 
+// TODO: refactor
 public class ConfirmationOverlay extends WindowOverlay {
     private static final int COLOR_BTN_CONFIRM_BG = 0xFFEF4444;
 

@@ -1,30 +1,30 @@
-package com.pug523.shelf.gui.widget;
+package com.pug523.shelf.ui.component;
 
 import com.pug523.shelf.common.compat.ComponentCompat;
 import com.pug523.shelf.common.compat.GuiCompat;
-import com.pug523.shelf.gui.controller.SearchBarController;
-import com.pug523.shelf.gui.layout.LayoutEngine;
+import com.pug523.shelf.ui.screen.controller.SearchBarController;
+import com.pug523.shelf.ui.layout.LayoutEngine;
 
-import com.pug523.shelf.ui.view.widget.Widget;
+import com.pug523.shelf.ui.widget.Widget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 
+// TODO: refactor after text input field fixed
 public class SearchBarWidget implements Widget {
-    private final SearchBarController controller;
-    private final TextInputFieldWidget<String> textField;
-
-    private static final Style SEARCH_STYLE = Style.EMPTY.applyFormats(new ChatFormatting[]{ChatFormatting.GRAY, ChatFormatting.ITALIC});
+    private static final Style SEARCH_STYLE = Style.EMPTY.applyFormats(ChatFormatting.GRAY, ChatFormatting.ITALIC);
     // TODO: i18n
     private static final Component SEARCH_COMPONENT = ComponentCompat.translatable("search...").withStyle(SEARCH_STYLE);
 
-    public SearchBarWidget(SearchBarController controller) {
+    private final TextInputFieldWidget textField;
+
+    public SearchBarWidget() {
         this.controller = controller;
         this.textField = new TextInputFieldWidget<>(
             false,
             s -> true,
-            s -> true,
+            null,
             this.controller::setQuery,
             null,
             ""

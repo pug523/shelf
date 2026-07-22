@@ -1,9 +1,8 @@
 package com.pug523.shelf;
 
-import com.pug523.shelf.config.Migrator;
+import com.pug523.shelf.core.config.Migrator;
 
 public class ShelfConfigMigrator {
     public static final Migrator migrator = new Migrator().addRenameRule("someOldName", "brandNewName")
-        .addRenameRule("configuWizuTypo", "configWithoutTypo")
-        .addRenameRule("oldCaseStyle", "new_case_style");
+            .addRenameRule("configuWizuTypo", "configWithoutTypo").addRenameRule("oldCaseStyle", "new_case_style");
 }

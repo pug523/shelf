@@ -3,9 +3,9 @@ package com.pug523.shelf;
 import com.pug523.shelf.api.command.Command;
 import com.pug523.shelf.api.command.ConfigOpenCommand;
 import com.pug523.shelf.api.command.ConfigControlCommand;
-import com.pug523.shelf.command.CommandManager;
+import com.pug523.shelf.common.command.CommandManager;
 
-import com.pug523.shelf.gui.renderer.shader.ShaderManager;
+import com.pug523.shelf.ui.render.shader.ShaderManager;
 
 public class InitHandler {
     public static void init() {

@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.Mixin;
 //#if MC >= 11800
 import com.pug523.shelf.Shelf;
 //#else
-//$$ import com.pug523.shelf.gui.renderer.shader.ShaderManager;
+//$$ import com.pug523.shelf.ui.render.shader.ShaderManager;
 //$$ import net.minecraft.client.renderer.GameRenderer;
 //$$ import net.minecraft.server.packs.resources.ResourceManager;
 //$$ import org.spongepowered.asm.mixin.injection.At;

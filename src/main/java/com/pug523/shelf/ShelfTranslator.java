@@ -1,6 +1,6 @@
 package com.pug523.shelf;
 
-import com.pug523.shelf.i18n.TranslatorEngine;
+import com.pug523.shelf.common.i18n.TranslatorEngine;
 import org.jspecify.annotations.Nullable;
 
 public class ShelfTranslator {

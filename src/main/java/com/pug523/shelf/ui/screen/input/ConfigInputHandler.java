@@ -6,21 +6,22 @@ import java.util.List;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import com.pug523.shelf.common.compat.JavaCompat;
-import com.pug523.shelf.ui.screen.ConfigScreen;
-import com.pug523.shelf.gui.controller.*;
-import com.pug523.shelf.gui.TabNode;
-import com.pug523.shelf.gui.layout.LayoutConfig;
-import com.pug523.shelf.gui.layout.LayoutEngine;
+import com.pug523.shelf.ui.screen.TabNode;
+import com.pug523.shelf.ui.layout.LayoutConfig;
+import com.pug523.shelf.ui.layout.LayoutEngine;
 import com.pug523.shelf.gui.layout.Bounds;
 import com.pug523.shelf.gui.layout.OptionRowLayout;
-import com.pug523.shelf.gui.model.OptionContext;
-import com.pug523.shelf.gui.model.RenderableItem;
-import com.pug523.shelf.gui.sound.SoundUtil;
-import com.pug523.shelf.gui.widget.option.OptionWidget;
+import com.pug523.shelf.ui.model.OptionContext;
+import com.pug523.shelf.ui.model.RenderableItem;
+import com.pug523.shelf.ui.screen.controller.*;
+import com.pug523.shelf.ui.sound.SoundUtil;
+import com.pug523.shelf.ui.option.OptionWidget;
 
-import com.pug523.shelf.gui.widget.SearchBarWidget;
-import com.pug523.shelf.gui.widget.overlay.OverlayWidget;
+import com.pug523.shelf.ui.component.SearchBarWidget;
+import com.pug523.shelf.ui.component.overlay.OverlayWidget;
+import com.pug523.shelf.ui.screen.ConfigScreen;
 
+// TODO: refactor
 public final class ConfigInputHandler {
     private final ConfigScreen screen;
 

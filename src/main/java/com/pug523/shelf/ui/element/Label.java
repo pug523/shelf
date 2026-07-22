@@ -2,7 +2,7 @@ package com.pug523.shelf.ui.element;
 
 import com.pug523.shelf.common.compat.ComponentCompat;
 import com.pug523.shelf.common.compat.GuiCompat;
-import com.pug523.shelf.gui.Colors;
+import com.pug523.shelf.core.Colors;
 import com.pug523.shelf.core.geometry.MousePos;
 import com.pug523.shelf.core.geometry.Rect;
 import com.pug523.shelf.ui.Element;

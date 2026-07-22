@@ -2,7 +2,7 @@ package com.pug523.shelf;
 
 import static com.pug523.shelf.ShelfTextUtil.confText;
 
-import com.pug523.shelf.gui.ConfigScreen;
+import com.pug523.shelf.ui.screen.ConfigScreen;
 import com.pug523.shelf.api.annotation.AnnotationParser;
 
 import net.minecraft.client.gui.screens.Screen;

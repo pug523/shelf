@@ -1,9 +1,9 @@
 package com.pug523.shelf.api.annotation;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.pug523.shelf.compat.ComponentCompat;
-import com.pug523.shelf.config.Option;
-import com.pug523.shelf.gui.widget.option.*;
+import com.pug523.shelf.common.compat.ComponentCompat;
+import com.pug523.shelf.core.config.Option;
+import com.pug523.shelf.ui.option.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class WidgetRegistry {
     private static final List<WidgetFactory> FACTORIES = new ArrayList<>();
 
@@ -30,22 +30,19 @@ public class WidgetRegistry {
         return null;
     }
 
-    public static <E> OptionWidget<E> createWidgetForType(
-        Class<E> type,
-        Annotation overrideAnnotation,
-        GuiOption<E> option
-    ) {
+    public static <E> OptionWidget<E> createWidgetForType(Class<E> type, Annotation overrideAnnotation,
+            GuiOption<E> option) {
         if (type == boolean.class || type == Boolean.class) {
             GuiOption<Boolean> boolOpt = (GuiOption<Boolean>) option;
             if (overrideAnnotation instanceof WidgetTypes.Toggle) {
                 WidgetTypes.Toggle toggle = (WidgetTypes.Toggle) overrideAnnotation;
                 switch (toggle.value()) {
-                    case BOX:
-                        return (OptionWidget<E>) new ToggleBoxOptionWidget(boolOpt);
-                    case ACTION_BUTTON:
-                        return (OptionWidget<E>) new ToggleActionButtonOptionWidget(boolOpt);
-                    default:
-                        return (OptionWidget<E>) new ToggleCapsuleOptionWidget(boolOpt);
+                case BOX:
+                    return (OptionWidget<E>) new ToggleBoxOptionWidget(boolOpt);
+                case ACTION_BUTTON:
+                    return (OptionWidget<E>) new ToggleActionButtonOptionWidget(boolOpt);
+                default:
+                    return (OptionWidget<E>) new ToggleCapsuleOptionWidget(boolOpt);
                 }
             }
             return (OptionWidget<E>) new ToggleCapsuleOptionWidget(boolOpt);
@@ -90,11 +87,8 @@ public class WidgetRegistry {
         }
 
         if (type.isEnum()) {
-            return (OptionWidget<E>) CyclingOptionWidget.of(
-                (Option<Enum>) option,
-                (Class<Enum>) type,
-                e -> ComponentCompat.literal(e.name())
-            );
+            return (OptionWidget<E>) CyclingOptionWidget.of((Option<Enum>) option, (Class<Enum>) type,
+                    e -> ComponentCompat.literal(e.name()));
         }
 
         if (overrideAnnotation instanceof WidgetTypes.Selector) {
@@ -114,11 +108,9 @@ public class WidgetRegistry {
                 candidates.addAll(Arrays.asList(type.getEnumConstants()));
             }
 
-            return (OptionWidget<E>) SelectorOptionWidget.single(
-                (GuiOption<Object>) option,
-                candidates,
-                e -> e instanceof Enum ? ComponentCompat.literal(((Enum<?>) e).name()) : ComponentCompat.literal(String.valueOf(e))
-            );
+            return (OptionWidget<E>) SelectorOptionWidget.single((GuiOption<Object>) option, candidates,
+                    e -> e instanceof Enum ? ComponentCompat.literal(((Enum<?>) e).name())
+                            : ComponentCompat.literal(String.valueOf(e)));
         }
 
         if (overrideAnnotation instanceof WidgetTypes.MultiSelector) {
@@ -134,11 +126,9 @@ public class WidgetRegistry {
                 }
             }
 
-            return (OptionWidget<E>) SelectorOptionWidget.multi(
-                (GuiOption<List<Object>>) option,
-                candidates,
-                e -> e instanceof Enum ? ComponentCompat.literal(((Enum<?>) e).name()) : ComponentCompat.literal(String.valueOf(e))
-            );
+            return (OptionWidget<E>) SelectorOptionWidget.multi((GuiOption<List<Object>>) option, candidates,
+                    e -> e instanceof Enum ? ComponentCompat.literal(((Enum<?>) e).name())
+                            : ComponentCompat.literal(String.valueOf(e)));
         }
 
         return null;
@@ -147,19 +137,20 @@ public class WidgetRegistry {
     static {
         register((field, option) -> {
             Class<?> type = field.getType();
-            if (type != boolean.class && type != Boolean.class) return null;
+            if (type != boolean.class && type != Boolean.class)
+                return null;
 
             Option<Boolean> boolOpt = (Option<Boolean>) (Object) option;
 
             if (field.isAnnotationPresent(WidgetTypes.Toggle.class)) {
                 WidgetTypes.Toggle toggle = field.getAnnotation(WidgetTypes.Toggle.class);
                 switch (toggle.value()) {
-                    case BOX:
-                        return new ToggleBoxOptionWidget(boolOpt);
-                    case ACTION_BUTTON:
-                        return new ToggleActionButtonOptionWidget(boolOpt);
-                    default:
-                        return new ToggleCapsuleOptionWidget(boolOpt);
+                case BOX:
+                    return new ToggleBoxOptionWidget(boolOpt);
+                case ACTION_BUTTON:
+                    return new ToggleActionButtonOptionWidget(boolOpt);
+                default:
+                    return new ToggleCapsuleOptionWidget(boolOpt);
                 }
             }
             return new ToggleCapsuleOptionWidget(boolOpt);
@@ -168,7 +159,8 @@ public class WidgetRegistry {
         // Integer
         register((field, option) -> {
             Class<?> type = field.getType();
-            if (type != int.class && type != Integer.class) return null;
+            if (type != int.class && type != Integer.class)
+                return null;
 
             if (field.isAnnotationPresent(WidgetTypes.ColorPicker.class)) {
                 return new ColorPickerOptionWidget((Option<Integer>) (Object) option);
@@ -183,7 +175,8 @@ public class WidgetRegistry {
         // Double
         register((field, option) -> {
             Class<?> type = field.getType();
-            if (type != double.class && type != Double.class) return null;
+            if (type != double.class && type != Double.class)
+                return null;
 
             if (field.isAnnotationPresent(WidgetTypes.SliderDouble.class)) {
                 WidgetTypes.SliderDouble s = field.getAnnotation(WidgetTypes.SliderDouble.class);
@@ -195,7 +188,8 @@ public class WidgetRegistry {
         // Float
         register((field, option) -> {
             Class<?> type = field.getType();
-            if (type != float.class && type != Float.class) return null;
+            if (type != float.class && type != Float.class)
+                return null;
 
             if (field.isAnnotationPresent(WidgetTypes.SliderFloat.class)) {
                 WidgetTypes.SliderFloat s = field.getAnnotation(WidgetTypes.SliderFloat.class);
@@ -206,14 +200,16 @@ public class WidgetRegistry {
 
         // String
         register((field, option) -> {
-            if (field.getType() != String.class) return null;
+            if (field.getType() != String.class)
+                return null;
             return new InputStringOptionWidget((Option<String>) (Object) option, s -> true, s -> true, null);
         });
 
         // Item
         register((field, option) -> {
             Class<?> type = field.getType();
-            if (net.minecraft.world.item.Item.class.isAssignableFrom(type) || field.isAnnotationPresent(WidgetTypes.InputItem.class)) {
+            if (net.minecraft.world.item.Item.class.isAssignableFrom(type)
+                    || field.isAnnotationPresent(WidgetTypes.InputItem.class)) {
                 return new InputItemOptionWidget((Option<net.minecraft.world.item.Item>) (Object) option);
             }
             return null;
@@ -223,11 +219,8 @@ public class WidgetRegistry {
         register((field, option) -> {
             if (field.isAnnotationPresent(WidgetTypes.Cycling.class) || field.getType().isEnum()) {
                 Class<Enum> enumClass = (Class<Enum>) field.getType();
-                return CyclingOptionWidget.of(
-                    (Option<Enum>) (Object) option,
-                    enumClass,
-                    e -> ComponentCompat.literal(e.name())
-                );
+                return CyclingOptionWidget.of((Option<Enum>) (Object) option, enumClass,
+                        e -> ComponentCompat.literal(e.name()));
             }
             return null;
         });
@@ -250,21 +243,21 @@ public class WidgetRegistry {
 
         // Selector
         register((field, option) -> {
-            if (!field.isAnnotationPresent(WidgetTypes.Selector.class)) return null;
+            if (!field.isAnnotationPresent(WidgetTypes.Selector.class))
+                return null;
 
             WidgetTypes.Selector anno = field.getAnnotation(WidgetTypes.Selector.class);
             List<Object> candidates = resolveCandidates(anno, field);
 
-            return SelectorOptionWidget.single(
-                option,
-                candidates,
-                e -> e instanceof Enum ? ComponentCompat.literal(((Enum<?>) e).name()) : ComponentCompat.literal(String.valueOf(e))
-            );
+            return SelectorOptionWidget.single(option, candidates,
+                    e -> e instanceof Enum ? ComponentCompat.literal(((Enum<?>) e).name())
+                            : ComponentCompat.literal(String.valueOf(e)));
         });
 
         // MultiSelector
         register((field, option) -> {
-            if (!field.isAnnotationPresent(WidgetTypes.MultiSelector.class) || !List.class.isAssignableFrom(field.getType())) {
+            if (!field.isAnnotationPresent(WidgetTypes.MultiSelector.class)
+                    || !List.class.isAssignableFrom(field.getType())) {
                 return null;
             }
 
@@ -279,11 +272,9 @@ public class WidgetRegistry {
                 }
             }
 
-            return SelectorOptionWidget.multi(
-                (GuiOption<List<Object>>) (Object) option,
-                candidates,
-                e -> e instanceof Enum ? ComponentCompat.literal(((Enum<?>) e).name()) : ComponentCompat.literal(String.valueOf(e))
-            );
+            return SelectorOptionWidget.multi((GuiOption<List<Object>>) (Object) option, candidates,
+                    e -> e instanceof Enum ? ComponentCompat.literal(((Enum<?>) e).name())
+                            : ComponentCompat.literal(String.valueOf(e)));
         });
     }
 

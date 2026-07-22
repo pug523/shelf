@@ -3,8 +3,8 @@ package com.pug523.shelf;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.pug523.shelf.api.annotation.ConfigEntry;
 import com.pug523.shelf.api.annotation.WidgetTypes;
-import com.pug523.shelf.gui.Colors;
-import com.pug523.shelf.gui.layout.LayoutConfig;
+import com.pug523.shelf.core.Colors;
+import com.pug523.shelf.ui.layout.LayoutConfig;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
