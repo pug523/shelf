@@ -123,7 +123,7 @@ jobs:
             - Built from: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: Publish Mods to Modrinth
-        uses: Kir-Antipov/mc-publish@52307b03863581dec6b652b83e597aec02ebb075
+        uses: Kir-Antipov/mc-publish@c23376546a97f5ba7984e94445da359459b14419
         with:
           MODRINTH_PROJECT_ID: ysmYXPgd  # https://modrinth.com/mod/shelf
           modrinth-token: ${{ secrets.MODRINTH_API_TOKEN }}
